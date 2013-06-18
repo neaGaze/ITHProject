@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearLayoutBulletin"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.62"
+        android:background="#dddddd"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical" >
+
+            <!--
+            <TextView
+                android:id="@+id/textViewBulletinTitleView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/bulletinName"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000077" />
+            -->
+
+            <TextView
+                android:id="@+id/editTextBulletinTitleView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/customview"
+                android:ems="10"
+                android:paddingBottom="7dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="7dp"
+                android:text="Title"
+                android:textColor="#000077"
+                android:textSize="25dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical" >
+
+            <!--
+            <TextView
+                android:id="@+id/textViewBulletinDescView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/bulletinDesc"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000077" />
+            -->
+
+            <TextView
+                android:id="@+id/editTextBulletinDescView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/customview"
+                android:ems="10"
+                android:paddingBottom="7dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="7dp"
+                android:text="Description"
+                android:textColor="#ffffff"
+                android:textSize="20dp" >
+            </TextView>
+        </LinearLayout>
+        <!--
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewBulletinDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/bulletinDate"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000077" />
+
+            <TextView
+                android:id="@+id/editTextBulletinDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="7dp"
+                android:paddingTop="7dp"
+                android:textColor="#ffffff"
+                android:textSize="20dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/customview"
+                android:ems="10"
+                android:paddingLeft="10dp" >
+
+            </TextView>
+        </LinearLayout>
+        -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical" >
+
+            <!--
+            <TextView
+                android:id="@+id/textViewBulletinAuthor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/bulletinAuthor"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000077" />
+            -->
+
+            <TextView
+                android:id="@+id/editTextBulletinAuthor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/customview"
+                android:ems="10"
+                android:gravity="left"
+                android:paddingBottom="7dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="7dp"
+                android:text="Author"
+                android:textColor="#ffffff"
+                android:textSize="17dp" >
+            </TextView>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical" >
+            
+              <TextView
+                android:id="@+id/editTextBulletinDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/bulletinDate"
+                android:textSize="15dp"
+                android:layout_gravity="right"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000055" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.62"
+        android:background="#dddddd"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewBulletinTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/bulletinName"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000077" />
+
+            <EditText
+                android:id="@+id/editTextBulletinTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="1"
+                android:ems="10"
+                android:paddingLeft="10dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewBulletinDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/bulletinDesc"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000077" />
+
+            <EditText
+                android:id="@+id/editTextBulletinDesc"
+                android:layout_width="match_parent"
+                android:layout_height="124dp"
+                android:layout_marginLeft="10dp"
+                android:ems="10"
+                android:inputType="textMultiLine"
+                android:paddingLeft="10dp" >
+               
+            </EditText>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/buttonBulletinSubmit"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:layout_gravity="right"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="@string/bulletinSubmit"
+            android:textColor="#000077"
+            android:textSize="15dp" />
+    </LinearLayout>
+
+</LinearLayout>

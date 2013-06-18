@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, ITHProjectActivity!</string>
+    <string name="userName">Username</string>
+    <string name="userPassword">Password</string>
+    <string name="login_string">Login</string>
+    <string name="bulletinName">Bulletin Title</string>
+    <string name="bulletinDesc">Bulletin Description</string>
+    <string name="app_name">ITHProject</string>
+    <string name="bulletinDate">Date of Created</string><string name="bulletinSubmit">Submit</string>
+    <string name="bulletinAuthor">Created By</string>
+    
+    
+    
+    
+    
+
+</resources>
