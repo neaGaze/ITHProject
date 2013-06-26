@@ -30,27 +30,31 @@ public class LocalConnection {
 	/************************************************************************************
 	 * Create a cache file for local storage / reuse otherwise
 	 * *************************************************************************************/
-	protected void createOrUseFile(String loginInfo, String url) {
+	protected void createOrUseFile(String loginInfo, String url, String fileName) {
 
-		FileWriter fileWriter = null;
+		// FileWriter fileWriter = null;
 		try {
-			//String content = loginInfo.toString();
+			// String content = loginInfo.toString();
 			String content = loginInfo;
-			File newTextFile = new File(url);
-			fileWriter = new FileWriter(newTextFile);
-			fileWriter.write(content);
-			fileWriter.close();
+			File newTextFilePath = new File(url);
+			if (!newTextFilePath.exists())
+				newTextFilePath.mkdirs();
+
+			File newTextFile = new File(url + fileName);
+			if (!newTextFile.exists()) {
+				newTextFile.createNewFile();
+				FileWriter fileWriter = new FileWriter(newTextFile);
+				fileWriter.write(content);
+				fileWriter.close();
+			}
+			// fileWriter.close();
 		} catch (FileNotFoundException e) {
 			Log.e("FILENOTFOUND Exception", "" + e.getMessage());
 			e.printStackTrace();
 		} catch (IOException ex) {
 			Log.e("Failed to write", "" + ex.getMessage());
 		} finally {
-			try {
-				fileWriter.close();
-			} catch (IOException ex) {
-				Log.e("IOException", "" + ex.getMessage());
-			}
+
 		}
 	}
 
@@ -79,7 +83,7 @@ public class LocalConnection {
 		} catch (IOException e) {
 			Log.e("ioEXception", "" + e.getMessage());
 			e.printStackTrace();
-		} 
+		}
 
 		return null;
 	}

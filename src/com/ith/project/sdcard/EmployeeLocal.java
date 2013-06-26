@@ -12,7 +12,7 @@ public class EmployeeLocal extends LocalConnection {
 	private String usersFolder = "/Employees";
 	private String employeesDetails = "/employees.json";
 
-	private static int localEmployeeId;
+	private static int localEmployeeId = 0;
 
 	public EmployeeLocal() {
 		localEmployeeId = 0;
@@ -33,12 +33,13 @@ public class EmployeeLocal extends LocalConnection {
 			JSONArray returnJsonArr = new JSONArray();
 
 			for (int i = 0; i < localFileJSON.length(); i++) {
+
 				JSONObject currentJson = localFileJSON.getJSONObject(i);
 				JSONObject returnJsonObject = new JSONObject();
-				returnJsonObject.put("EmployeeId",
-						currentJson.getInt("EmployeeId"));
 				returnJsonObject.put("EmployeeName",
 						currentJson.getString("EmployeeName"));
+				returnJsonObject.put("EmployeeId",
+						currentJson.getInt("EmployeeId"));
 				returnJsonObject.put("Gender", currentJson.getString("Gender"));
 				returnJsonObject.put("HomePhone",
 						currentJson.getString("HomePhone"));
@@ -68,8 +69,8 @@ public class EmployeeLocal extends LocalConnection {
 	 * write files to sdcard
 	 * ************************************************************************************/
 	public void writeFile2Sdcard(JSONObject thisJsonFile) {
-		this.createOrUseFile(thisJsonFile.toString(), urlLocal + usersFolder
-				+ employeesDetails);
+		this.createOrUseFile(thisJsonFile.toString(), urlLocal + usersFolder,
+				employeesDetails);
 	}
 
 	/*****************************************************************************************
@@ -82,7 +83,7 @@ public class EmployeeLocal extends LocalConnection {
 			JSONObject jsonObj = new JSONObject();
 
 			jsonObj.put("UserLoginId", "");
-			jsonObj.put("EmployeeId", "1");
+			jsonObj.put("EmployeeId", 1);
 			jsonObj.put("EmployeeName", "Jason Bourne");
 			jsonObj.put("Gender", "Male");
 			jsonObj.put("HomePhone", "68979879");
@@ -97,7 +98,7 @@ public class EmployeeLocal extends LocalConnection {
 			JSONObject newjsonObj = new JSONObject();
 
 			newjsonObj.put("UserLoginId", "");
-			newjsonObj.put("BulletinId", "2");
+			newjsonObj.put("EmployeeId", 2);
 			newjsonObj.put("EmployeeName", "James Bond");
 			newjsonObj.put("Gender", "Male");
 			newjsonObj.put("HomePhone", "1179879");
@@ -110,8 +111,8 @@ public class EmployeeLocal extends LocalConnection {
 							"High tech spy, good physique and uhm uhm ladies beware of him !!");
 			jsonArr.put(newjsonObj);
 
-			this.createOrUseFile(jsonArr.toString(), urlLocal + usersFolder
-					+ employeesDetails);
+			this.createOrUseFile(jsonArr.toString(), urlLocal + usersFolder,
+					employeesDetails);
 
 		} catch (JSONException e) {
 			Log.e("JSONException", "" + e.getMessage());
@@ -119,15 +120,15 @@ public class EmployeeLocal extends LocalConnection {
 		}
 	}
 
-
 	/*****************************************************************************************
-	 * update the Local File "employees.json" according to the value of webservice
+	 * update the Local File "employees.json" according to the value of
+	 * webservice
 	 * ************************************************************************************/
 	public void updateLocalFiles(JSONObject inputJson, String employeesFromWS) {
 		try {
 			JSONObject employeesObj = new JSONObject(employeesFromWS);
 			JSONArray employeesArr = employeesObj
-					.getJSONArray("GetEmployeesResult");
+					.getJSONArray("GetEmployeeListResult");
 
 			JSONArray jsonArr = new JSONArray();
 
@@ -142,26 +143,26 @@ public class EmployeeLocal extends LocalConnection {
 				jsonObj.put("Gender",
 						employeesArr.getJSONObject(i).getString("Gender"));
 				jsonObj.put("HomePhone", employeesArr.getJSONObject(i)
-						.getString("HomePhone"));			
-				jsonObj.put("Mobile", employeesArr.getJSONObject(i)
-						.getString("Mobile"));			
-				jsonObj.put("Email", employeesArr.getJSONObject(i)
-						.getString("Email"));			
-				jsonObj.put("Address", employeesArr.getJSONObject(i)
-						.getString("Address"));			
+						.getString("HomePhone"));
+				jsonObj.put("Mobile",
+						employeesArr.getJSONObject(i).getString("Mobile"));
+				jsonObj.put("Email",
+						employeesArr.getJSONObject(i).getString("Email"));
+				jsonObj.put("Address",
+						employeesArr.getJSONObject(i).getString("Address"));
 				jsonObj.put("Designation", employeesArr.getJSONObject(i)
-						.getString("Designation"));			
-				jsonObj.put("Remarks", employeesArr.getJSONObject(i)
-						.getString("Remarks"));
+						.getString("Designation"));
+				jsonObj.put("Remarks",
+						employeesArr.getJSONObject(i).getString("Remarks"));
 				jsonArr.put(jsonObj);
 			}
 
-			this.createOrUseFile(jsonArr.toString(), urlLocal + usersFolder
-					+ employeesDetails);
+			this.createOrUseFile(jsonArr.toString(), urlLocal + usersFolder,
+					employeesDetails);
 
 		} catch (JSONException e) {
 			Log.e("JSONException", "" + e.getMessage());
 			e.printStackTrace();
-		} 
+		}
 	}
 }

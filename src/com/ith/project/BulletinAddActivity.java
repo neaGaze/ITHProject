@@ -1,22 +1,37 @@
 package com.ith.project;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.ith.project.menu.CustomMenu;
+import com.ith.project.menu.CustomMenuListAdapter;
+
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 
 public class BulletinAddActivity extends Activity implements OnClickListener {
 
@@ -31,6 +46,12 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 	private ProgressDialog pdialog;
 	private JSONObject insertBulletin;
 	private HttpConnection conn;
+	private ImageButton menuButton;
+	private ImageButton homeButton;
+	private CustomMenuListAdapter menuAdapter;
+	private LinearLayout linLayoutMenu;
+	private ListView menuListView;
+	private Dialog dialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -52,6 +73,8 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 	public void onPause() {
 		super.onPause();
 		pdialog.dismiss();
+		if (dialog != null)
+			dialog.dismiss();
 	}
 
 	@Override
@@ -66,70 +89,158 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 		bulletinTitle = (EditText) findViewById(R.id.editTextBulletinTitle);
 		bulletinDesc = (EditText) findViewById(R.id.editTextBulletinDesc);
 		bulletinSubmit = (Button) findViewById(R.id.buttonBulletinSubmit);
+
+		menuButton = (ImageButton) findViewById(R.id.menu);
+		menuButton.setOnClickListener(BulletinAddActivity.this);
+
+		homeButton = (ImageButton) findViewById(R.id.home);
+		homeButton.setOnClickListener(BulletinAddActivity.this);
+
 		bulletinSubmit.setOnClickListener(this);
 		pdialog.dismiss();
 	}
 
 	public void onClick(View v) {
 
-		// pdialog.show();
-		userId = new StringBuilder().append(LoginAuthentication.getUserId())
-				.toString();
-		title = bulletinTitle.getText().toString();
-		desc = bulletinDesc.getText().toString();
-		date = getCurrentDate();
-		Log.d("Bulletin Add Date", "" + date);
-		insertBulletin = bulletinAdd.makeNewBulletinJSON(userId, title, desc);
+		if (v.equals(menuButton)) {
+			Intent intent = new Intent(this, GridItemActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			this.startActivity(intent);
+			this.finish();
+		} else if (v.equals(homeButton)) {
+			callMenuDialog();
+		} else {
+			// pdialog.show();
+			userId = new StringBuilder()
+					.append(LoginAuthentication.getUserId()).toString();
+			title = bulletinTitle.getText().toString();
+			desc = bulletinDesc.getText().toString();
+			date = getCurrentDate();
+			Log.d("Bulletin Add Date", "" + date);
+			insertBulletin = bulletinAdd.makeNewBulletinJSON(userId, title,
+					desc);
 
-		/** send the JSONObject to update the bulletins in the database **/
-		new Thread(new Runnable() {
+			/** send the JSONObject to update the bulletins in the database **/
+			new Thread(new Runnable() {
 
-			public void run() {
+				public void run() {
 
-				conn = HttpConnection.getSingletonConn();
+					conn = HttpConnection.getSingletonConn();
 
-				String insertStatusStr = conn.getJSONFromUrl(insertBulletin,
-						url);
+					String insertStatusStr = conn.getJSONFromUrl(
+							insertBulletin, url);
 
-				try {
+					try {
 
-					JSONObject insertStatusJson = new JSONObject(
-							insertStatusStr);
+						JSONObject insertStatusJson = new JSONObject(
+								insertStatusStr);
 
-					boolean insertStatus = (Boolean) insertStatusJson
-							.get("InsertBulletins");
+						boolean insertStatus = (Boolean) insertStatusJson
+								.get("InsertBulletins");
 
-					if (insertStatus) {
-						Toast.makeText(BulletinAddActivity.this,
-								"Successfully Bulletin Added",
-								Toast.LENGTH_SHORT).show();
-					} else {
-						Toast.makeText(BulletinAddActivity.this,
-								"Problem Adding Bulletin", Toast.LENGTH_SHORT)
-								.show();
+						if (insertStatus) {
+							Toast.makeText(BulletinAddActivity.this,
+									"Successfully Bulletin Added",
+									Toast.LENGTH_SHORT).show();
+						} else {
+							Toast.makeText(BulletinAddActivity.this,
+									"Problem Adding Bulletin",
+									Toast.LENGTH_SHORT).show();
 
-						Log.e("Problem Adding Bulletin ",
-								"InsertStatus From Web Service" + insertStatus);
+							Log.e("Problem Adding Bulletin ",
+									"InsertStatus From Web Service"
+											+ insertStatus);
+						}
+
+					} catch (JSONException e) {
+						Log.e("JSONException", "" + e.getMessage());
+						e.printStackTrace();
 					}
 
-				} catch (JSONException e) {
-					Log.e("JSONException", "" + e.getMessage());
-					e.printStackTrace();
+					runOnUiThread(new Runnable() {
+
+						public void run() {
+
+							Intent intent = new Intent(
+									BulletinAddActivity.this,
+									ListItemActivity.class);
+							intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+							startActivity(intent);
+
+							// BulletinAddActivity.this.finish();
+						}
+					});
 				}
 
-				runOnUiThread(new Runnable() {
+			}).start();
+		}
+	}
 
-					public void run() {
+	private void callMenuDialog() {
 
-						startActivity(new Intent(BulletinAddActivity.this,
-								ListItemActivity.class));
+		LayoutInflater menuInflater = (LayoutInflater) this
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-						BulletinAddActivity.this.finish();
-					}
-				});
+		linLayoutMenu = (LinearLayout) findViewById(R.id.linearLayoutCustomMenu_2);
+		menuInflater.inflate(R.layout.menu_list_view, linLayoutMenu, false);
+
+		/** To bring front the Dialog box **/
+		dialog = new Dialog(this, R.style.mydialogstyle);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialog.setCanceledOnTouchOutside(true);
+
+		/** To set the alignment of the Dialog box in the screen **/
+		WindowManager.LayoutParams WMLP = dialog.getWindow().getAttributes();
+		WMLP.x = getWindowManager().getDefaultDisplay().getWidth();
+		WMLP.gravity = Gravity.TOP;
+		WMLP.verticalMargin = 0.08f; // To put it below header
+		dialog.getWindow().setAttributes(WMLP);
+
+		/** To set the dialog box with the List layout in the android xml **/
+		dialog.setContentView(R.layout.menu_list_view);
+
+		menuListView = (ListView) dialog.findViewById(R.id.listView2);
+
+		/** make an arrayList of items to display at the CustomMenu **/
+		ArrayList<CustomMenu> tempArrList = new ArrayList<CustomMenu>();
+		tempArrList.add(setMenuItems("Exit", "exit"));
+
+		/** Work on the adapters to set the list items with the ArrayList items **/
+		menuAdapter = new CustomMenuListAdapter(BulletinAddActivity.this,
+				R.layout.custom_menu_2, tempArrList);
+		menuListView.setAdapter(menuAdapter);
+		menuListView.setOnItemClickListener(new OnItemClickListener() {
+
+			public void onItemClick(AdapterView<?> adapterView, View view,
+					int position, long id) {
+
+				TextView c = (TextView) view
+						.findViewById(R.id.textViewCustomMenu_2);
+				String keyword = c.getText().toString();
+
+				/** When Exit menu item is pressed **/
+				if (keyword.equals("Exit")) {
+					pdialog.show();
+					BulletinAddActivity.this.finish();
+					GridItemActivity.getGridItemActivityInstance().finish();
+					ListItemActivity.getListItemActivityInstance().finish();
+				}
 			}
+		});
 
-		}).start();
+		dialog.show();
+
+	}
+
+	/****************************************************************************
+	 * When we have to set Menu Items in the ArrayList
+	 *************************************************************************/
+	public CustomMenu setMenuItems(String menuString, String menuIcon) {
+
+		CustomMenu menu = new CustomMenu(menuString, menuIcon);
+		menu.setValues(menuString, menuIcon);
+
+		return menu;
 	}
 
 	@Override

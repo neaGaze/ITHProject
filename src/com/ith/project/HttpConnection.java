@@ -6,16 +6,16 @@ import java.io.InputStreamReader;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.app.ProgressDialog;
 import android.util.Log;
 
 public class HttpConnection /*
@@ -23,16 +23,25 @@ public class HttpConnection /*
 							 * JSONObject>
 							 */{
 	// "http://kathmandu/WcfTestApp/TestWcf.svc/json/Login";
-	//private String url  = "http://kathmandu/EMSWebService/Service1.svc/json";
+	// private String url = "http://kathmandu/EMSWebService/Service1.svc/json";
 
 	private HttpClient httpclient;
 	private HttpPost httppost;
 	private static HttpConnection httpConnection;
 
 	public HttpConnection() {
-		//this.url = url;
-		httpclient = new DefaultHttpClient();
+		// this.url = url;
+		HttpParams httpParameters = new BasicHttpParams();
+		// Set the timeout in milliseconds until a connection is established.
+		int timeoutConnection = 3000;
+		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+		// Set the default socket timeout (SO_TIMEOUT) 
+		// in milliseconds which is the timeout for waiting for data.
+		int timeoutSocket = 4000;
+		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 		
+		httpclient = new DefaultHttpClient(httpParameters);
+
 	}
 
 	public static HttpConnection getSingletonConn() {
@@ -48,20 +57,27 @@ public class HttpConnection /*
 		// initialize
 		InputStream is = null;
 		String result = "";
-		JSONArray jArray = null;
+		// JSONArray jArray = null;
 
 		// http post
 		try {
 			httppost = new HttpPost(url);
-			httppost.setHeader(HTTP.CONTENT_TYPE, "application/json; charset=utf-8");
-			//httppost.setHeader("Accept", "application/json");
+			httppost.setHeader(HTTP.CONTENT_TYPE,
+					"application/json; charset=utf-8");
+			// httppost.setHeader("Accept", "application/json");
 			StringEntity se = new StringEntity(jsonForm.toString());
-			httppost.setEntity(se);
-			
+			httppost.setEntity(se);						
+
 			HttpResponse response = httpclient.execute(httppost);
-			HttpEntity entity = response.getEntity();
-			is = entity.getContent();
-			Log.v("Successful Connection", ":D");
+			
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+				Log.d("Web Service available", "OK to Go");
+				HttpEntity entity = response.getEntity();
+				is = entity.getContent();
+				Log.v("Successful Connection", ":D");
+			} else {
+				Log.e("Web service unavailable", "Go Local");
+			}
 
 		} catch (Exception e) {
 			Log.e("Error in http connection:", "" + e.toString());

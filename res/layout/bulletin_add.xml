@@ -26,7 +26,8 @@
                 android:paddingLeft="10dp"
                 android:text="@string/bulletinName"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="#000077" />
+                android:textColor="#000077" 
+                android:textSize="15dp"/>
 
             <EditText
                 android:id="@+id/editTextBulletinTitle"
@@ -35,7 +36,8 @@
                 android:layout_marginLeft="10dp"
                 android:layout_weight="1"
                 android:ems="10"
-                android:paddingLeft="10dp" />
+                android:paddingLeft="10dp" 
+                android:textSize="15dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -53,7 +55,8 @@
                 android:paddingLeft="10dp"
                 android:text="@string/bulletinDesc"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="#000077" />
+                android:textColor="#000077" 
+                android:textSize="15dp"/>
 
             <EditText
                 android:id="@+id/editTextBulletinDesc"

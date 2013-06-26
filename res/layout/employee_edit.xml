@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <LinearLayout
+        android:id="@+id/scrollableLayoutEdit"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:isScrollContainer="true" >
+
+        <TableLayout
+            android:id="@+id/tableLayoutEmpEdit"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#dddddd" >
+
+            <TextView
+                android:id="@+id/UserAddeditTextEmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="10dp"
+                android:text="@string/employeeAdd"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000099"
+                android:textSize="18dp"
+                android:textStyle="bold" />
+
+            <!-- For username -->
+
+            <TableRow
+                android:id="@+id/UserAddtableRow1EmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/UserAddtextViewUserNameEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/employeeName"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000055"
+                    android:textSize="15dp" />
+
+                <EditText
+                    android:id="@+id/UserAddeditTextUserNameEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:ems="10"
+                    android:inputType="textPostalAddress"
+                    android:textSize="15dp" >
+                </EditText>
+            </TableRow>
+
+            <!-- For Gender dropbox -->
+
+            <TableRow
+                android:id="@+id/UserAddtableRow2EmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/UserAddtextViewGenderEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/employeeGender"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000055"
+                    android:textSize="15dp" />
+
+                <RadioGroup
+                    android:id="@+id/radioSexEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <RadioButton
+                        android:id="@+id/radioButton1EmpEdit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="8dp"
+                        android:checked="true"
+                        android:text="@string/genderMale"
+                        android:textColor="#000055"
+                        android:textSize="15dp" />
+
+                    <RadioButton
+                        android:id="@+id/radioButton2EmpEdit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/genderFemale"
+                        android:textColor="#000055"
+                        android:textSize="15dp" />
+                </RadioGroup>
+            </TableRow>
+
+            <!-- For location -->
+
+            <TableRow
+                android:id="@+id/UserAddtableRow3EmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/UserAddtextViewLocationEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/employeeAddress"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000055"
+                    android:textSize="15dp" />
+
+                <EditText
+                    android:id="@+id/UserAddeditTextLocationEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:ems="10"
+                    android:inputType="textPostalAddress"
+                    android:textSize="15dp" >
+                </EditText>
+            </TableRow>
+
+            <!-- For Email -->
+
+            <TableRow
+                android:id="@+id/UserAddtableRow4EmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/UserAddtextViewEmailEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/employeeEmail"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000055"
+                    android:textSize="15dp" />
+
+                <EditText
+                    android:id="@+id/UserAddeditTextEmailEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:ems="10"
+                    android:inputType="textEmailAddress"
+                    android:textSize="15dp" />
+            </TableRow>
+
+            <!-- For Homephone -->
+
+            <TableRow
+                android:id="@+id/UserAddtableRow5EmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/UserAddtextViewHomePhoneEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/employeeHomePhone"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000055"
+                    android:textSize="15dp" />
+
+                <EditText
+                    android:id="@+id/UserAddeditTextHomePhoneEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:ems="10"
+                    android:inputType="phone"
+                    android:textSize="15dp" />
+            </TableRow>
+
+            <!-- For MOBILE -->
+
+            <TableRow
+                android:id="@+id/UserAddtableRow6EmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/UserAddtextViewMobileEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/employeeMobile"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000055"
+                    android:textSize="15dp" />
+
+                <EditText
+                    android:id="@+id/UserAddeditTextMobileEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:ems="10"
+                    android:inputType="phone"
+                    android:textSize="15dp" />
+            </TableRow>
+
+            <!-- For UserName -->
+
+            <TableRow
+                android:id="@+id/UserAddtableRow7EmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/UserAddtextViewUsernameEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/employeeUserName"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000055"
+                    android:textSize="15dp" />
+
+                <EditText
+                    android:id="@+id/UserAddeditTextUsernameEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:ems="10"
+                    android:textSize="15dp" />
+            </TableRow>
+
+            <!-- For Password1 -->
+
+            <TableRow
+                android:id="@+id/UserAddtableRow8EmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/UserAddtextViewPassword1EmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/employeePwd"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000055"
+                    android:textSize="15dp" />
+
+                <EditText
+                    android:id="@+id/UserAddeditTextPassword1EmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:ems="10"
+                    android:inputType="textPassword"
+                    android:textSize="15dp" />
+            </TableRow>
+
+            <!-- For Password2 -->
+
+            <TableRow
+                android:id="@+id/UserAddtableRow9EmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/UserAddtextViewPassword2EmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/employeePwdReenter"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000055"
+                    android:textSize="15dp" />
+
+                <EditText
+                    android:id="@+id/UserAddeditTextPassword2EmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:ems="10"
+                    android:inputType="textPassword"
+                    android:textSize="15dp" />
+            </TableRow>
+            <!-- For Designation -->
+
+            <TableRow
+                android:id="@+id/UserAddtableRow10EmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/UserAddtextViewDesignationEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/employeeDesignation"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000055"
+                    android:textSize="15dp" />
+
+                <EditText
+                    android:id="@+id/UserAddeditTextDesignationEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:ems="10"
+                    android:textSize="15dp" />
+            </TableRow>
+
+            <!-- For Remarks -->
+
+            <TableRow
+                android:id="@+id/UserAddtableRow11EmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/UserAddtextViewRemarksEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/employeeRemarks"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000055"
+                    android:textSize="15dp" />
+
+                <EditText
+                    android:id="@+id/UserAddeditTextRemarksEmpEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:ems="10"
+                    android:textSize="15dp" />
+            </TableRow>
+
+            <!-- Button -->
+
+            <Button
+                android:id="@+id/UserAddbuttonEditEmpEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:background="@color/title_blue"
+                android:text="@string/employeeUpdate"
+                android:textColor="#000000" />
+        </TableLayout>
+    </LinearLayout>
+
+</ScrollView>

@@ -72,7 +72,7 @@ public class BulletinLocal extends LocalConnection {
 	 * ************************************************************************************/
 	public void writeFile2Sdcard(JSONObject thisJsonFile) {
 		this.createOrUseFile(thisJsonFile.toString(), urlLocal + usersFolder
-				+ bulletinsDetails);
+				, bulletinsDetails);
 	}
 
 	/*****************************************************************************************
@@ -103,7 +103,7 @@ public class BulletinLocal extends LocalConnection {
 			jsonArr.put(newjsonObj);
 
 			this.createOrUseFile(jsonArr.toString(), urlLocal + usersFolder
-					+ bulletinsDetails);
+					, bulletinsDetails);
 
 		} catch (JSONException e) {
 			Log.e("JSONException", "" + e.getMessage());
@@ -140,7 +140,7 @@ public class BulletinLocal extends LocalConnection {
 			}
 
 			this.createOrUseFile(jsonArr.toString(), urlLocal + usersFolder
-					+ bulletinsDetails);
+					, bulletinsDetails);
 
 		} catch (JSONException e) {
 			Log.e("JSONException", "" + e.getMessage());

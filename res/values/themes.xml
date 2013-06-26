@@ -6,4 +6,10 @@
         <item name="android:windowTitleBackgroundStyle">@style/WindowTitleBackground</item>
     </style>
 
+    <style name="MyThemeWithDialog" parent="android:Theme">
+        <item name="android:windowTitleSize">77px</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowTitleBackgroundStyle">@style/DoNotDim</item>
+    </style>
+
 </resources>

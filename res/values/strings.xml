@@ -10,6 +10,24 @@
     <string name="app_name">ITHProject</string>
     <string name="bulletinDate">Date of Created</string><string name="bulletinSubmit">Submit</string>
     <string name="bulletinAuthor">Created By</string>
+    <string name="employeeName">Name *</string>
+    <string name="employeeGender">Gender *</string><string name="employeeHomePhone">HomePhone</string>
+    
+    <string name="employeeMobile">Mobile *</string>
+    <string name="employeeEmail">Email *</string>
+    <string name="employeeAddress">Address *</string>
+    <string name="employeeAdd">Add Employee</string>
+    <string name="employeeDesignation">Designation *</string>
+    <string name="genderMale">Male</string>
+    <string name="genderFemale">Female</string>
+    <string name="employeeRemarks">Remarks</string>
+    <string name="sendWebMessages">Web Message</string>
+    <string name="sendInstantMessages">Instant Message</string>
+    <string name="searchEmployee">Search Employee</string>
+    <string name="employeeUserName">UserName *</string>
+    <string name="employeePwdReenter">Re-enter Password *</string>
+    <string name="employeePwd">Password *</string>
+    <string name="employeeUpdate">Update</string>
     
     
     

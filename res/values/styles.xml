@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-    <resources>
-        <style name="WindowTitleBackground">
-            <item name="android:background">@android:color/transparent</item>
-        </style>
-    </resources>
+<resources>
+
+    <style name="WindowTitleBackground">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="DoNotDim" parent="android:Theme">
+        <item name="android:windowTitleSize">77px</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="mydialogstyle" parent="android:style/Theme.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@style/DialogAnimation</item>
+    </style>
+
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/roll_down</item>
+        <item name="android:windowExitAnimation">@anim/slide_up_dialog</item>
+    </style>
+
+</resources>

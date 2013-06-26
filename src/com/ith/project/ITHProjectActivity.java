@@ -1,5 +1,9 @@
 package com.ith.project;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.ith.project.sdcard.LoginLocal;
 import android.app.Activity;
@@ -31,6 +35,10 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 	private LoginAuthentication auth;
 	private String uname, pass;
 	private ProgressDialog pdialog;
+	private JSONObject tempObject;
+	private JSONObject jsonRemoteWebservice;
+	private JSONObject workingJson = null;
+	private static String workingStatus;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -71,7 +79,6 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 
 				uname = uName.getText().toString();
 				pass = pwd.getText().toString();
-				JSONObject tempObject;
 				conn = HttpConnection.getSingletonConn();
 				// conn = new HttpConnection(url);
 				loginLocal = new LoginLocal();
@@ -85,17 +92,34 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 					if (conMgr.getActiveNetworkInfo() != null
 							&& conMgr.getActiveNetworkInfo().isAvailable()
 							&& conMgr.getActiveNetworkInfo().isConnected()
-							&& netInfo != null && netInfo.isConnected())
+							&& netInfo != null && netInfo.isConnected()) {
 
-					{
+						String connected = conn.getJSONFromUrl(tempObject, url);
+						if (!connected.equals(""))
+							jsonRemoteWebservice = new JSONObject(connected);
 
-						JSONObject jsonRemoteWebservice = new JSONObject(conn
-								.getJSONFromUrl(tempObject, url));
-
-						loginLocal.updateLocalFiles(jsonRemoteWebservice,
-								tempObject); // tempObject contains Username and
-												// password
 					}
+
+					/** Know that Internet is connected OR not connected **/
+					if (jsonRemoteWebservice != null) {
+						workingStatus = "Online";
+						if (jsonRemoteWebservice
+								.getBoolean("AutheticationStatus") == true) {
+							loginLocal.updateLocalFiles(jsonRemoteWebservice,
+									tempObject); // tempObject contains Username
+													// and password
+
+						}
+
+					} else {
+						workingStatus = "Offline";
+					}
+
+					/**
+					 * Always read from local regardless of how the connection
+					 * is done
+					 **/
+					workingJson = loginLocal.getJSONFromLocal(tempObject);
 
 				} catch (Exception e) {
 					Log.e("JSONException", "" + e.getMessage());
@@ -103,33 +127,44 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 					e.printStackTrace();
 				}
 
-				JSONObject jsonRemote = loginLocal.getJSONFromLocal(tempObject);
-
-				auth.setFlagFromAuth(jsonRemote);
+				auth.setFlagFromAuth(workingJson);
 
 				runOnUiThread(new Runnable() {
 					public void run() {
 						Log.v("Login status", "" + auth.getAuthStatus());
 						if (auth.getAuthStatus()) {
 
-							Log.v("loginStatus @main Thread", "");
+							loginLocal
+									.updateLocalFiles(workingJson, tempObject); // tempObject
+																				// contains
+																				// Username
+																				// and
+																				// password
+							Log.v("loginStatus @main Thread",
+									"" + auth.getAuthStatus());
 							auth.setValues();
 							/** here store locally for offline data **/
 							// LoginLocal loginLocal = new LoginLocal();
 							JSONObject jsonLocal = loginLocal
-									.createJSON4LoginLocal(uname, pass,
-											auth.getUserLoginId(),
-											auth.getEmployeeId(),
-											auth.getUserId(),
-											auth.getUserRoleId());
+									.createJSON4LoginLocal(
+											uname,
+											pass,
+											LoginAuthentication
+													.getUserLoginId(),
+											LoginAuthentication.getEmployeeId(),
+											LoginAuthentication.getUserId(),
+											LoginAuthentication.getUserRoleId());
 
 							loginLocal.writeFile2Sdcard(jsonLocal);
 
 							pdialog.dismiss();
+							Toast.makeText(ITHProjectActivity.this,
+									"" + workingStatus, Toast.LENGTH_SHORT)
+									.show();
 							Intent intent = new Intent(ITHProjectActivity.this,
 									ListItemActivity.class);
 							intent.putExtra("UserLoginId",
-									auth.getUserLoginId());
+									LoginAuthentication.getUserLoginId());
 							ITHProjectActivity.this.startActivity(intent);
 							ITHProjectActivity.this.finish();
 						} else {
@@ -153,4 +188,5 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 		loginStatus = tmpStatus;
 		Log.v("loginStatus @updateLoginstatus()", "" + loginStatus);
 	}
+
 }

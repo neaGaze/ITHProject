@@ -36,7 +36,7 @@ public class Employee {
 	/*************************************************************************************
 	 * Make a JSONObject of new Employee that admin adds
 	 * ***************************************************************************************/
-	public JSONObject makeNewBulletinJSON(String Name, String gender,
+	public JSONObject makeNewEmployeeJSON(String Name, String gender,
 			String homePhone, String mobile, String email, String address,
 			String designation, String remarks) {
 

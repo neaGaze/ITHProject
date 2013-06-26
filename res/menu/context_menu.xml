@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/itemAddEmployee"
+        android:enabled="true"
+        android:title="@string/employeeAdd"
+        android:visible="true">
+    </item>
+    <item
+        android:id="@+id/itemSendWebMessage"
+        android:enabled="true"
+        android:title="@string/sendWebMessages"
+        android:visible="true">
+    </item>
+    <item
+        android:id="@+id/itemSendInstantMessages"
+        android:enabled="true"
+        android:title="@string/sendInstantMessages"
+        android:visible="true">
+    </item>
+
+</menu>

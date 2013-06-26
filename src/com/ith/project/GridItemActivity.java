@@ -1,17 +1,24 @@
 package com.ith.project;
 
 import java.util.ArrayList;
+
+import com.ith.project.menu.CustomMenu;
+import com.ith.project.menu.CustomMenuListAdapter;
+
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -21,9 +28,9 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class GridItemActivity extends Activity implements OnItemClickListener,
 		OnClickListener {
@@ -37,6 +44,12 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 	private ImageButton menuButton;
 	private ImageButton BulletinButton;
 	private ImageButton homeButton;
+	private LinearLayout linLayoutMenu;
+	private ListView menuListView;
+	static ListItemArrayAdapter listItemArrAdapter;
+	static CustomMenuListAdapter menuAdapter;
+	private static GridItemActivity context;
+	private Dialog dialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -51,6 +64,7 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 		setContentView(R.layout.grid_view);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
 				R.layout.custom_title);
+		context = this;
 		init();
 	}
 
@@ -58,6 +72,8 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 	public void onPause() {
 		super.onPause();
 		pdialog.dismiss();
+		if (dialog != null)
+			dialog.dismiss();
 	}
 
 	@Override
@@ -71,14 +87,14 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 	 * ***********************************************************************************/
 	private void init() {
 		/** To remove add Bulletin for normal users **/
-		if (LoginAuthentication.getUserRoleId() == 2)
-			findViewById(R.id.bulletin_add_icon).setVisibility(View.INVISIBLE);
+		// if (LoginAuthentication.getUserRoleId() == 2)
+		// findViewById(R.id.bulletin_add_icon).setVisibility(View.INVISIBLE);
 
 		parser = new ParseListItem(this, "GRID_ITEM");
 		this.gridItemDetails = parser.getGridItemDetails();
 
-		BulletinButton = (ImageButton) findViewById(R.id.bulletin_add_icon);
-		BulletinButton.setOnClickListener(this);
+		// BulletinButton = (ImageButton) findViewById(R.id.bulletin_add_icon);
+		// BulletinButton.setOnClickListener(this);
 
 		menuButton = (ImageButton) findViewById(R.id.menu);
 		menuButton.setOnClickListener(this);
@@ -132,21 +148,20 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 
 				gridView = new View(context);
 
-				// get layout from mobile.xml
+				/** get layout from mobile.xml **/
 				gridView = inflater.inflate(R.layout.grid_items, null);
 
-				// set value into textview
+				/** set value into textview **/
 				TextView textView = (TextView) gridView
 						.findViewById(R.id.textViewMenuName);
 				textView.setText(gridItemDetails.get(position).getMenuName());
 
-				// set image based on selected text
+				/** set image based on selected text **/
 				ImageView imageView = (ImageView) gridView
 						.findViewById(R.id.imageViewMenuIcon);
 
 				int id = getResources().getIdentifier(
 						gridItemDetails.get(position).getMenuIcon(),
-						// "employee1",
 						"drawable", getApplicationContext().getPackageName());
 
 				// imageView.setImageResource(R.drawable.user1);
@@ -227,21 +242,94 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 	public void onClick(View v) {
 		if (v.equals(menuButton)) {
 			pdialog.show();
-
-			// Intent intent = new Intent(this,GridItemActivity.class);
-			// this.startActivity(intent);
+			Intent intent = new Intent(this, GridItemActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			this.startActivity(intent);
 			// this.finish();
+			pdialog.dismiss();
 		} else if (v.equals(BulletinButton)) {
 			pdialog.show();
-			// Toast.makeText(this, "Add Bulletin", Toast.LENGTH_SHORT).show();
 			Intent intent = new Intent(GridItemActivity.this,
 					BulletinAddActivity.class);
 			this.startActivity(intent);
 			this.finish();
 
 		} else if (v.equals(homeButton)) {
-			Toast.makeText(this, "Home Button", Toast.LENGTH_SHORT).show();
+			callMenuDialog();
 		}
 	}
 
+	/****************************************************************************
+	 * When the Home Button is Clicked at the Menu
+	 *************************************************************************/
+	private void callMenuDialog() {
+
+		LayoutInflater menuInflater = (LayoutInflater) this
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		linLayoutMenu = (LinearLayout) findViewById(R.id.linearLayoutCustomMenu_2);
+		menuInflater.inflate(R.layout.menu_list_view, linLayoutMenu, false);
+
+		/** To bring front the Dialog box **/
+		dialog = new Dialog(this, R.style.mydialogstyle);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialog.setCanceledOnTouchOutside(true);
+
+		/** To set the alignment of the Dialog box in the screen **/
+		WindowManager.LayoutParams WMLP = dialog.getWindow().getAttributes();
+		WMLP.x = getWindowManager().getDefaultDisplay().getWidth();
+		WMLP.gravity = Gravity.TOP;
+		WMLP.verticalMargin = 0.08f; // To put it below header
+		dialog.getWindow().setAttributes(WMLP);
+
+		/** To set the dialog box with the List layout in the android xml **/
+		dialog.setContentView(R.layout.menu_list_view);
+
+		menuListView = (ListView) dialog.findViewById(R.id.listView2);
+
+		/** make an arrayList of items to display at the CustomMenu **/
+		ArrayList<CustomMenu> tempArrList = new ArrayList<CustomMenu>();
+		tempArrList.add(setMenuItems("Exit", "exit"));
+
+		/** Call adapter for the list View to populate ArrayList items **/
+		menuAdapter = new CustomMenuListAdapter(GridItemActivity.this,
+				R.layout.custom_menu_2, tempArrList);
+		menuListView.setAdapter(menuAdapter);
+		menuListView.setOnItemClickListener(new OnItemClickListener() {
+
+			public void onItemClick(AdapterView<?> adapterView, View view,
+					int position, long id) {
+
+				TextView c = (TextView) view
+						.findViewById(R.id.textViewCustomMenu_2);
+				String keyword = c.getText().toString();
+
+				/** When "Exit" menu item is pressed **/
+				if (keyword.equals("Exit")) {
+					pdialog.show();
+					GridItemActivity.this.finish();
+					GridItemActivity.getGridItemActivityInstance().finish();
+					ListItemActivity.getListItemActivityInstance().finish();
+				}
+			}
+		});
+
+		dialog.show();
+
+	}
+
+	public CustomMenu setMenuItems(String menuString, String menuIcon) {
+
+		CustomMenu menu = new CustomMenu(menuString, menuIcon);
+		menu.setValues(menuString, menuIcon);
+
+		return menu;
+	}
+
+	/****************************************************************************
+	 * Get the Activity instance of GridItemActivity
+	 *************************************************************************/
+	public static GridItemActivity getGridItemActivityInstance() {
+		return context;
+	}
 }

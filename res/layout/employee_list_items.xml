@@ -14,48 +14,76 @@
         android:focusableInTouchMode="false"
         android:orientation="vertical" >
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:orientation="vertical" >
-
-            <TextView
-                android:id="@+id/textViewEmployeeName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="0dp"
-                android:layout_marginTop="5dp"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:paddingBottom="7dp"
-                android:paddingTop="7dp"
-                android:text="EmployeeName"
-                android:textColor="#000055"
-                android:textSize="22dp" />
-        </LinearLayout>
-
-        <LinearLayout
+        <TableLayout
+            android:id="@+id/tableLayoutCheckBox"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginTop="-3dp"
-            android:orientation="horizontal" >
+            android:layout_height="wrap_content" >
 
-            <TextView
-                android:id="@+id/textViewEmployeeLocation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:layout_marginLeft="0dp"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:text="Employee Address"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="#000044"
-                android:textSize="15sp" />
-        </LinearLayout>
+            <TableRow
+                android:id="@+id/tableRowCheckBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <CheckBox
+                    android:id="@+id/checkBox1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" 
+                    android:layout_gravity="center"
+                    android:focusable="false"
+                    android:focusableInTouchMode="true"/>
+
+                <ImageView
+                    android:id="@+id/imageViewEmployee"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/textViewEmployeeName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="0dp"
+                        android:layout_marginTop="5dp"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:paddingBottom="4dp"
+                        android:paddingTop="2dp"
+                        android:text="EmployeeName"
+                        android:textColor="#000055"
+                        android:textSize="15dp" />
+                    <!--
+                    </LinearLayout>    
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginTop="-3dp"
+                    android:orientation="horizontal" >
+                    -->
+
+                    <TextView
+                        android:id="@+id/textViewEmployeeLocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top"
+                        android:layout_marginLeft="0dp"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:text="Employee Address"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="#000044"
+                        android:textSize="10dp" />
+                </LinearLayout>
+            </TableRow>
+        </TableLayout>
     </LinearLayout>
 
 </LinearLayout>

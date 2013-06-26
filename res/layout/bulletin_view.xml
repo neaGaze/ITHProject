@@ -44,7 +44,7 @@
                 android:paddingTop="7dp"
                 android:text="Title"
                 android:textColor="#000077"
-                android:textSize="25dp" />
+                android:textSize="15dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -78,7 +78,7 @@
                 android:paddingTop="7dp"
                 android:text="Description"
                 android:textColor="#ffffff"
-                android:textSize="20dp" >
+                android:textSize="12dp" >
             </TextView>
         </LinearLayout>
         <!--
@@ -149,7 +149,7 @@
                 android:paddingTop="7dp"
                 android:text="Author"
                 android:textColor="#ffffff"
-                android:textSize="17dp" >
+                android:textSize="12dp" >
             </TextView>
         </LinearLayout>
 
@@ -167,7 +167,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="10dp"
                 android:text="@string/bulletinDate"
-                android:textSize="15dp"
+                android:textSize="12dp"
                 android:layout_gravity="right"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#000055" />

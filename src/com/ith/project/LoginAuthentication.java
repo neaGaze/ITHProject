@@ -115,14 +115,21 @@ public class LoginAuthentication {
 		remoteJson = jsonObject;
 		try {
 
-			if ((Boolean) remoteJson.get("AutheticationStatus"))
+			if (jsonObject == null)
+				setAuthStatus(false);
+			else if ((Boolean) remoteJson.get("AutheticationStatus")) {
 				setAuthStatus(true);
+				Log.v("onPostExecute@auth", "" + remoteJson.toString());
+			}
 
 		} catch (JSONException e) {
 			Log.e("JSONException", "" + e.getMessage());
 			e.printStackTrace();
+		}catch (NullPointerException e) {
+			Log.e("NullPointerException", "" + e.getMessage());
+			e.printStackTrace();
 		}
-		Log.v("onPostExecute@auth", "" + remoteJson.toString());
+
 		// Log.v("AutheticationStatus@onPostExecute is:", "" +
 		// this.AutheticationStatus);
 
