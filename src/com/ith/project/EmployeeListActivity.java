@@ -8,6 +8,9 @@ import com.ith.project.R;
 import com.ith.project.menu.CustomMenu;
 import com.ith.project.menu.CustomMenuListAdapter;
 import com.ith.project.sdcard.EmployeeLocal;
+import com.ith.project.sqlite.BulletinSQLite;
+import com.ith.project.sqlite.EmployeeSQLite;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -61,6 +64,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 	private ImageButton searchButton;
 	private HttpConnection conn;
 	private EmployeeLocal employeeLocal;
+	private EmployeeSQLite employeeSQLite;
 	private Employee employee;
 	private static EmployeeListItemArrayAdapter listItemArrAdapter;
 	private static int employeeCount;
@@ -90,6 +94,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 	@Override
 	public void onPause() {
 		super.onPause();
+		employeeSQLite.closeDB();
 		pdialog.dismiss();
 		if (dialog != null)
 			dialog.dismiss();
@@ -112,7 +117,11 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 				JSONObject inputJson;
 				conn = HttpConnection.getSingletonConn();
 				// conn = new HttpConnection(url);
-				employeeLocal = new EmployeeLocal();
+				// employeeLocal = new EmployeeLocal();
+
+				employeeSQLite = new EmployeeSQLite(EmployeeListActivity.this);
+				employeeSQLite.openDB();
+
 				employee = new Employee();
 
 				inputJson = employee.getJsonUserLoginId(LoginAuthentication
@@ -132,22 +141,22 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 				Log.v("Employees:", "" + employeesFromWS);
 
 				/** Update the local file according to the web service **/
-				employeeLocal.updateLocalFiles(inputJson, employeesFromWS);
+				// employeeLocal.updateLocalFiles(inputJson, employeesFromWS);
+				employeeSQLite.updateDBUsersTableJson(employeesFromWS);
 				// employeeLocal.updateLocalFiles();
 
 				/** Now read from the local file always **/
-				JSONArray outputJson = employeeLocal
-						.getJSONFromLocal(inputJson);
+				// JSONArray outputJson = employeeLocal
+				// .getJSONFromLocal(inputJson);
 
-				Log.v("JsonArray:", "" + outputJson.toString());
+				// Log.v("JsonArray:", "" + outputJson.toString());
 
-				itemDetails = setEmployee(outputJson);
+				// itemDetails = setEmployee(outputJson);
+				itemDetails = employeeSQLite.getJSONFromDB();
 				returnItemDetails = itemDetails;
 
-				Log.v("Employees:",
-						""
-								+ employeeLocal.getJSONFromLocal(inputJson)
-										.toString());
+				// Log.v("Employees:",""+
+				// employeeLocal.getJSONFromLocal(inputJson).toString());
 
 				/**
 				 * To run the main thread after completion of the connection
@@ -241,7 +250,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 		// if (userRolesId == 2)
 		// findViewById(R.id.bulletin_add_icon).setVisibility(View.INVISIBLE);
 	}
-	
+
 	/****************************************************************************
 	 * Get the correct employee ID
 	 *************************************************************************/
@@ -256,8 +265,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 			int position, long id) {
 
 		pdialog.show();
-		Log.v("Employee LIst Item clicked", "@ "+position);
-		Log.v("Employee LIst Item clicked", "@ "+position);
+		Log.v("Employee LIst Item clicked", "@ " + position);
 		Intent intent = new Intent(EmployeeListActivity.this,
 				EmployeeViewActivity.class);
 		intent.putExtra("PositionOfEmployee", (position));
@@ -439,7 +447,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
@@ -451,7 +459,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 		return super.onKeyDown(keyCode, event);
 	}
-	
+
 	/******************************************************************************************
 	 * A new ArrayAdapter to handle the List View
 	 * *****************************************************************************************/
@@ -595,7 +603,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 		listItemArrAdapter.getFilter().filter(s.toString().toLowerCase());
 		listItemArrAdapter.notifyDataSetChanged();
 	}
-	
+
 	/****************************************************************************
 	 * Get the Activity instance of GridItemActivity
 	 *************************************************************************/

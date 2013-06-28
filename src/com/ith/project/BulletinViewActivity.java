@@ -98,9 +98,10 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 		bulletinDesc.setText(ListItemActivity.getBulletinArrayList()
 				.get(position).getDescription());
 
-		bulletinAuthor = (TextView) findViewById(R.id.editTextBulletinAuthor);
-		bulletinAuthor.setText(ListItemActivity.getBulletinArrayList()
-				.get(position).getEmployeeName());
+		// bulletinAuthor = (TextView)
+		// findViewById(R.id.editTextBulletinAuthor);
+		// bulletinAuthor.setText(ListItemActivity.getBulletinArrayList()
+		// .get(position).getEmployeeName());
 
 		bulletinDate = (TextView) findViewById(R.id.editTextBulletinDate);
 		bulletinDate.setText(ListItemActivity.getBulletinArrayList()
@@ -172,7 +173,7 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 		if (LoginAuthentication.getUserRoleId() == 1)
 			tempArrList.add(setMenuItems("Add Bulletin", "add_employee"));
 		tempArrList.add(setMenuItems("Exit", "exit"));
-		
+
 		menuAdapter = new CustomMenuListAdapter(BulletinViewActivity.this,
 				R.layout.custom_menu_2, tempArrList);
 		menuListView.setAdapter(menuAdapter);
@@ -192,7 +193,7 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 					Intent intent = new Intent(BulletinViewActivity.this,
 							BulletinAddActivity.class);
 					BulletinViewActivity.this.startActivity(intent);
-				} 
+				}
 				/** When "Exit" menu item is pressed **/
 				else if (keyword.equals("Exit")) {
 					pdialog.show();

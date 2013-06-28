@@ -7,6 +7,8 @@ import org.json.JSONObject;
 import com.ith.project.menu.CustomMenu;
 import com.ith.project.menu.CustomMenuListAdapter;
 import com.ith.project.sdcard.BulletinLocal;
+import com.ith.project.sqlite.BulletinSQLite;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -49,6 +51,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 	private ImageButton homeButton;
 	private HttpConnection conn;
 	private BulletinLocal bulletinLocal;
+	private BulletinSQLite bulletinSQLite;
 	private Bulletin bulletin;
 	static ListItemArrayAdapter listItemArrAdapter;
 	private static int bulletinCount;
@@ -78,6 +81,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 	@Override
 	public void onPause() {
 		super.onPause();
+		bulletinSQLite.closeDB();
 		pdialog.dismiss();
 		if (dialog != null)
 			dialog.dismiss();
@@ -101,9 +105,14 @@ public class ListItemActivity extends Activity implements OnClickListener,
 				JSONObject inputJson;
 				conn = HttpConnection.getSingletonConn();
 				// conn = new HttpConnection(url);
-				bulletinLocal = new BulletinLocal();
+				// bulletinLocal = new BulletinLocal();
+
+				bulletinSQLite = new BulletinSQLite(ListItemActivity.this);
+				bulletinSQLite.openDB();
+				
 				bulletin = new Bulletin();
 
+				/** Make a json Object out of UserLoginId **/
 				inputJson = bulletin.getJsonUserLoginId(LoginAuthentication
 						.getUserLoginId());
 
@@ -118,20 +127,20 @@ public class ListItemActivity extends Activity implements OnClickListener,
 				Log.v("Bulletins:", "" + bulletinsFromWS);
 
 				/** Update the local file according to the web service **/
-				bulletinLocal.updateLocalFiles(inputJson, bulletinsFromWS);
+				// bulletinLocal.updateLocalFiles(inputJson, bulletinsFromWS);
+				bulletinSQLite.updateDBUsersTableJson(bulletinsFromWS);
 
 				/** Now read from the local file always **/
-				JSONArray outputJson = bulletinLocal
-						.getJSONFromLocal(inputJson);
+				// JSONArray outputJson = bulletinLocal
+				// .getJSONFromLocal(inputJson);
 
-				Log.v("JsonArray:", "" + outputJson.toString());
+				// Log.v("JsonArray:", "" + outputJson.toString());
 
-				itemDetails = setBulletin(outputJson);
+				// itemDetails = setBulletin(outputJson);
+				itemDetails = bulletinSQLite.getJSONFromDB();
 
-				Log.v("Bulletins:",
-						""
-								+ bulletinLocal.getJSONFromLocal(inputJson)
-										.toString());
+				// Log.v("Bulletins:",""+
+				// bulletinLocal.getJSONFromLocal(inputJson).toString());
 
 				/**
 				 * To run the main thread after completion of the connection
@@ -411,6 +420,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 		// ListItemActivity.this.finish();
 
 	}
+
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
@@ -422,7 +432,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 
 		return super.onKeyDown(keyCode, event);
 	}
-	
+
 	public static ArrayList<Bulletin> getBulletinArrayList() {
 		return itemDetails;
 	}

@@ -8,10 +8,10 @@ import android.util.Log;
 public class Bulletin {
 
 	private int BulletinId, EmployeeId;
-	private String Title, Description, BulletinDate,EmployeeName;
+	private String Title, Description, BulletinDate, EmployeeName;
 	private String date;
 	private String time;
-	
+
 	public Bulletin() {
 
 	}
@@ -39,14 +39,14 @@ public class Bulletin {
 	 * ***************************************************************************************/
 	public JSONObject makeNewBulletinJSON(String userId, String Title,
 			String Desc) {
-		
+
 		JSONObject tempJsonFile = new JSONObject();
 
 		try {
-			//tempJsonFile.put("BulletinDate", date);
+			// tempJsonFile.put("BulletinDate", date);
 			tempJsonFile.put("Description", Desc);
 			tempJsonFile.put("Title", Title);
-			tempJsonFile.put("UserId",userId);
+			tempJsonFile.put("EmployeeId", Integer.parseInt(userId));
 
 		} catch (JSONException e) {
 			Log.e("Could not convert to JSONObject", "" + e.getMessage());
@@ -79,7 +79,7 @@ public class Bulletin {
 	public String getBulletinDate() {
 		return this.BulletinDate;
 	}
-	
+
 	public String getDate() {
 		return this.date;
 	}
@@ -105,19 +105,45 @@ public class Bulletin {
 			e.printStackTrace();
 		}
 	}
-	
+
+	public void setBulletinId(int i) {
+		BulletinId = i;
+	}
+
+	public void setTitle(String title) {
+		Title = title;
+	}
+
+	public void setDesc(String desc) {
+		Description = desc;
+	}
+
+	public void setDate(String date) {
+		BulletinDate = date;
+	}
+
+	public void setEmpName(String empName) {
+		EmployeeName = empName;
+	}
+
 	/***************************************************************************************
 	 * To separate Date From time
 	 * ***************************************************************************************/
-	private void parseDateTime(String dateTime2) {
+	public void parseDateTime(String dateTime2) {
 
 		this.date = new StringBuilder().append(dateTime2.substring(6, 8))
 				.append("-").append(dateTime2.substring(4, 6)).append("-")
 				.append(dateTime2.substring(0, 4)).toString();
 
 		this.time = new StringBuilder().append(dateTime2.substring(9, 11))
-				.append(":").append(dateTime2.substring(11, 13))/*.append(":")
-				.append(dateTime2.substring(13))*/.toString();
+				.append(":").append(dateTime2.substring(11, 13))/*
+																 * .append(":")
+																 * .
+																 * append(dateTime2
+																 * .
+																 * substring(13)
+																 * )
+																 */.toString();
 
 	}
 }

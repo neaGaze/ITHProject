@@ -118,4 +118,40 @@ public class Employee {
 	public String getRemarks() {
 		return this.Remarks;
 	}
+
+	public void setEmployeeId(int empId) {
+		this.EmployeeId = empId;
+	}
+	
+	public void setEmployeeName(String empName) {
+		this.EmployeeName = empName;
+	}
+	
+	public void setGender(String gender) {
+		this.Gender = gender;
+	}
+
+	public void setHomePhone(String homePhone) {
+		this.HomePhone = homePhone;
+	}
+	
+	public void setMobile(String mobile) {
+		this.Mobile = mobile;
+	}
+	
+	public void setEmail(String email) {
+		this.Email = email;
+	}
+	
+	public void setAddress(String address) {
+		this.Address = address;
+	}
+	
+	public void setDesignation(String designation) {
+		this.Designation = designation;
+	}
+	
+	public void setRemarks(String remarks) {
+		this.Remarks= remarks;
+	}
 }

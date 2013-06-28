@@ -6,6 +6,8 @@ import java.security.NoSuchAlgorithmException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.ith.project.sdcard.LoginLocal;
+import com.ith.project.sqlite.LoginSQLite;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -32,6 +34,7 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 	private EditText uName, pwd;
 	private HttpConnection conn;
 	private LoginLocal loginLocal;
+	private LoginSQLite loginSQLite;
 	private LoginAuthentication auth;
 	private String uname, pass;
 	private ProgressDialog pdialog;
@@ -51,6 +54,12 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 		pdialog.cancel();
 		initialize();
 
+	}
+
+	@Override
+	protected void onPause() {
+		loginSQLite.closeDB();
+		super.onPause();
 	}
 
 	/**************************************************************************************
@@ -82,6 +91,11 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 				conn = HttpConnection.getSingletonConn();
 				// conn = new HttpConnection(url);
 				loginLocal = new LoginLocal();
+
+				/** Initialize the loginSQLite **/
+				loginSQLite = new LoginSQLite(ITHProjectActivity.this);
+				loginSQLite.openDB();
+
 				auth = new LoginAuthentication();
 				tempObject = auth.jsonFormValues(uname, pass);
 				// auth.execute(tempObject);
@@ -97,7 +111,7 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 						String connected = conn.getJSONFromUrl(tempObject, url);
 						if (!connected.equals(""))
 							jsonRemoteWebservice = new JSONObject(connected);
-
+						Log.e("Login auth return", "" + connected);
 					}
 
 					/** Know that Internet is connected OR not connected **/
@@ -105,10 +119,10 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 						workingStatus = "Online";
 						if (jsonRemoteWebservice
 								.getBoolean("AutheticationStatus") == true) {
-							loginLocal.updateLocalFiles(jsonRemoteWebservice,
-									tempObject); // tempObject contains Username
-													// and password
-
+							// loginLocal.updateLocalFiles(jsonRemoteWebservice,tempObject);
+							// tempObject contains Username and password
+							loginSQLite.updateDBUsersTableJson(
+									jsonRemoteWebservice, tempObject);
 						}
 
 					} else {
@@ -119,7 +133,8 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 					 * Always read from local regardless of how the connection
 					 * is done
 					 **/
-					workingJson = loginLocal.getJSONFromLocal(tempObject);
+					// workingJson = loginLocal.getJSONFromLocal(tempObject);
+					workingJson = loginSQLite.getJSONFromDB(tempObject);
 
 				} catch (Exception e) {
 					Log.e("JSONException", "" + e.getMessage());
@@ -134,28 +149,31 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 						Log.v("Login status", "" + auth.getAuthStatus());
 						if (auth.getAuthStatus()) {
 
-							loginLocal
-									.updateLocalFiles(workingJson, tempObject); // tempObject
-																				// contains
-																				// Username
-																				// and
-																				// password
+							// loginLocal.updateLocalFiles(workingJson,tempObject);
+							// tempObject contains Username and password
+							loginSQLite.updateDBUsersTableJson(workingJson,
+									tempObject);
+
 							Log.v("loginStatus @main Thread",
 									"" + auth.getAuthStatus());
 							auth.setValues();
 							/** here store locally for offline data **/
 							// LoginLocal loginLocal = new LoginLocal();
-							JSONObject jsonLocal = loginLocal
-									.createJSON4LoginLocal(
-											uname,
-											pass,
-											LoginAuthentication
-													.getUserLoginId(),
-											LoginAuthentication.getEmployeeId(),
-											LoginAuthentication.getUserId(),
-											LoginAuthentication.getUserRoleId());
-
-							loginLocal.writeFile2Sdcard(jsonLocal);
+							/**
+							 * JSONObject jsonLocal = loginLocal
+							 * .createJSON4LoginLocal( uname, pass,
+							 * LoginAuthentication .getUserLoginId(),
+							 * LoginAuthentication.getEmployeeId(),
+							 * LoginAuthentication.getUserId(),
+							 * LoginAuthentication.getUserRoleId());
+							 * 
+							 * loginLocal.writeFile2Sdcard(jsonLocal);
+							 */
+							loginSQLite.insertDBUsersTableValues(uname, pass,
+									LoginAuthentication.getUserLoginId(),
+									LoginAuthentication.getEmployeeId(),
+									LoginAuthentication.getUserId(),
+									LoginAuthentication.getUserRoleId());
 
 							pdialog.dismiss();
 							Toast.makeText(ITHProjectActivity.this,
@@ -165,6 +183,7 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 									ListItemActivity.class);
 							intent.putExtra("UserLoginId",
 									LoginAuthentication.getUserLoginId());
+							// loginSQLite.closeDB();
 							ITHProjectActivity.this.startActivity(intent);
 							ITHProjectActivity.this.finish();
 						} else {

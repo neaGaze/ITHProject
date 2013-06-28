@@ -41,7 +41,7 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 	private EditText bulletinDesc;
 	private Button bulletinSubmit;
 	private Bulletin bulletinAdd;
-	private String userId, title, desc, date;
+	private String employeeId, title, desc, date;
 	private Calendar cal;
 	private ProgressDialog pdialog;
 	private JSONObject insertBulletin;
@@ -111,14 +111,15 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 			callMenuDialog();
 		} else {
 			// pdialog.show();
-			userId = new StringBuilder()
-					.append(LoginAuthentication.getUserId()).toString();
+			employeeId = new StringBuilder()
+					.append(LoginAuthentication.getEmployeeId()).toString();
 			title = bulletinTitle.getText().toString();
 			desc = bulletinDesc.getText().toString();
 			date = getCurrentDate();
 			Log.d("Bulletin Add Date", "" + date);
-			insertBulletin = bulletinAdd.makeNewBulletinJSON(userId, title,
+			insertBulletin = bulletinAdd.makeNewBulletinJSON(employeeId, title,
 					desc);
+			Log.v("insertBulletin status", "" + insertBulletin.toString());
 
 			/** send the JSONObject to update the bulletins in the database **/
 			new Thread(new Runnable() {
@@ -127,9 +128,10 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 
 					conn = HttpConnection.getSingletonConn();
 
+					Log.e("insertStringJson", "" + insertBulletin.toString());
 					String insertStatusStr = conn.getJSONFromUrl(
 							insertBulletin, url);
-
+					Log.e("Here comes insertStatusStr", "" + insertStatusStr);
 					try {
 
 						JSONObject insertStatusJson = new JSONObject(

@@ -7,8 +7,8 @@
     <LinearLayout 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginBottom="3dp"
+        android:layout_marginTop="3dp"
         android:background="@drawable/customview"
         android:focusable="false"
         android:focusableInTouchMode="false"
@@ -30,9 +30,9 @@
                 android:focusableInTouchMode="false"
                 android:text="TextView"
                 android:textColor="#000055"
-                android:textSize="15dp" 
-                android:paddingTop="7dp"
-                android:paddingBottom="7dp"/>
+                android:textSize="17dp" 
+                android:paddingTop="3dp"
+                android:paddingBottom="5dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -54,7 +54,7 @@
                 android:text="Medium Text"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="#000044"
-                android:textSize="10dp" />
+                android:textSize="12dp" />
 
             <TextView
                 android:id="@+id/textViewListTime"
@@ -66,7 +66,7 @@
                 android:text="Medium Text"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="#000044"
-                android:textSize="10dp" />
+                android:textSize="12dp" />
         </LinearLayout>
     </LinearLayout>
 

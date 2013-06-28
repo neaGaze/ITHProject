@@ -28,25 +28,27 @@ public class HttpConnection /*
 	private HttpClient httpclient;
 	private HttpPost httppost;
 	private static HttpConnection httpConnection;
+	private static int ConnCount = 0;
 
 	public HttpConnection() {
 		// this.url = url;
 		HttpParams httpParameters = new BasicHttpParams();
 		// Set the timeout in milliseconds until a connection is established.
 		int timeoutConnection = 3000;
-		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
-		// Set the default socket timeout (SO_TIMEOUT) 
-		// in milliseconds which is the timeout for waiting for data.
-		int timeoutSocket = 4000;
-		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-		
-		httpclient = new DefaultHttpClient(httpParameters);
+		HttpConnectionParams.setConnectionTimeout(httpParameters,timeoutConnection);
+		// Set the default socket timeout (SO_TIMEOUT)in milliseconds which is
+		// the timeout for waiting for data.
+	//	int timeoutSocket = 5000;
+	//	HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 
+		httpclient = new DefaultHttpClient(httpParameters);
 	}
 
 	public static HttpConnection getSingletonConn() {
+
 		if (httpConnection == null)
 			httpConnection = new HttpConnection();
+		Log.v("Connection count:", "" + ConnCount++);
 		return httpConnection;
 	}
 
@@ -65,11 +67,12 @@ public class HttpConnection /*
 			httppost.setHeader(HTTP.CONTENT_TYPE,
 					"application/json; charset=utf-8");
 			// httppost.setHeader("Accept", "application/json");
-			StringEntity se = new StringEntity(jsonForm.toString());
-			httppost.setEntity(se);						
+			String tempNetworkJson = jsonForm.toString();
+			StringEntity se = new StringEntity(tempNetworkJson);
+			httppost.setEntity(se);
 
 			HttpResponse response = httpclient.execute(httppost);
-			
+
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				Log.d("Web Service available", "OK to Go");
 				HttpEntity entity = response.getEntity();

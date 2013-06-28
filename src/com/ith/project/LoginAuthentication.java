@@ -22,7 +22,7 @@ public class LoginAuthentication {
 	}
 
 	/*************************************************************************************
-	 * Make a JSONObject out of username & pssword
+	 * Make a JSONObject out of username & password
 	 * ***************************************************************************************/
 	public JSONObject jsonFormValues(String username, String password) {
 		JSONObject tempJsonFile = new JSONObject();
