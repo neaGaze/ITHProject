@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.ith.project.EntityClasses.Bulletin;
+import com.ith.project.EntityClasses.LoginAuthentication;
+import com.ith.project.connection.HttpConnection;
 import com.ith.project.menu.CustomMenu;
 import com.ith.project.menu.CustomMenuListAdapter;
 import com.ith.project.sdcard.BulletinLocal;
@@ -128,6 +132,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 
 				/** Update the local file according to the web service **/
 				// bulletinLocal.updateLocalFiles(inputJson, bulletinsFromWS);
+				bulletinSQLite.deleteAllRows();
 				bulletinSQLite.updateDBUsersTableJson(bulletinsFromWS);
 
 				/** Now read from the local file always **/
@@ -155,10 +160,6 @@ public class ListItemActivity extends Activity implements OnClickListener,
 
 						menuButton = (ImageButton) findViewById(R.id.menu);
 						menuButton.setOnClickListener(ListItemActivity.this);
-
-						// BulletinButton = (ImageButton)
-						// findViewById(R.id.bulletin_add_icon);
-						// BulletinButton.setOnClickListener(ListItemActivity.this);
 
 						homeButton = (ImageButton) findViewById(R.id.home);
 						homeButton.setOnClickListener(ListItemActivity.this);

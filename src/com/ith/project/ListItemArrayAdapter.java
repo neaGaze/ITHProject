@@ -1,6 +1,9 @@
 package com.ith.project;
 
 import java.util.ArrayList;
+
+import com.ith.project.EntityClasses.Bulletin;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;

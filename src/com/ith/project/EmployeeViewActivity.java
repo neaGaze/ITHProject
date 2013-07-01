@@ -2,6 +2,7 @@ package com.ith.project;
 
 import java.util.ArrayList;
 
+import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.menu.CustomMenu;
 import com.ith.project.menu.CustomMenuListAdapter;
 
@@ -44,6 +45,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 	private ListView menuListView;
 	static CustomMenuListAdapter menuAdapter;
 	private Dialog dialog;
+	private int position;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -86,7 +88,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 
 		inflater.inflate(R.layout.employee_view, lin, false);
 		Bundle bundle = getIntent().getExtras();
-		int position = bundle.getInt("PositionOfEmployee");
+		position = bundle.getInt("PositionOfEmployee");
 
 		Log.v("Employee Name", ""
 				+ EmployeeListActivity.getEmployeeArrayList().get(position)
@@ -203,8 +205,10 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 		ArrayList<CustomMenu> tempArrList = new ArrayList<CustomMenu>();
 
 		/** To remove add Bulletin for normal users **/
-		if (LoginAuthentication.getUserRoleId() == 1)
+		if (LoginAuthentication.getUserRoleId() == 1) {
 			tempArrList.add(setMenuItems("Add Employee", "add_employee"));
+			tempArrList.add(setMenuItems("Edit Contents", "edit_user"));
+		}
 		tempArrList.add(setMenuItems("Send Web Message", "mail_web"));
 		tempArrList.add(setMenuItems("Send SMS", "mail_sms"));
 		tempArrList.add(setMenuItems("Phone Call", "call"));
@@ -227,6 +231,16 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 					pdialog.show();
 					Intent intent = new Intent(EmployeeViewActivity.this,
 							EmployeeAddActivity.class);
+					EmployeeViewActivity.this.startActivity(intent);
+					EmployeeViewActivity.this.finish();
+
+				}/** When "Edit Employee" menu item is pressed **/
+				else if (keyword.equals("Edit Contents")) {
+					pdialog.show();
+					Intent intent = new Intent(EmployeeViewActivity.this,
+							EmployeeEditActivity.class);
+					intent.putExtra("PositionOfEmployeeEdit",
+							EmployeeViewActivity.this.position);
 					EmployeeViewActivity.this.startActivity(intent);
 					EmployeeViewActivity.this.finish();
 				} else if (keyword.equals("Send Web Message")) {

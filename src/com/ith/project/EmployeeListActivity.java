@@ -5,6 +5,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.ith.project.R;
+import com.ith.project.EntityClasses.Employee;
+import com.ith.project.EntityClasses.LoginAuthentication;
+import com.ith.project.connection.HttpConnection;
 import com.ith.project.menu.CustomMenu;
 import com.ith.project.menu.CustomMenuListAdapter;
 import com.ith.project.sdcard.EmployeeLocal;
@@ -56,6 +59,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 	private static final int MENU_EXIT = 0;
 	private final String url = "http://192.168.100.2/EMSWebService/Service1.svc/json/GetEmployeeList";
+	private final String delUrl = "http://192.168.100.2/EMSWebService/Service1.svc/json/DeleteEmployees";
 
 	private static ArrayList<Employee> itemDetails;
 	private static ArrayList<Employee> returnItemDetails;
@@ -128,9 +132,9 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 				employeeSQLite = new EmployeeSQLite(EmployeeListActivity.this);
 				employeeSQLite.openDB();
 
-				employee = new Employee();
+				// employee = new Employee();
 
-				inputJson = employee.getJsonUserLoginId(LoginAuthentication
+				inputJson = Employee.getJsonUserLoginId(LoginAuthentication
 						.getUserLoginId());
 
 				Log.v("getemployee inquiry", "" + inputJson.toString());
@@ -386,8 +390,30 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 						selectedItemDetails.add(itemDetails.get(i));
 						Log.e("Deleted Items", ""
 								+ itemDetails.get(i).getEmployeeName());
+
 					}
 				}
+				
+				Thread delThread = new Thread(new Runnable() {
+
+					public void run() {
+						JSONObject inputDelJson;
+
+						inputDelJson = Employee
+								.getDelJsonQueryObject(selectedItemDetails);
+
+						Log.e("Delete Emps ", "" + inputDelJson.toString());
+
+						/** To establish connection to the web service **/
+						String delEmployeesFromWS = conn.getJSONFromUrl(
+								inputDelJson, delUrl);
+
+						Log.v("Employees Delete Status:", ""
+								+ delEmployeesFromWS);
+					}
+
+				});
+				delThread.start();
 
 			}
 		});

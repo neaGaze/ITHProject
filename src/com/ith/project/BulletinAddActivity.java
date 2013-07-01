@@ -6,6 +6,9 @@ import java.util.Calendar;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.ith.project.EntityClasses.Bulletin;
+import com.ith.project.EntityClasses.LoginAuthentication;
+import com.ith.project.connection.HttpConnection;
 import com.ith.project.menu.CustomMenu;
 import com.ith.project.menu.CustomMenuListAdapter;
 

@@ -1,4 +1,4 @@
-package com.ith.project;
+package com.ith.project.connection;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

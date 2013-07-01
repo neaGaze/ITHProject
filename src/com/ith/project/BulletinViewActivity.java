@@ -2,6 +2,7 @@ package com.ith.project;
 
 import java.util.ArrayList;
 
+import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.menu.CustomMenu;
 import com.ith.project.menu.CustomMenuListAdapter;
 

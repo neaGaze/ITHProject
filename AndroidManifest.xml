@@ -50,6 +50,10 @@
             android:name=".EmployeeAddActivity"
             android:theme="@style/MyThemeWithDialog" >
         </activity>
+        <activity
+            android:name=".EmployeeEditActivity"
+            android:theme="@style/MyThemeWithDialog" >
+        </activity>
     </application>
 
 </manifest>

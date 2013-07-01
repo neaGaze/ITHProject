@@ -1,10 +1,9 @@
 package com.ith.project;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.ith.project.EntityClasses.LoginAuthentication;
+import com.ith.project.connection.HttpConnection;
 import com.ith.project.sdcard.LoginLocal;
 import com.ith.project.sqlite.LoginSQLite;
 

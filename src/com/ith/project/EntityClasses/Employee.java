@@ -1,5 +1,8 @@
-package com.ith.project;
+package com.ith.project.EntityClasses;
 
+import java.util.ArrayList;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -8,7 +11,7 @@ import android.util.Log;
 public class Employee {
 
 	private String EmployeeName, Gender, HomePhone, Mobile, Email, Address,
-			Designation, Remarks;
+			Designation, Remarks, userRoles;
 	private boolean Checked = false;
 	private int EmployeeId;
 
@@ -19,7 +22,7 @@ public class Employee {
 	/*************************************************************************************
 	 * Make a JSONObject out of UserLoginId
 	 * ***************************************************************************************/
-	public JSONObject getJsonUserLoginId(String UserLoginId) {
+	public static JSONObject getJsonUserLoginId(String UserLoginId) {
 
 		JSONObject tempJsonFile = new JSONObject();
 
@@ -32,6 +35,27 @@ public class Employee {
 		}
 
 		return tempJsonFile;
+	}
+
+	/*************************************************************************************
+	 * Make a JSONObject out of EmployeeIds
+	 * ***************************************************************************************/
+	public static JSONObject getDelJsonQueryObject(
+			ArrayList<Employee> selectedItemDetails) {
+		JSONObject jsonObject = new JSONObject();
+		JSONArray tempJsonFile = new JSONArray();
+		for (int i = 0; i < selectedItemDetails.size(); i++) {
+			tempJsonFile.put(selectedItemDetails.get(i).getEmployeeId());
+		}
+		try {
+
+			jsonObject.put("DeleteEmployees", tempJsonFile);
+
+		} catch (JSONException e) {
+			Log.e("JSONEXception @ getDelJsonQueryObject", "" + e.getMessage());
+			e.printStackTrace();
+		}
+		return jsonObject;
 	}
 
 	/*************************************************************************************
@@ -58,8 +82,9 @@ public class Employee {
 
 			UserNEmployee.put("employee", tempJsonFile);
 
-			onlyUser.put("Username", username);
+			onlyUser.put("UserName", username);
 			onlyUser.put("Password", password);
+			onlyUser.put("UserRoles", "normal");
 
 			UserNEmployee.put("user", onlyUser);
 
@@ -69,6 +94,32 @@ public class Employee {
 		}
 		Log.e("User and Employee JSON", "" + UserNEmployee.toString());
 		return UserNEmployee;
+	}
+
+	/*************************************************************************************
+	 * Make a JSONObject of new Employee that admin Edits
+	 * ***************************************************************************************/
+	public static JSONObject makeNewEditEmployeeJSON(String Name,
+			String gender, String homePhone, String mobile, String email,
+			String address, String designation, String remarks) {
+
+		JSONObject tempJsonFile = new JSONObject();
+		try {
+			tempJsonFile.put("EmployeeName", Name);
+			tempJsonFile.put("Gender", gender);
+			tempJsonFile.put("HomePhone", homePhone);
+			tempJsonFile.put("Mobile", mobile);
+			tempJsonFile.put("Email", email);
+			tempJsonFile.put("Address", address);
+			tempJsonFile.put("Designation", designation);
+			tempJsonFile.put("Remarks", remarks);
+
+			Log.e("Edit Json Query File", "" + tempJsonFile.toString());
+		} catch (JSONException e) {
+			Log.e("Could not convert to JSONObject", "" + e.getMessage());
+			e.printStackTrace();
+		}
+		return tempJsonFile;
 	}
 
 	/******************************************************************************************
@@ -172,4 +223,5 @@ public class Employee {
 	public void setChecked(boolean checked) {
 		this.Checked = checked;
 	}
+
 }

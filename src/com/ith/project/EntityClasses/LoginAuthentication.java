@@ -1,4 +1,4 @@
-package com.ith.project;
+package com.ith.project.EntityClasses;
 
 import org.json.JSONException;
 import org.json.JSONObject;

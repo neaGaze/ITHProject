@@ -1,9 +1,6 @@
 package com.ith.project.menu;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import com.ith.project.Bulletin;
 import com.ith.project.R;
 
 import android.content.Context;
@@ -43,7 +40,7 @@ public class CustomMenuListAdapter extends ArrayAdapter<CustomMenu> {
 			/** For Text of Custom Menu **/
 			TextView textView = (TextView) view
 					.findViewById(R.id.textViewCustomMenu_2);
-			String tempText= this.listDets.get(position).getText().toString();
+			String tempText = this.listDets.get(position).getText().toString();
 			textView.setText(tempText);
 			textView.setFocusable(false);
 

@@ -6,8 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ith.project.Bulletin;
-import com.ith.project.Employee;
+import com.ith.project.EntityClasses.Employee;
 
 import android.content.Context;
 import android.database.Cursor;

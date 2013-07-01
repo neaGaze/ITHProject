@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.ith.project.Bulletin;
+
+import com.ith.project.EntityClasses.Bulletin;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -27,7 +29,7 @@ public class BulletinSQLite {
 	 * ************************************************************************************/
 	public void openDB() {
 		db = usersDBHelper.getWritableDatabase();
-		//db.execSQL("PRAGMA foreign_keys = ON;");
+		// db.execSQL("PRAGMA foreign_keys = ON;");
 	}
 
 	/***********************************************************************************
@@ -50,7 +52,7 @@ public class BulletinSQLite {
 				+ UsersDBHelper.EmployeeName + " ) VALUES ('" + Title + "', '"
 				+ Desc + "', '" + BulletinDate + "', '" + empName + "')";
 
-	//	Log.v("INSERT QUERY BULLETINS", "" + insertQuery);
+		// Log.v("INSERT QUERY BULLETINS", "" + insertQuery);
 		db.execSQL(insertQuery);
 	}
 
@@ -93,13 +95,20 @@ public class BulletinSQLite {
 						+ bulletinsArr.getJSONObject(i).getString(
 								"EmployeeName") + "')";
 
-			//	Log.v("UPDATE QUERY BULLETINS", "" + updateQuery);
+				// Log.v("UPDATE QUERY BULLETINS", "" + updateQuery);
 				db.execSQL(updateQuery);
 			}
 		} catch (JSONException e) {
 			Log.e("JSONException", "" + e.getMessage());
 			e.printStackTrace();
 		}
+	}
+
+	/*****************************************************************************************
+	 * Delete All Table Rows
+	 * ************************************************************************************/
+	public void deleteAllRows() {
+		db.delete(UsersDBHelper.TABLE_BULLETINS, null, null);
 	}
 
 	/*****************************************************************************************
@@ -111,7 +120,7 @@ public class BulletinSQLite {
 
 		String readQuery = "SELECT * FROM " + BulletinDBHelper.TABLE_BULLETINS;
 
-	//	Log.v("SELECT QUERY BULLETINS", "" + readQuery);
+		// Log.v("SELECT QUERY BULLETINS", "" + readQuery);
 		Cursor cursor = db.rawQuery(readQuery, null);
 		Log.v("CURSOR BULLETINS SIZE:", "" + cursor.getCount());
 
@@ -150,4 +159,5 @@ public class BulletinSQLite {
 		cursor.close();
 		return null;
 	}
+
 }

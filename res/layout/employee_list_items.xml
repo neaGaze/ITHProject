@@ -5,7 +5,7 @@
     android:background="#dddddd" >
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
         android:layout_marginTop="4dp"
@@ -16,12 +16,12 @@
 
         <TableLayout
             android:id="@+id/tableLayoutCheckBox"
-            android:layout_width="match_parent"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content" >
 
             <TableRow
                 android:id="@+id/tableRowCheckBox"
-                android:layout_width="match_parent"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content" >
 
                 <CheckBox
@@ -39,14 +39,14 @@
                     android:layout_gravity="center"/>
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:orientation="vertical" >
 
                     <TextView
                         android:id="@+id/textViewEmployeeName"
-                        android:layout_width="match_parent"
+                        android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="0dp"
                         android:layout_marginTop="5dp"

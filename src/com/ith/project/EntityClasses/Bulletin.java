@@ -1,4 +1,7 @@
-package com.ith.project;
+package com.ith.project.EntityClasses;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,6 +14,8 @@ public class Bulletin {
 	private String Title, Description, BulletinDate, EmployeeName;
 	private String date;
 	private String time;
+	private String currDate, previousDate; // for retrieving latest few days'
+											// Bulletins only
 
 	public Bulletin() {
 
@@ -22,10 +27,11 @@ public class Bulletin {
 	public JSONObject getJsonUserLoginId(String UserLoginId) {
 
 		JSONObject tempJsonFile = new JSONObject();
-
+		this.setDaysInterval();
 		try {
 			tempJsonFile.put("userLoginId", UserLoginId);
-
+			tempJsonFile.put("starDateTime", previousDate);
+			tempJsonFile.put("endDateTime", currDate);
 		} catch (JSONException e) {
 			Log.e("Could not convert to JSONObject", "" + e.getMessage());
 			e.printStackTrace();
@@ -145,5 +151,21 @@ public class Bulletin {
 																 * )
 																 */.toString();
 
+	}
+
+	/***************************************************************************************
+	 * To get the start and end Date of the Bulletins
+	 * ***************************************************************************************/
+	public void setDaysInterval() {
+		/** Get current day **/
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+		currDate = dtFormat.format(cal.getTime());
+		Log.e("CurrDate", "" + currDate);
+
+		/** Get date of 7 days from now **/
+		cal.add(Calendar.DAY_OF_YEAR, -7);
+		previousDate = dtFormat.format(cal.getTime());
+		Log.e("PreviousDate", "" + previousDate);
 	}
 }

@@ -220,91 +220,6 @@
                     android:textSize="15dp" />
             </TableRow>
 
-            <!-- For UserName -->
-
-            <TableRow
-                android:id="@+id/UserAddtableRow7EmpEdit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/UserAddtextViewUsernameEmpEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="left"
-                    android:layout_marginLeft="10dp"
-                    android:paddingTop="5dp"
-                    android:text="@string/employeeUserName"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textColor="#000055"
-                    android:textSize="15dp" />
-
-                <EditText
-                    android:id="@+id/UserAddeditTextUsernameEmpEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.35"
-                    android:ems="10"
-                    android:textSize="15dp" />
-            </TableRow>
-
-            <!-- For Password1 -->
-
-            <TableRow
-                android:id="@+id/UserAddtableRow8EmpEdit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/UserAddtextViewPassword1EmpEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="left"
-                    android:layout_marginLeft="10dp"
-                    android:paddingTop="5dp"
-                    android:text="@string/employeePwd"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textColor="#000055"
-                    android:textSize="15dp" />
-
-                <EditText
-                    android:id="@+id/UserAddeditTextPassword1EmpEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.35"
-                    android:ems="10"
-                    android:inputType="textPassword"
-                    android:textSize="15dp" />
-            </TableRow>
-
-            <!-- For Password2 -->
-
-            <TableRow
-                android:id="@+id/UserAddtableRow9EmpEdit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/UserAddtextViewPassword2EmpEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="left"
-                    android:layout_marginLeft="10dp"
-                    android:paddingTop="5dp"
-                    android:text="@string/employeePwdReenter"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textColor="#000055"
-                    android:textSize="15dp" />
-
-                <EditText
-                    android:id="@+id/UserAddeditTextPassword2EmpEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.35"
-                    android:ems="10"
-                    android:inputType="textPassword"
-                    android:textSize="15dp" />
-            </TableRow>
             <!-- For Designation -->
 
             <TableRow
@@ -360,7 +275,6 @@
                     android:ems="10"
                     android:textSize="15dp" />
             </TableRow>
-
             <!-- Button -->
 
             <Button
@@ -369,7 +283,8 @@
                 android:layout_height="50dp"
                 android:background="@color/title_blue"
                 android:text="@string/employeeUpdate"
-                android:textColor="#000000" />
+                android:textColor="#000000" >
+            </Button>
         </TableLayout>
     </LinearLayout>
 
