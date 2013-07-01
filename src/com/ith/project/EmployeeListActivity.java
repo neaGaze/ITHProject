@@ -37,6 +37,9 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -56,12 +59,15 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 	private static ArrayList<Employee> itemDetails;
 	private static ArrayList<Employee> returnItemDetails;
+	private static ArrayList<Employee> selectedItemDetails;
 	private ListView listView;
 	private ImageButton menuButton;
 	private ImageButton EmployeeButton;
 	private ImageButton homeButton;
 	private EditText searchBox;
 	private ImageButton searchButton;
+	private CheckBox checkBox;
+	private int currPos;
 	private HttpConnection conn;
 	private EmployeeLocal employeeLocal;
 	private EmployeeSQLite employeeSQLite;
@@ -199,6 +205,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 						listView.setAdapter(listItemArrAdapter);
 						employeeCount = listItemArrAdapter.getCount();
 						listView.setOnItemClickListener(EmployeeListActivity.this);
+
 						pdialog.dismiss();
 					}
 				});
@@ -327,8 +334,10 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 		ArrayList<CustomMenu> tempArrList = new ArrayList<CustomMenu>();
 
 		/** To remove add Bulletin for normal users **/
-		if (LoginAuthentication.getUserRoleId() == 1)
+		if (LoginAuthentication.getUserRoleId() == 1) {
 			tempArrList.add(setMenuItems("Add Employee", "add_employee"));
+			tempArrList.add(setMenuItems("Delete Employee", "delete_user"));
+		}
 		tempArrList.add(setMenuItems("Send Web Message", "mail_web"));
 		tempArrList.add(setMenuItems("Send SMS", "mail_sms"));
 		tempArrList.add(setMenuItems("Phone Call", "call"));
@@ -352,6 +361,8 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 					Intent intent = new Intent(EmployeeListActivity.this,
 							EmployeeAddActivity.class);
 					EmployeeListActivity.this.startActivity(intent);
+				} else if (keyword.equals("Delete Employee")) {
+					deleteEmployee();
 				} else if (keyword.equals("Send Web Message")) {
 
 				} else if (keyword.equals("Send SMS")) {
@@ -366,6 +377,18 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 					GridItemActivity.getGridItemActivityInstance().finish();
 					ListItemActivity.getListItemActivityInstance().finish();
 				}
+			}
+
+			private void deleteEmployee() {
+				selectedItemDetails = new ArrayList<Employee>();
+				for (int i = 0; i < employeeCount; i++) {
+					if (itemDetails.get(i).getChecked()) {
+						selectedItemDetails.add(itemDetails.get(i));
+						Log.e("Deleted Items", ""
+								+ itemDetails.get(i).getEmployeeName());
+					}
+				}
+
 			}
 		});
 
@@ -481,6 +504,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 			LayoutInflater inflater = (LayoutInflater) cntxt
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+			currPos = position;
 			View view;
 			// if (convertView == null)
 			{
@@ -508,6 +532,20 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 				else
 					imageView.setBackgroundResource(R.drawable.male_employee);
 				imageView.setFocusable(false);
+
+				CheckBox checkBox = (CheckBox) view
+						.findViewById(R.id.checkBox1);
+				checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+						if (isChecked) {
+							itemDets.get(currPos).setChecked(true);
+						}
+
+					}
+
+				});
 				inflater = null;
 			} // else
 				// view = (View) convertView;

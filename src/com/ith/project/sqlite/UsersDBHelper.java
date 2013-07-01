@@ -18,6 +18,7 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 	public static final String UserLoginId = "UserLoginId";
 	public static final String UserRolesId = "UserRolesId";
 	public static final String EmployeeId = "EmployeeId";
+	public static final String DateModified = "DateModified";
 	public static final String TABLE_USERS = "USERS";
 
 	private static final String USERS_CREATE_QUERY = "CREATE TABLE "
@@ -25,7 +26,7 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 			+ " INTEGER PRIMARY KEY AUTOINCREMENT, " + Username
 			+ " TEXT NOT NULL, " + Password + " TEXT NOT NULL, " + UserLoginId
 			+ " TEXT NOT NULL, " + UserRolesId + " INTEGER NOT NULL, "
-			+ EmployeeId + " INTEGER NOT NULL )";
+			+ EmployeeId + " INTEGER NOT NULL)";
 
 	/** For BULLETIN Table **/
 	public static final String BulletinId = "BulletinId";

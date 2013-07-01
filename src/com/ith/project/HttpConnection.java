@@ -38,8 +38,8 @@ public class HttpConnection /*
 		HttpConnectionParams.setConnectionTimeout(httpParameters,timeoutConnection);
 		// Set the default socket timeout (SO_TIMEOUT)in milliseconds which is
 		// the timeout for waiting for data.
-	//	int timeoutSocket = 5000;
-	//	HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+		int timeoutSocket = 6000;
+		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 
 		httpclient = new DefaultHttpClient(httpParameters);
 	}

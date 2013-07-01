@@ -34,7 +34,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class EmployeeAddActivity extends Activity implements OnClickListener {
 
-	private final String url = "http://192.168.100.2/EMSWebService/Service1.svc/json/InsertEmployees";
+	private final String url = "http://192.168.100.2/EMSWebService/Service1.svc/json/InsertEmployee";
 	public static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
 			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
@@ -154,7 +154,7 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 			/** Make a json object out of form fields **/
 			insertEmployee = employeeAdd.makeNewEmployeeJSON(empName,
 					empGender, empHomePhone, empMobile, empEmail, empAddress,
-					empDesignation, empRemarks);
+					empDesignation, empRemarks, empUserName, empPwd1);
 
 			/** Verify Email address **/
 			correctEmail = emailValidate(empEmail);
@@ -182,25 +182,23 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 						String insertStatusStr = conn.getJSONFromUrl(
 								insertEmployee, url);
 
+						Log.e("EMPLOYEE ADD RETURN WEB", "" + insertStatusStr);
 						try {
 
 							JSONObject insertStatusJson = new JSONObject(
 									insertStatusStr);
 
 							boolean insertStatus = (Boolean) insertStatusJson
-									.get("InsertEmployee");
+									.get("InsertEmployeeResult");
 
 							if (insertStatus) {
-								Toast.makeText(EmployeeAddActivity.this,
-										"Successfully Employee Added",
-										Toast.LENGTH_SHORT).show();
+								// Toast.makeText(EmployeeAddActivity.this,"Successfully Employee Added",Toast.LENGTH_SHORT).show();
+								Log.e("Succesfully Added Employee ",
+										"InsertStatus From Web Service is: "
+												+ insertStatus);
 							} else {
-								Toast.makeText(EmployeeAddActivity.this,
-										"Problem Adding Employee",
-										Toast.LENGTH_SHORT).show();
-
 								Log.e("Problem Adding Employee ",
-										"InsertStatus From Web Service"
+										"InsertStatus From Web Service is: "
 												+ insertStatus);
 							}
 
@@ -227,16 +225,16 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 			} else if (!fieldsFilled) {
 				Toast.makeText(EmployeeAddActivity.this,
 						"One Or More Fields Empty", Toast.LENGTH_SHORT).show();
-			} else if (!correctEmail)
+			} else if (!correctEmail) {
 				Toast.makeText(EmployeeAddActivity.this, "Invalid Email",
 						Toast.LENGTH_SHORT).show();
-			else if (!correctPhone)
+			} else if (!correctPhone) {
 				Toast.makeText(EmployeeAddActivity.this,
 						"Invalid Phone length", Toast.LENGTH_SHORT).show();
-			else if (!correctPwd)
+			} else if (!correctPwd) {
 				Toast.makeText(EmployeeAddActivity.this,
 						"Password Don't Match", Toast.LENGTH_SHORT).show();
-			else {
+			} else {
 				Toast.makeText(EmployeeAddActivity.this,
 						"Some Incorrect Fields", Toast.LENGTH_SHORT).show();
 			}
