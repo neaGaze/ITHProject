@@ -499,12 +499,20 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 			this.itemDets = itemDetails;
 		}
 
+		/** For Passing View  **/
+		private class ViewHolder {
+			TextView code;
+			CheckBox name;
+		}
+
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			LayoutInflater inflater = (LayoutInflater) cntxt
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 			currPos = position;
+			ViewHolder holder = null;
+
 			View view;
 			// if (convertView == null)
 			{
@@ -535,14 +543,19 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 				CheckBox checkBox = (CheckBox) view
 						.findViewById(R.id.checkBox1);
-				checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
-					public void onCheckedChanged(CompoundButton buttonView,
-							boolean isChecked) {
-						if (isChecked) {
-							itemDets.get(currPos).setChecked(true);
-						}
+				holder = new ViewHolder();
+				holder.code = textView;
+				holder.name = checkBox;
+				view.setTag(holder);
 
+				checkBox.setOnClickListener(new OnClickListener() {
+
+					public void onClick(View v) {
+						CheckBox chkBox = (CheckBox) v;
+						Employee emp = (Employee) chkBox.getTag();
+						Log.e("CheckBox check", "" + chkBox.isChecked());
+						emp.setChecked(chkBox.isChecked());
 					}
 
 				});
@@ -550,6 +563,9 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 			} // else
 				// view = (View) convertView;
 
+			Employee employee = itemDets.get(position);
+			holder.name.setChecked(employee.getChecked());
+			holder.name.setTag(employee);
 			return view;
 		}
 
