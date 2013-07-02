@@ -38,8 +38,10 @@ import android.widget.AdapterView.OnItemClickListener;
 public class EmployeeEditActivity extends Activity implements OnClickListener {
 
 	private final String url = "http://192.168.100.2/EMSWebService/Service1.svc/json/EditEmployee";
+	private final String mobileStrPattern = "\\d{9}";
 
 	private HttpConnection conn;
+	private int employeeId;
 	private EditText employeeName;
 	private RadioGroup employeeGenderGroup;
 	private RadioButton employeeGender;
@@ -59,7 +61,7 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 	static CustomMenuListAdapter menuAdapter;
 	private Context context;
 	private Matcher matcher;
-	private Pattern pattern;
+	private Pattern pattern, mobilePattern;
 	private JSONObject insertEmployee;
 	private String empName, empGender, empHomePhone, empMobile, empEmail,
 			empAddress, empDesignation, empRemarks;
@@ -108,11 +110,22 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 				+ EmployeeListActivity.getEmployeeArrayList().get(position)
 						.getEmployeeName());
 
+		employeeId = EmployeeListActivity.getEmployeeArrayList().get(position)
+				.getEmployeeId();
+
 		employeeName = (EditText) findViewById(R.id.UserAddeditTextUserNameEmpEdit);
 		employeeName.setHint(EmployeeListActivity.getEmployeeArrayList()
 				.get(position).getEmployeeName());
 
 		employeeGenderGroup = (RadioGroup) findViewById(R.id.radioSexEmpEdit);
+		String genderChk = EmployeeListActivity.getEmployeeArrayList()
+				.get(position).getGender();
+		if (genderChk.equals("female")) {
+			employeeGender = (RadioButton) findViewById(R.id.radioButton1EmpEdit);
+			employeeGender.setChecked(false);
+			employeeGender = (RadioButton) findViewById(R.id.radioButton2EmpEdit);
+			employeeGender.setChecked(true);
+		}
 		employeeGender = (RadioButton) findViewById(employeeGenderGroup
 				.getCheckedRadioButtonId());
 
@@ -151,7 +164,7 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 		homeButton.setOnClickListener(this);
 
 		pattern = Pattern.compile(EmployeeAddActivity.EMAIL_PATTERN);
-
+		mobilePattern = Pattern.compile(mobileStrPattern);
 		pdialog.dismiss();
 
 	}
@@ -172,7 +185,8 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 			if (empName.isEmpty())
 				empName = employeeName.getHint().toString();
 
-			empGender = employeeGender.getText().toString();
+			empGender = ((RadioButton) findViewById(employeeGenderGroup
+					.getCheckedRadioButtonId())).getText().toString();
 
 			empHomePhone = employeeHomePhone.getText().toString();
 			if (empHomePhone.isEmpty())
@@ -199,22 +213,21 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 				empRemarks = employeeRemarks.getHint().toString();
 
 			/** Make a json object out of form fields **/
-			insertEmployee = Employee.makeNewEditEmployeeJSON(empName,
-					empGender, empHomePhone, empMobile, empEmail, empAddress,
-					empDesignation, empRemarks);
+			insertEmployee = Employee.makeNewEditEmployeeJSON(employeeId,
+					empName, empGender, empHomePhone, empMobile, empEmail,
+					empAddress, empDesignation, empRemarks);
 
 			/** Verify Email address **/
 			correctEmail = emailValidate(empEmail);
 
-			/** Verify Empty fields **/
-			// boolean fieldsFilled = FieldsValidate(empName,
-			// empGender,empMobile, empEmail, empAddress, empDesignation);
-
 			/** Verify phone length **/
-			boolean correctPhone = phoneValidate(empMobile);
+			boolean correctPhone = phoneValidate(empHomePhone);
+
+			/** Verify mobie length **/
+			boolean correctMobile = mobileValidate(empMobile);
 
 			/** send the JSONObject to update the employees in the database **/
-			if (correctEmail && correctPhone) {
+			if (correctEmail && correctPhone && correctMobile) {
 
 				new Thread(new Runnable() {
 
@@ -235,7 +248,6 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 									.get("EditEmployeeResult");
 
 							if (insertStatus) {
-								// Toast.makeText(EmployeeAddActivity.this,"Successfully Employee Added",Toast.LENGTH_SHORT).show();
 								Log.e("Succesfully Edited Employee ",
 										"EditStatus From Web Service is: "
 												+ insertStatus);
@@ -271,6 +283,9 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 			} else if (!correctPhone) {
 				Toast.makeText(EmployeeEditActivity.this,
 						"Invalid Phone length", Toast.LENGTH_SHORT).show();
+			} else if (!correctMobile) {
+				Toast.makeText(EmployeeEditActivity.this,
+						"Invalid Mobile length", Toast.LENGTH_SHORT).show();
 			} else {
 				Toast.makeText(EmployeeEditActivity.this,
 						"Some Incorrect Fields", Toast.LENGTH_SHORT).show();
@@ -278,20 +293,6 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 		}
 	}
 
-	/*****************************************************************************************
-	 * TO validate If Fields are empty or not
-	 * ******************************************************************************************/
-	/*
-	 * private boolean FieldsValidate(String empName2, String empGender2, String
-	 * empMobile2, String empEmail2, String empAddress2, String empDesignation2)
-	 * {
-	 * 
-	 * boolean tmpFlag = true; if (empName2.isEmpty() || empGender2.isEmpty() ||
-	 * empMobile2.isEmpty() || empEmail2.isEmpty() || empAddress2.isEmpty() ||
-	 * empDesignation2.isEmpty()) tmpFlag = false;
-	 * 
-	 * return tmpFlag; }
-	 */
 	/***********************************************************************************************************
 	 * TO validate E-mail address
 	 * *********************************************************************************************************/
@@ -308,12 +309,33 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 	public boolean phoneValidate(final String phone) {
 
 		try {
-
+			if (empHomePhone.equals(employeeHomePhone.getHint().toString()))
+				return true;
 			int pNumber = Integer.parseInt(phone);
 			if ((pNumber < Integer.MAX_VALUE) && (pNumber > 999999))
 				return true;
 			else
 				return false;
+
+		} catch (NumberFormatException e) {
+			Log.e("Phone length is null", "Please fill the phone field");
+			Toast.makeText(this, "Phone Field is Empty", Toast.LENGTH_SHORT)
+					.show();
+			return false;
+		}
+
+	}
+
+	/***********************************************************************************************************
+	 * To validate Mobile length
+	 * *********************************************************************************************************/
+	public boolean mobileValidate(final String mobile) {
+
+		try {
+			if (empMobile.equals(employeeMobile.getHint().toString()))
+				return true;
+			matcher = mobilePattern.matcher(mobile);
+			return matcher.matches();
 
 		} catch (NumberFormatException e) {
 			Log.e("Phone length is null", "Please fill the phone field");

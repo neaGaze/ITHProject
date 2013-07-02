@@ -8,7 +8,7 @@ import android.util.Log;
 
 public class UsersDBHelper extends SQLiteOpenHelper {
 
-	public static final String DB_NAME = "EIS.db";
+	public static final String DB_NAME = "EMS.db";
 	public static final int DB_VERSION = 1;
 
 	/** For USERS Table **/
@@ -18,7 +18,6 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 	public static final String UserLoginId = "UserLoginId";
 	public static final String UserRolesId = "UserRolesId";
 	public static final String EmployeeId = "EmployeeId";
-	public static final String DateModified = "DateModified";
 	public static final String TABLE_USERS = "USERS";
 
 	private static final String USERS_CREATE_QUERY = "CREATE TABLE "
@@ -52,6 +51,7 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 	public static final String Designation = "Designation";
 	public static final String Remarks = "Remarks";
 	public static final String TABLE_EMPLOYEES = "EMPLOYEES";
+	public static final String DateModified = "DateModified";
 
 	private static final String EMPLOYEES_CREATE_QUERY = "CREATE TABLE "
 			+ TABLE_EMPLOYEES + " (" + EmployeeId
@@ -59,7 +59,18 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 			+ EmployeeName + " TEXT NOT NULL, " + Gender + " TEXT NOT NULL, "
 			+ HomePhone + " TEXT, " + Mobile + " TEXT NOT NULL, " + Email
 			+ " TEXT NOT NULL, " + Address + " TEXT NOT NULL, " + Designation
-			+ " TEXT NOT NULL, " + Remarks + " TEXT " + ")";
+			+ " TEXT NOT NULL, " + Remarks + " TEXT, " + DateModified
+			+ " TEXT" + ")";
+
+	/** For Latest DateTime Log **/
+	public static final String LogId = "LogId";
+	public static final String LatestDate = "LatestDate";
+	public static final String TABLE_DATELOG = "DATELOG";
+
+	private static final String DATELOG_CREATE_QUERY = "CREATE TABLE "
+			+ TABLE_DATELOG + " (" + LogId
+			+ " INTEGER PRIMARY KEY AUTOINCREMENT, " + LatestDate
+			+ " TEXT)";
 
 	public UsersDBHelper(Context context) {
 		// super(context);
@@ -76,6 +87,9 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 
 		Log.e("CREATE EMPLOYEE TABLE", "" + EMPLOYEES_CREATE_QUERY);
 		db.execSQL(EMPLOYEES_CREATE_QUERY);
+
+		Log.e("CREATE DATELOG TABLE", "" + DATELOG_CREATE_QUERY);
+		db.execSQL(DATELOG_CREATE_QUERY);
 	}
 
 	@Override

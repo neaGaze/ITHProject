@@ -1,6 +1,8 @@
 package com.ith.project.sqlite;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -8,6 +10,7 @@ import org.json.JSONObject;
 
 import com.ith.project.EntityClasses.Employee;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,6 +20,7 @@ public class EmployeeSQLite {
 
 	private UsersDBHelper usersDBHelper;
 	private SQLiteDatabase db;
+	private DateLogSQLite dateLogSQLite;
 	private static int EmployeeId = 0;
 
 	public EmployeeSQLite(Context context) {
@@ -42,14 +46,21 @@ public class EmployeeSQLite {
 	/************************************************************************************
 	 * Update the Employee datas according to JSON object
 	 * *************************************************************************************/
-	public void updateDBUsersTableJson(String bulletinFromWS) {
+	public void updateDBUsersTableJson(String bulletinFromWS,
+			DateLogSQLite dateLogSQLite) {
 		try {
-
+			this.dateLogSQLite = dateLogSQLite;
 			JSONObject employeesObj;
 			employeesObj = new JSONObject(bulletinFromWS);
 			JSONArray employeesArr = employeesObj
 					.getJSONArray("GetEmployeeListResult");
 			EmployeeId = 0;
+
+			/** Calculate the current Date and Time **/
+			Calendar cal = Calendar.getInstance();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+			String currDate = dateFormat.format(cal.getTime());
+
 			for (int i = 0; i < employeesArr.length(); i++) {
 
 				String updateQuery = "INSERT OR REPLACE INTO "
@@ -74,8 +85,11 @@ public class EmployeeSQLite {
 						+ UsersDBHelper.Designation
 						+ ", "
 						+ UsersDBHelper.Remarks
+						+ ", "
+						+ UsersDBHelper.DateModified
 						+ ") VALUES ("
-						+ (EmployeeId++)
+						+ /** (EmployeeId++) **/
+						employeesArr.getJSONObject(i).getInt("EmployeeId")
 						+ ", "
 						+ "0"
 						+ ", '"
@@ -95,13 +109,17 @@ public class EmployeeSQLite {
 						+ employeesArr.getJSONObject(i)
 								.getString("Designation") + "', '"
 						+ employeesArr.getJSONObject(i).getString("Remarks")
-						+ "')";
+						+ "', '" + updateDateMod(currDate) + "')";
 
 				Log.v("UPDATE QUERY BULLETINS", "" + updateQuery);
 				db.execSQL(updateQuery);
 			}
+
+			this.dateLogSQLite.updateDateLog(currDate);
+
 		} catch (JSONException e) {
-			Log.e("JSONException", "" + e.getMessage());
+			Log.e("JSONException probably because u r offline",
+					"" + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -145,6 +163,8 @@ public class EmployeeSQLite {
 						.getColumnIndex(UsersDBHelper.Designation)));
 				tempEmployee.setRemarks(cursor.getString(cursor
 						.getColumnIndex(UsersDBHelper.Remarks)));
+				tempEmployee.setDateModified(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.DateModified)));
 
 				tempArrList.add(tempEmployee);
 
@@ -153,9 +173,43 @@ public class EmployeeSQLite {
 			cursor.close();
 			return tempArrList;
 		} else {
-			Log.e("NO ROW FOUND @ EMPLOYEE TABLE", "Cursor Size is 0");
+			Log.e("NO ROW FOUND at EMPLOYEE TABLE", "Cursor Size is 0");
 		}
 		cursor.close();
 		return null;
+	}
+
+	/*****************************************************************************************
+	 * delete From sqlite deleted employees
+	 * ************************************************************************************/
+	public void deleteEmployees(ArrayList<Employee> delArr) {
+
+		Integer[] empId = new Integer[delArr.size()];
+		for (int i = 0; i < delArr.size(); i++) {
+			empId[i] = delArr.get(i).getEmployeeId();
+
+			String deleteQuery = "DELETE FROM " + UsersDBHelper.TABLE_EMPLOYEES
+					+ " WHERE " + UsersDBHelper.EmployeeId + " = " + empId[i];
+
+			Log.v("DELETE QUERY BULLETINS", "" + deleteQuery);
+			db.execSQL(deleteQuery);
+		}
+	}
+
+	/*****************************************************************************************
+	 * update the DateModified acc to the latest time
+	 * ************************************************************************************/
+	public String updateDateMod(String currDate) {
+
+		String emptyChkQuery = "SELECT * FROM " + UsersDBHelper.TABLE_EMPLOYEES;
+		Cursor cursor = db.rawQuery(emptyChkQuery, null);
+		/** If not sync yet **/
+		if (cursor.getCount() == 0) {
+			cursor.close();
+			return null;
+		} else {
+			cursor.close();
+			return currDate;
+		}
 	}
 }

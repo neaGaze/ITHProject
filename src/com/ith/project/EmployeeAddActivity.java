@@ -143,7 +143,9 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 			boolean correctEmail = false;
 			// pdialog.show();
 			empName = employeeName.getText().toString();
-			empGender = employeeGender.getText().toString();
+			// empGender = employeeGender.getText().toString();
+			empGender = ((RadioButton) findViewById(employeeGenderGroup
+					.getCheckedRadioButtonId())).getText().toString();
 			empHomePhone = employeeHomePhone.getText().toString();
 			empMobile = employeeMobile.getText().toString();
 			empEmail = employeeEmail.getText().toString();

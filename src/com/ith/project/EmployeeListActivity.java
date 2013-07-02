@@ -12,6 +12,7 @@ import com.ith.project.menu.CustomMenu;
 import com.ith.project.menu.CustomMenuListAdapter;
 import com.ith.project.sdcard.EmployeeLocal;
 import com.ith.project.sqlite.BulletinSQLite;
+import com.ith.project.sqlite.DateLogSQLite;
 import com.ith.project.sqlite.EmployeeSQLite;
 
 import android.app.Activity;
@@ -59,7 +60,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 	private static final int MENU_EXIT = 0;
 	private final String url = "http://192.168.100.2/EMSWebService/Service1.svc/json/GetEmployeeList";
-	private final String delUrl = "http://192.168.100.2/EMSWebService/Service1.svc/json/DeleteEmployees";
+	private final String delUrl = "http://192.168.100.2/EMSWebService/Service1.svc/json/DeleteEmployee";
 
 	private static ArrayList<Employee> itemDetails;
 	private static ArrayList<Employee> returnItemDetails;
@@ -75,6 +76,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 	private HttpConnection conn;
 	private EmployeeLocal employeeLocal;
 	private EmployeeSQLite employeeSQLite;
+	private DateLogSQLite dateLogSQLite;
 	private Employee employee;
 	private static EmployeeListItemArrayAdapter listItemArrAdapter;
 	private static int employeeCount;
@@ -130,12 +132,14 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 				// employeeLocal = new EmployeeLocal();
 
 				employeeSQLite = new EmployeeSQLite(EmployeeListActivity.this);
+				dateLogSQLite = new DateLogSQLite(EmployeeListActivity.this);
 				employeeSQLite.openDB();
+				dateLogSQLite.openDB();
 
 				// employee = new Employee();
 
-				inputJson = Employee.getJsonUserLoginId(LoginAuthentication
-						.getUserLoginId());
+				inputJson = Employee.getJsonUserLoginIdEmployee(LoginAuthentication
+						.getUserLoginId(),dateLogSQLite.getLatestDateModified());
 
 				Log.v("getemployee inquiry", "" + inputJson.toString());
 
@@ -152,10 +156,10 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 				/** Update the local file according to the web service **/
 				// employeeLocal.updateLocalFiles(inputJson, employeesFromWS);
-				employeeSQLite.updateDBUsersTableJson(employeesFromWS);
+				employeeSQLite.updateDBUsersTableJson(employeesFromWS, dateLogSQLite);
 				// employeeLocal.updateLocalFiles();
 
-				/** Now read from the local file always **/
+				/** Now read from the local DB always **/
 				// JSONArray outputJson = employeeLocal
 				// .getJSONFromLocal(inputJson);
 
@@ -366,6 +370,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 							EmployeeAddActivity.class);
 					EmployeeListActivity.this.startActivity(intent);
 				} else if (keyword.equals("Delete Employee")) {
+
 					deleteEmployee();
 				} else if (keyword.equals("Send Web Message")) {
 
@@ -393,7 +398,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 					}
 				}
-				
+
 				Thread delThread = new Thread(new Runnable() {
 
 					public void run() {
@@ -408,8 +413,35 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 						String delEmployeesFromWS = conn.getJSONFromUrl(
 								inputDelJson, delUrl);
 
-						Log.v("Employees Delete Status:", ""
+						Log.e("Employees Delete Status:", ""
 								+ delEmployeesFromWS);
+
+						try {
+							JSONObject delReplyJson = new JSONObject(
+									delEmployeesFromWS);
+							if (delReplyJson.getBoolean("DeleteEmployeeResult")) {
+								employeeSQLite
+										.deleteEmployees(selectedItemDetails);
+							}
+						} catch (JSONException e) {
+							Log.e("JSON Parse Error @ EmplListAct",
+									"" + e.getMessage());
+							e.printStackTrace();
+						}
+
+						runOnUiThread(new Runnable() {
+
+							public void run() {
+								pdialog.show();
+								EmployeeListActivity.this.finish();
+								Intent intent = new Intent(
+										EmployeeListActivity.this,
+										EmployeeListActivity.class);
+								EmployeeListActivity.this.startActivity(intent);
+
+							}
+
+						});
 					}
 
 				});

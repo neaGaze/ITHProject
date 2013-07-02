@@ -1,6 +1,8 @@
 package com.ith.project.EntityClasses;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,7 +13,7 @@ import android.util.Log;
 public class Employee {
 
 	private String EmployeeName, Gender, HomePhone, Mobile, Email, Address,
-			Designation, Remarks, userRoles;
+			Designation, Remarks, dateModified;
 	private boolean Checked = false;
 	private int EmployeeId;
 
@@ -38,10 +40,33 @@ public class Employee {
 	}
 
 	/*************************************************************************************
-	 * Make a JSONObject out of EmployeeIds
+	 * Make a JSONObject out of UserLoginId For Employee with DateTime
+	 * ***************************************************************************************/
+	public static JSONObject getJsonUserLoginIdEmployee(String UserLoginId,
+			String latestDateMod) {
+
+		JSONObject tempJsonFile = new JSONObject();
+	//	Calendar cal = Calendar.getInstance();
+	//	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+	//	String currDate = dateFormat.format(cal.getTime());
+		try {
+			tempJsonFile.put("userLoginId", UserLoginId);
+			tempJsonFile.put("modifiedDateTime", latestDateMod);
+		} catch (JSONException e) {
+			Log.e("Could not convert to JSONObject", "" + e.getMessage());
+			e.printStackTrace();
+		}
+
+		return tempJsonFile;
+	}
+
+	/*************************************************************************************
+	 * Make a JSONObject out of EmployeeIds for delete
 	 * ***************************************************************************************/
 	public static JSONObject getDelJsonQueryObject(
 			ArrayList<Employee> selectedItemDetails) {
+
+		JSONObject deleteEmp = new JSONObject();
 		JSONObject jsonObject = new JSONObject();
 		JSONArray tempJsonFile = new JSONArray();
 		for (int i = 0; i < selectedItemDetails.size(); i++) {
@@ -49,8 +74,8 @@ public class Employee {
 		}
 		try {
 
-			jsonObject.put("DeleteEmployees", tempJsonFile);
-
+			jsonObject.put("employeeId", tempJsonFile);
+			deleteEmp.put("DeleteEmployee", jsonObject);
 		} catch (JSONException e) {
 			Log.e("JSONEXception @ getDelJsonQueryObject", "" + e.getMessage());
 			e.printStackTrace();
@@ -84,7 +109,7 @@ public class Employee {
 
 			onlyUser.put("UserName", username);
 			onlyUser.put("Password", password);
-			onlyUser.put("UserRoles", "normal");
+			onlyUser.put("UserRolesId", LoginAuthentication.getUserRoleId());
 
 			UserNEmployee.put("user", onlyUser);
 
@@ -99,12 +124,14 @@ public class Employee {
 	/*************************************************************************************
 	 * Make a JSONObject of new Employee that admin Edits
 	 * ***************************************************************************************/
-	public static JSONObject makeNewEditEmployeeJSON(String Name,
+	public static JSONObject makeNewEditEmployeeJSON(int EmpId, String Name,
 			String gender, String homePhone, String mobile, String email,
 			String address, String designation, String remarks) {
 
+		JSONObject tempEmployee = new JSONObject();
 		JSONObject tempJsonFile = new JSONObject();
 		try {
+			tempJsonFile.put("EmployeeId", EmpId);
 			tempJsonFile.put("EmployeeName", Name);
 			tempJsonFile.put("Gender", gender);
 			tempJsonFile.put("HomePhone", homePhone);
@@ -114,12 +141,13 @@ public class Employee {
 			tempJsonFile.put("Designation", designation);
 			tempJsonFile.put("Remarks", remarks);
 
-			Log.e("Edit Json Query File", "" + tempJsonFile.toString());
+			tempEmployee.put("employee", tempJsonFile);
+			Log.e("Edit Json Query File", "" + tempEmployee.toString());
 		} catch (JSONException e) {
 			Log.e("Could not convert to JSONObject", "" + e.getMessage());
 			e.printStackTrace();
 		}
-		return tempJsonFile;
+		return tempEmployee;
 	}
 
 	/******************************************************************************************
@@ -222,6 +250,11 @@ public class Employee {
 
 	public void setChecked(boolean checked) {
 		this.Checked = checked;
+	}
+
+	public void setDateModified(String dateMod) {
+		this.dateModified = dateMod;
+
 	}
 
 }
