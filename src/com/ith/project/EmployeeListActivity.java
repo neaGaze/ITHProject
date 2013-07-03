@@ -100,13 +100,13 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 				R.layout.custom_title);
 		context = this;
 		init();
-
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
 		employeeSQLite.closeDB();
+		dateLogSQLite.closeDB();
 		pdialog.dismiss();
 		if (dialog != null)
 			dialog.dismiss();

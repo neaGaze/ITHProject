@@ -36,12 +36,11 @@ public class DateLogSQLite {
 	 * *************************************************************************************/
 	public void updateDateLog(String currDate) {
 
-		String updateDateLog = "INSERT OR REPLACE INTO "
-				+ UsersDBHelper.TABLE_DATELOG + " ( " + UsersDBHelper.LogId
-				+ ", " + UsersDBHelper.LatestDate + ") VALUES ("+ (++logId) +",'" +currDate
-				+ "')";
+		String updateDateLog = "INSERT INTO " + UsersDBHelper.TABLE_DATELOG
+				+ " ( " + UsersDBHelper.LatestDate + ") VALUES (" + "'"
+				+ currDate + "')";
 		Log.e("INSERT DATELOG Query", "" + updateDateLog);
-		db.execSQL(updateDateLog, null);
+		db.execSQL(updateDateLog);
 
 	}
 

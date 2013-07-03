@@ -59,8 +59,8 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 			+ EmployeeName + " TEXT NOT NULL, " + Gender + " TEXT NOT NULL, "
 			+ HomePhone + " TEXT, " + Mobile + " TEXT NOT NULL, " + Email
 			+ " TEXT NOT NULL, " + Address + " TEXT NOT NULL, " + Designation
-			+ " TEXT NOT NULL, " + Remarks + " TEXT, " + DateModified
-			+ " TEXT" + ")";
+			+ " TEXT NOT NULL, " + Remarks + " TEXT, " + DateModified + " TEXT"
+			+ ")";
 
 	/** For Latest DateTime Log **/
 	public static final String LogId = "LogId";
@@ -69,8 +69,25 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 
 	private static final String DATELOG_CREATE_QUERY = "CREATE TABLE "
 			+ TABLE_DATELOG + " (" + LogId
-			+ " INTEGER PRIMARY KEY AUTOINCREMENT, " + LatestDate
-			+ " TEXT)";
+			+ " INTEGER PRIMARY KEY AUTOINCREMENT, " + LatestDate + " TEXT)";
+
+	/** For MESSAGE TABLE **/
+	public static final String MessageId = "MessageId";
+	public static final String MessageSubject = "MessageSubject";
+	public static final String MessageDesc = "MessageDesc";
+	public static final String MessageFrom = "MessageFrom";
+	public static final String MessageTo = "MessageTo";
+	public static final String MessageDate = "MessageDate";
+	public static final String MessageRead = "MessageRead";
+	public static final String TABLE_MESSAGE = "MESSAGES";
+
+	private static final String MESSAGE_CREATE_QUERY = "CREATE TABLE "
+			+ TABLE_MESSAGE + " (" + MessageId
+			+ " INTEGER PRIMARY KEY AUTOINCREMENT, " + MessageSubject
+			+ " TEXT NOT NULL, " + MessageDesc + " TEXT NOT NULL, "
+			+ MessageFrom + " INTEGER NOT NULL, " + MessageTo + " INTEGER, "
+			+ MessageDate + " TEXT NOT NULL, " + MessageRead
+			+ " BOOLEAN NOT NULL)";
 
 	public UsersDBHelper(Context context) {
 		// super(context);
@@ -90,6 +107,9 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 
 		Log.e("CREATE DATELOG TABLE", "" + DATELOG_CREATE_QUERY);
 		db.execSQL(DATELOG_CREATE_QUERY);
+
+		Log.e("CREATE MESSAGE TABLE", "" + EMPLOYEES_CREATE_QUERY);
+		db.execSQL(EMPLOYEES_CREATE_QUERY);
 	}
 
 	@Override

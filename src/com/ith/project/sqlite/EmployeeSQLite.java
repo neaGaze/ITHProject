@@ -48,6 +48,7 @@ public class EmployeeSQLite {
 	 * *************************************************************************************/
 	public void updateDBUsersTableJson(String bulletinFromWS,
 			DateLogSQLite dateLogSQLite) {
+
 		try {
 			this.dateLogSQLite = dateLogSQLite;
 			JSONObject employeesObj;
@@ -62,6 +63,13 @@ public class EmployeeSQLite {
 			String currDate = dateFormat.format(cal.getTime());
 
 			for (int i = 0; i < employeesArr.length(); i++) {
+
+				if (employeesArr.getJSONObject(i).getBoolean("Deleted")) {
+
+					deleteOneEmployee(employeesArr.getJSONObject(i).getInt(
+							"EmployeeId"));
+					continue;
+				}
 
 				String updateQuery = "INSERT OR REPLACE INTO "
 						+ UsersDBHelper.TABLE_EMPLOYEES
@@ -114,7 +122,7 @@ public class EmployeeSQLite {
 				Log.v("UPDATE QUERY BULLETINS", "" + updateQuery);
 				db.execSQL(updateQuery);
 			}
-
+			// this.dateLogSQLite.openDB();
 			this.dateLogSQLite.updateDateLog(currDate);
 
 		} catch (JSONException e) {
@@ -188,12 +196,16 @@ public class EmployeeSQLite {
 		for (int i = 0; i < delArr.size(); i++) {
 			empId[i] = delArr.get(i).getEmployeeId();
 
-			String deleteQuery = "DELETE FROM " + UsersDBHelper.TABLE_EMPLOYEES
-					+ " WHERE " + UsersDBHelper.EmployeeId + " = " + empId[i];
-
-			Log.v("DELETE QUERY BULLETINS", "" + deleteQuery);
-			db.execSQL(deleteQuery);
+			deleteOneEmployee(empId[i]);
 		}
+	}
+
+	private void deleteOneEmployee(int empId) {
+		String deleteQuery = "DELETE FROM " + UsersDBHelper.TABLE_EMPLOYEES
+				+ " WHERE " + UsersDBHelper.EmployeeId + " = " + empId;
+
+		Log.v("DELETE QUERY BULLETINS", "" + deleteQuery);
+		db.execSQL(deleteQuery);
 	}
 
 	/*****************************************************************************************

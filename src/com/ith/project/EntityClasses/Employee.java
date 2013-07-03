@@ -1,8 +1,6 @@
 package com.ith.project.EntityClasses;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
