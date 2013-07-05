@@ -11,7 +11,7 @@ import android.util.Log;
 public class Employee {
 
 	private String EmployeeName, Gender, HomePhone, Mobile, Email, Address,
-			Designation, Remarks, dateModified;
+			Designation, Remarks;
 	private boolean Checked = false;
 	private int EmployeeId;
 
@@ -251,7 +251,6 @@ public class Employee {
 	}
 
 	public void setDateModified(String dateMod) {
-		this.dateModified = dateMod;
 
 	}
 

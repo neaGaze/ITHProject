@@ -85,6 +85,8 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 	public void onPause() {
 		super.onPause();
 		pdialog.dismiss();
+		if (dialog != null)
+			dialog.dismiss();
 	}
 
 	@Override

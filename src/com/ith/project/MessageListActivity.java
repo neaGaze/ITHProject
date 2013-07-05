@@ -31,6 +31,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
@@ -55,6 +56,7 @@ public class MessageListActivity extends Activity implements OnClickListener,
 	private static MessageItemArrayAdapter msgItemArrAdapter;
 	private LinearLayout linLayoutMenu;
 	private static int messageCount;
+	private static boolean connFlag;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -111,13 +113,15 @@ public class MessageListActivity extends Activity implements OnClickListener,
 
 				/** To establish connection to the web service **/
 				// String messagesFromWS = conn.getJSONFromUrl(inputJson, url);
-
+				connFlag = true;
 				// Log.v("Messages:", "" + messagesFromWS);
-
-				/** Update the local file according to the web service **/
-				// messageSQLite.updateDBMsgsTableJson(messagesFromWS,
-				// dateLogSQLite);
-
+				// if (!messagesFromWS.equals(""))
+				{
+					// connFlag = false;
+					/** Update the local file according to the web service **/
+					// messageSQLite.updateDBMsgsTableJson(messagesFromWS,
+					// dateLogSQLite);
+				}
 				/** Now read from the local DB always **/
 				itemDetails = messageSQLite.getJSONFromDB();
 				/**
@@ -140,8 +144,8 @@ public class MessageListActivity extends Activity implements OnClickListener,
 
 						Log.d("***Welcome to Message ListView***", ".......");
 						msgItemArrAdapter = new MessageItemArrayAdapter(
-								MessageListActivity.this, R.layout.list_items,
-								itemDetails);
+								MessageListActivity.this,
+								R.layout.messages_list, itemDetails);
 						listView.setAdapter(msgItemArrAdapter);
 						messageCount = msgItemArrAdapter.getCount();
 						listView.setOnItemClickListener(MessageListActivity.this);
@@ -167,7 +171,7 @@ public class MessageListActivity extends Activity implements OnClickListener,
 		pdialog.show();
 
 		Intent intent = new Intent(MessageListActivity.this,
-				BulletinViewActivity.class);
+				MessageViewActivity.class);
 		intent.putExtra("PositionOfMessage", (position));
 		MessageListActivity.this.startActivity(intent);
 
@@ -270,7 +274,18 @@ public class MessageListActivity extends Activity implements OnClickListener,
 
 				}/** When "Send Web Message" menu item is pressed **/
 				else if (keyword.equals("Send Web Message")) {
-					pdialog.show();
+					if (!connFlag) {
+						pdialog.show();
+						Intent intent = new Intent(MessageListActivity.this,
+								MessageAddActivity.class);
+						MessageListActivity.this.startActivity(intent);
+					} else {
+						Toast.makeText(MessageListActivity.this,
+								"Oops ! Can't send while you're Offline",
+								Toast.LENGTH_SHORT).show();
+						Log.e("Attempted Message Send While Offline",
+								"Go Online and then try");
+					}
 
 				}/** When "Call" menu item is pressed **/
 				else if (keyword.equals("Call")) {
@@ -326,12 +341,17 @@ public class MessageListActivity extends Activity implements OnClickListener,
 			{
 				view = new View(this.cntxt);
 
-				view = inflater.inflate(R.layout.list_items, parent, false);
+				view = inflater.inflate(R.layout.messages_list, parent, false);
 
 				parent.setBackgroundColor(Color.rgb(221, 221, 221));
 
+				TableLayout tableLayout = (TableLayout) view
+						.findViewById(R.id.tableLayoutCheckBoxMessage);
+				if (!this.itemDets.get(position).getMsgRead())
+					tableLayout.setBackgroundResource(R.drawable.message_view_unread);
+
 				TextView textView = (TextView) view
-						.findViewById(R.id.textViewListDesc);
+						.findViewById(R.id.textViewMessageTitle);
 				textView.setText(this.itemDets.get(position).getTitle());
 				textView.setFocusable(false);
 
@@ -339,17 +359,17 @@ public class MessageListActivity extends Activity implements OnClickListener,
 						MessageListActivity.this);
 				employeeSQLite.openDB();
 				TextView msgFrom = (TextView) view
-						.findViewById(R.id.textViewListDate);
+						.findViewById(R.id.textViewMessageSender);
 				msgFrom.setText(employeeSQLite.getEmpName(this.itemDets.get(
 						position).getMsgFrom()));
 				msgFrom.setFocusable(false);
 				employeeSQLite.closeDB();
 
 				TextView time = (TextView) view
-						.findViewById(R.id.textViewListTime);
-				time.setText(this.itemDets.get(position).getTime());
+						.findViewById(R.id.textViewMessageDate);
+				time.setText(this.itemDets.get(position).getDate());
 				textView.setFocusable(false);
-				time.setVisibility(View.GONE);
+				// time.setVisibility(View.GONE);
 				inflater = null;
 			} // else
 				// view = (View) convertView;

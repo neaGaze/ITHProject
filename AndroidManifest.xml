@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.WRITE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -62,7 +63,14 @@
             android:name=".MessageListActivity"
             android:theme="@style/MyThemeWithDialog" >
         </activity>
-
+        <activity
+            android:name=".MessageAddActivity"
+            android:theme="@style/MyThemeWithDialog" >
+        </activity>
+        <activity
+            android:name=".MessageViewActivity"
+            android:theme="@style/MyThemeWithDialog" >
+        </activity>
         <receiver android:name=".smsmessages.SMSReceiver" >
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />

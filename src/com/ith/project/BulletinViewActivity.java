@@ -39,7 +39,7 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 	private ImageButton menuButton;
 	private ImageButton BulletinButton;
 	private ImageButton homeButton;
-	private ProgressDialog pdialog;
+	public ProgressDialog pdialog;
 	private LinearLayout linLayoutMenu;
 	private ListView menuListView;
 	static ListItemArrayAdapter listItemArrAdapter;

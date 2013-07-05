@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.menu.CustomMenu;
 import com.ith.project.menu.CustomMenuListAdapter;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -13,6 +12,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -261,6 +261,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 
 				}/** When "Edit Employee" menu item is pressed **/
 				else if (keyword.equals("Edit Contents")) {
+
 					pdialog.show();
 					Intent intent = new Intent(EmployeeViewActivity.this,
 							EmployeeEditActivity.class);
@@ -268,18 +269,43 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 							EmployeeViewActivity.this.position);
 					EmployeeViewActivity.this.startActivity(intent);
 					EmployeeViewActivity.this.finish();
-				} else if (keyword.equals("Send Web Message")) {
+
+				}/** When "Send Web Message" menu item is pressed **/
+				else if (keyword.equals("Send Web Message")) {
+
+					pdialog.show();
+					Intent intent = new Intent(EmployeeViewActivity.this,
+							MessageAddActivity.class);
+					intent.putExtra(
+							"FROM_EMPLOYEE_VIEW",
+							EmployeeListActivity.getEmployeeArrayList()
+									.get(EmployeeViewActivity.this.position)
+									.getMobile());
+					EmployeeViewActivity.this.startActivity(intent);
+					EmployeeViewActivity.this.finish();
 
 				}/** When "Send SMS" menu item is pressed **/
 				else if (keyword.equals("Send SMS")) {
 
 					pdialog.show();
 					Intent intent = new Intent(Intent.ACTION_VIEW);
-					intent.putExtra("address", EmployeeListActivity
-							.getEmployeeArrayList().get(position).getMobile());
+					intent.putExtra(
+							"address",
+							EmployeeListActivity.getEmployeeArrayList()
+									.get(EmployeeViewActivity.this.position)
+									.getMobile());
 					intent.setType("vnd.android-dir/mms-sms");
 					EmployeeViewActivity.this.startActivity(intent);
-				} else if (keyword.equals("Phone Call")) {
+
+				}/** When "Call" menu item is pressed **/
+				else if (keyword.equals("Phone Call")) {
+					pdialog.show();
+					Intent intent = new Intent(Intent.ACTION_CALL);
+					intent.setData(Uri.parse("tel:"
+							+ EmployeeListActivity.getEmployeeArrayList()
+									.get(EmployeeViewActivity.this.position)
+									.getMobile()));
+					EmployeeViewActivity.this.startActivity(intent);
 
 				}
 				/** When "Exit" menu item is pressed **/

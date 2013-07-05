@@ -119,7 +119,7 @@ public class EmployeeSQLite {
 			this.dateLogSQLite.updateDateLog(currDate);
 
 		} catch (JSONException e) {
-			Log.e("JSONException probably because u r offline",
+			Log.e("JSONException probably because u r updateTODate / OFFLINE",
 					"" + e.getMessage());
 			e.printStackTrace();
 		}

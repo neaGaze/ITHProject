@@ -2,15 +2,11 @@ package com.ith.project.EntityClasses;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.content.Context;
 import android.util.Log;
 
 public class LoginAuthentication {
 
-	private JSONObject formDets, remoteJson;
-	private String remoteStr;
-
+	private JSONObject remoteJson;
 	private static String UserloginId;
 	private static int UserId;
 	private static int EmployeeId;

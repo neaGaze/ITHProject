@@ -713,7 +713,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 	}
 
-	public void beforeTextChanged(CharSequence s, int start, int berore,
+	public void beforeTextChanged(CharSequence s, int start, int before,
 			int count) {
 		// TODO Auto-generated method stub
 
