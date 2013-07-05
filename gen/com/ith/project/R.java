@@ -126,6 +126,7 @@ public final class R {
         public static final int UserAddtextViewUsername=0x7f090033;
         public static final int button1=0x7f090081;
         public static final int buttonBulletinSubmit=0x7f090004;
+        public static final int buttonMessageSubmit=0x7f090089;
         public static final int buttonSearch=0x7f090066;
         public static final int checkBox1=0x7f090062;
         public static final int editText1=0x7f09007e;
@@ -141,6 +142,9 @@ public final class R {
         public static final int editTextEmployeeGender=0x7f09006b;
         public static final int editTextEmployeeHomePhone=0x7f09006d;
         public static final int editTextEmployeeMobile=0x7f09006f;
+        public static final int editTextMessageDesc=0x7f090088;
+        public static final int editTextMessageTitle=0x7f090086;
+        public static final int editTextMessageTo=0x7f090084;
         public static final int editTextSearch=0x7f090067;
         public static final int gridView=0x7f090078;
         public static final int home=0x7f09001a;
@@ -152,9 +156,9 @@ public final class R {
         public static final int imageViewCustomMenu_2=0x7f090016;
         public static final int imageViewEmployee=0x7f090063;
         public static final int imageViewMenuIcon=0x7f090076;
-        public static final int itemAddEmployee=0x7f090086;
-        public static final int itemSendInstantMessages=0x7f090088;
-        public static final int itemSendWebMessage=0x7f090087;
+        public static final int itemAddEmployee=0x7f09008d;
+        public static final int itemSendInstantMessages=0x7f09008f;
+        public static final int itemSendWebMessage=0x7f09008e;
         public static final int linearLayoutBulletin=0x7f090005;
         public static final int linearLayoutCustomMenu1=0x7f090009;
         public static final int linearLayoutCustomMenu2=0x7f09000c;
@@ -196,12 +200,15 @@ public final class R {
         public static final int textViewEmployeeMobile=0x7f09006e;
         public static final int textViewEmployeeName=0x7f090064;
         public static final int textViewListDate=0x7f09007a;
-        public static final int textViewListDate1=0x7f090084;
+        public static final int textViewListDate1=0x7f09008b;
         public static final int textViewListDesc=0x7f090079;
-        public static final int textViewListDesc1=0x7f090083;
+        public static final int textViewListDesc1=0x7f09008a;
         public static final int textViewListTime=0x7f09007b;
-        public static final int textViewListTime1=0x7f090085;
+        public static final int textViewListTime1=0x7f09008c;
         public static final int textViewMenuName=0x7f090077;
+        public static final int textViewMessageDesc=0x7f090087;
+        public static final int textViewMessageTitle=0x7f090085;
+        public static final int textViewMessageTo=0x7f090083;
     }
     public static final class layout {
         public static final int bulletin_add=0x7f030000;
@@ -220,12 +227,17 @@ public final class R {
         public static final int list_view=0x7f03000d;
         public static final int login_screen=0x7f03000e;
         public static final int menu_list_view=0x7f03000f;
-        public static final int test_list_items=0x7f030010;
+        public static final int message_add=0x7f030010;
+        public static final int test_list_items=0x7f030011;
     }
     public static final class menu {
         public static final int context_menu=0x7f080000;
     }
     public static final class string {
+        public static final int MessageDesc=0x7f06001d;
+        public static final int MessageSubmit=0x7f06001e;
+        public static final int MessageTitle=0x7f06001c;
+        public static final int MessageTo=0x7f06001f;
         public static final int app_name=0x7f060006;
         public static final int bulletinAuthor=0x7f060009;
         public static final int bulletinDate=0x7f060007;

@@ -2,7 +2,6 @@ package com.ith.project.sqlite;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
@@ -79,6 +78,7 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 	public static final String MessageTo = "MessageTo";
 	public static final String MessageDate = "MessageDate";
 	public static final String MessageRead = "MessageRead";
+	public static final String MessageType = "MessageType";
 	public static final String TABLE_MESSAGE = "MESSAGES";
 
 	private static final String MESSAGE_CREATE_QUERY = "CREATE TABLE "
@@ -87,7 +87,7 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 			+ " TEXT NOT NULL, " + MessageDesc + " TEXT NOT NULL, "
 			+ MessageFrom + " INTEGER NOT NULL, " + MessageTo + " INTEGER, "
 			+ MessageDate + " TEXT NOT NULL, " + MessageRead
-			+ " BOOLEAN NOT NULL)";
+			+ " INTEGER NOT NULL, " + MessageType + " TEXT NOT NULL)";
 
 	public UsersDBHelper(Context context) {
 		// super(context);
@@ -108,8 +108,8 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 		Log.e("CREATE DATELOG TABLE", "" + DATELOG_CREATE_QUERY);
 		db.execSQL(DATELOG_CREATE_QUERY);
 
-		Log.e("CREATE MESSAGE TABLE", "" + EMPLOYEES_CREATE_QUERY);
-		db.execSQL(EMPLOYEES_CREATE_QUERY);
+		Log.e("CREATE MESSAGE TABLE", "" + MESSAGE_CREATE_QUERY);
+		db.execSQL(MESSAGE_CREATE_QUERY);
 	}
 
 	@Override

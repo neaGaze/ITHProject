@@ -28,6 +28,10 @@
     <string name="employeePwdReenter">Re-enter Password *</string>
     <string name="employeePwd">Password *</string>
     <string name="employeeUpdate">Update</string>
+    <string name="MessageTitle">Subject</string>
+    <string name="MessageDesc">Message Body</string>
+    <string name="MessageSubmit">Send</string>
+    <string name="MessageTo">To: </string>
     
     
     

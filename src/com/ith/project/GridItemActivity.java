@@ -214,15 +214,21 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 		switch (position) {
 		case 0: {
 			this.startActivity(new Intent(this, EmployeeListActivity.class));
+			break;
 		}
 		case 1: {
-
+			this.startActivity(new Intent(this, MessageListActivity.class));
+			break;
 		}
 		case 2: {
 
+			Log.e("This is EVENT LIST opening " + (position), "Great!!!!");
+			break;
 		}
 		case 3: {
 
+			Log.e("This is LEAVE PAGE opening " + (position), "Great!!!!");
+			break;
 		}
 		}
 	}

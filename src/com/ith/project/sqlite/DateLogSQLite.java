@@ -9,8 +9,6 @@ public class DateLogSQLite {
 
 	private UsersDBHelper usersDBHelper;
 	private SQLiteDatabase db;
-	private static int logId = 1;
-
 	public DateLogSQLite(Context context) {
 		// super(context, new UsersDBHelper(context));
 		usersDBHelper = new UsersDBHelper(context);

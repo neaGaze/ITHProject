@@ -3,14 +3,10 @@ package com.ith.project.sqlite;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.ith.project.EntityClasses.Employee;
-
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,7 +17,6 @@ public class EmployeeSQLite {
 	private UsersDBHelper usersDBHelper;
 	private SQLiteDatabase db;
 	private DateLogSQLite dateLogSQLite;
-	private static int EmployeeId = 0;
 
 	public EmployeeSQLite(Context context) {
 		// super(context, new UsersDBHelper(context));
@@ -55,8 +50,6 @@ public class EmployeeSQLite {
 			employeesObj = new JSONObject(bulletinFromWS);
 			JSONArray employeesArr = employeesObj
 					.getJSONArray("GetEmployeeListResult");
-			EmployeeId = 0;
-
 			/** Calculate the current Date and Time **/
 			Calendar cal = Calendar.getInstance();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -223,5 +216,21 @@ public class EmployeeSQLite {
 			cursor.close();
 			return currDate;
 		}
+	}
+
+	/*****************************************************************************************
+	 * Retrieve the EmployeeName from EmployeeID
+	 * ************************************************************************************/
+	public String getEmpName(int EmployeeId) {
+		String EmpNameQuery = "SELECT " + UsersDBHelper.EmployeeName + " FROM "
+				+ UsersDBHelper.TABLE_EMPLOYEES + " WHERE "
+				+ UsersDBHelper.EmployeeId + " = " + EmployeeId;
+		String empName = null;
+		Cursor cursor = db.rawQuery(EmpNameQuery, null);
+		if (cursor.moveToFirst())
+			empName = cursor.getString(cursor
+					.getColumnIndex(UsersDBHelper.EmployeeName));
+		return empName;
+
 	}
 }

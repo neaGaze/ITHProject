@@ -118,7 +118,7 @@ public class BulletinSQLite {
 
 		ArrayList<Bulletin> tempArrList = new ArrayList<Bulletin>();
 
-		String readQuery = "SELECT * FROM " + BulletinDBHelper.TABLE_BULLETINS;
+		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_BULLETINS;
 
 		// Log.v("SELECT QUERY BULLETINS", "" + readQuery);
 		Cursor cursor = db.rawQuery(readQuery, null);

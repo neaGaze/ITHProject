@@ -86,6 +86,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 	static CustomMenuListAdapter menuAdapter;
 	private Dialog dialog;
 	private static EmployeeListActivity context;
+	private static boolean connFlag;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -138,8 +139,9 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 				// employee = new Employee();
 
-				inputJson = Employee.getJsonUserLoginIdEmployee(LoginAuthentication
-						.getUserLoginId(),dateLogSQLite.getLatestDateModified());
+				inputJson = Employee.getJsonUserLoginIdEmployee(
+						LoginAuthentication.getUserLoginId(),
+						dateLogSQLite.getLatestDateModified());
 
 				Log.v("getemployee inquiry", "" + inputJson.toString());
 
@@ -151,14 +153,19 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 				/** To establish connection to the web service **/
 				String employeesFromWS = conn.getJSONFromUrl(inputJson, url);
+				connFlag = true;
 
-				Log.v("Employees:", "" + employeesFromWS);
+				Log.v("Employees:", "here: " + employeesFromWS);
+				if (!employeesFromWS.equals("")) {
+					connFlag = false;
 
-				/** Update the local file according to the web service **/
-				// employeeLocal.updateLocalFiles(inputJson, employeesFromWS);
-				employeeSQLite.updateDBUsersTableJson(employeesFromWS, dateLogSQLite);
-				// employeeLocal.updateLocalFiles();
-
+					/** Update the local file according to the web service **/
+					// employeeLocal.updateLocalFiles(inputJson,
+					// employeesFromWS);
+					employeeSQLite.updateDBUsersTableJson(employeesFromWS,
+							dateLogSQLite);
+					// employeeLocal.updateLocalFiles();
+				}
 				/** Now read from the local DB always **/
 				// JSONArray outputJson = employeeLocal
 				// .getJSONFromLocal(inputJson);
@@ -365,10 +372,19 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 				/** When "Add Employee" menu item is pressed **/
 				if (keyword.equals("Add Employee")) {
-					pdialog.show();
-					Intent intent = new Intent(EmployeeListActivity.this,
-							EmployeeAddActivity.class);
-					EmployeeListActivity.this.startActivity(intent);
+					if (!connFlag) {
+						pdialog.show();
+						Intent intent = new Intent(EmployeeListActivity.this,
+								EmployeeAddActivity.class);
+						EmployeeListActivity.this.startActivity(intent);
+					}
+					else{
+						Toast.makeText(EmployeeListActivity.this,
+								"Oops ! Can't add while you're Offline",
+								Toast.LENGTH_SHORT).show();
+						Log.e("Attempted Employee Add While Offline",
+								"Go Online and then try");
+					}
 				} else if (keyword.equals("Delete Employee")) {
 
 					deleteEmployee();

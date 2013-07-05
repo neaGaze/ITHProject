@@ -30,7 +30,7 @@ public class Bulletin {
 		this.setDaysInterval();
 		try {
 			tempJsonFile.put("userLoginId", UserLoginId);
-			tempJsonFile.put("starDateTime", previousDate);
+			tempJsonFile.put("startDateTime", previousDate);
 			tempJsonFile.put("endDateTime", currDate);
 		} catch (JSONException e) {
 			Log.e("Could not convert to JSONObject", "" + e.getMessage());

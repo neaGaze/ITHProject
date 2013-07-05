@@ -65,6 +65,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 	static CustomMenuListAdapter menuAdapter;
 	private static ListItemActivity context;
 	private Dialog dialog;
+	private boolean connFlag;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -113,7 +114,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 
 				bulletinSQLite = new BulletinSQLite(ListItemActivity.this);
 				bulletinSQLite.openDB();
-				
+
 				bulletin = new Bulletin();
 
 				/** Make a json Object out of UserLoginId **/
@@ -127,14 +128,18 @@ public class ListItemActivity extends Activity implements OnClickListener,
 
 				/** To establish connection to the web service **/
 				String bulletinsFromWS = conn.getJSONFromUrl(inputJson, url);
-
-				Log.v("Bulletins:", "" + bulletinsFromWS);
+				connFlag = true;
+				Log.e("Bulletins:", "here: " + bulletinsFromWS);
 
 				/** Update the local file according to the web service **/
 				// bulletinLocal.updateLocalFiles(inputJson, bulletinsFromWS);
-				bulletinSQLite.deleteAllRows();
-				bulletinSQLite.updateDBUsersTableJson(bulletinsFromWS);
-
+				if (!bulletinsFromWS.equals("")) {
+					connFlag = false;
+					Log.e("Empty Bulletins Response",
+							"So don't delete Bulletins");
+					bulletinSQLite.deleteAllRows();
+					bulletinSQLite.updateDBUsersTableJson(bulletinsFromWS);
+				}
 				/** Now read from the local file always **/
 				// JSONArray outputJson = bulletinLocal
 				// .getJSONFromLocal(inputJson);
@@ -299,10 +304,18 @@ public class ListItemActivity extends Activity implements OnClickListener,
 
 				/** When "Add Bulletin" menu item is pressed **/
 				if (keyword.equals("Add Bulletin")) {
-					pdialog.show();
-					Intent intent = new Intent(ListItemActivity.this,
-							BulletinAddActivity.class);
-					ListItemActivity.this.startActivity(intent);
+					if (!connFlag) {
+						pdialog.show();
+						Intent intent = new Intent(ListItemActivity.this,
+								BulletinAddActivity.class);
+						ListItemActivity.this.startActivity(intent);
+					} else {
+						Toast.makeText(ListItemActivity.this,
+								"Can't add while you're Offline",
+								Toast.LENGTH_SHORT).show();
+						Log.e("Attempted Bulletin Add While Offline",
+								"Go Online and then try");
+					}
 				}
 				/** When "Exit" menu item is pressed **/
 				else if (keyword.equals("Exit")) {

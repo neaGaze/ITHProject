@@ -9,8 +9,10 @@ import com.ith.project.menu.CustomMenuListAdapter;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -46,6 +48,8 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 	static CustomMenuListAdapter menuAdapter;
 	private Dialog dialog;
 	private int position;
+	private BroadcastReceiver broadcastReceiver;
+	private IntentFilter intentFilter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -61,11 +65,11 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
 				R.layout.custom_title);
 		init();
-
 	}
 
 	@Override
 	public void onPause() {
+		unregisterReceiver(broadcastReceiver);
 		super.onPause();
 		pdialog.dismiss();
 		if (dialog != null)
@@ -74,11 +78,32 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onResume() {
+		registerReceiver(broadcastReceiver, intentFilter);
 		super.onResume();
 		pdialog.dismiss();
 	}
 
 	private void init() {
+
+		/** Register Intent Filter with only SMS RECEIVED ACTION **/
+		intentFilter = new IntentFilter();
+		intentFilter.addAction("SMS_RECEIVED_ACTION");
+
+		/** Register BroadCastReceiver **/
+		broadcastReceiver = new BroadcastReceiver() {
+
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				Bundle bundle = intent.getExtras();
+				String sender = bundle.getString("MSG_SENDER_NUMBER");
+				String msg = bundle.getString("MSG_BODY");
+
+				Log.e("SMS RECEIVED SUCCESSFULLY", "read it from android sms");
+				Log.e("SMS SENDER is", "" + sender);
+				Log.e("SMS BODY is", "" + msg);
+			}
+		};
+
 		/** To remove add Bulletin for normal users **/
 		modifyEmployeeAdd4Admin(LoginAuthentication.getUserRoleId());
 
@@ -245,8 +270,15 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 					EmployeeViewActivity.this.finish();
 				} else if (keyword.equals("Send Web Message")) {
 
-				} else if (keyword.equals("Send SMS")) {
+				}/** When "Send SMS" menu item is pressed **/
+				else if (keyword.equals("Send SMS")) {
 
+					pdialog.show();
+					Intent intent = new Intent(Intent.ACTION_VIEW);
+					intent.putExtra("address", EmployeeListActivity
+							.getEmployeeArrayList().get(position).getMobile());
+					intent.setType("vnd.android-dir/mms-sms");
+					EmployeeViewActivity.this.startActivity(intent);
 				} else if (keyword.equals("Phone Call")) {
 
 				}

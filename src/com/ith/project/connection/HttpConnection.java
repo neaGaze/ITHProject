@@ -29,16 +29,17 @@ public class HttpConnection /*
 	private HttpPost httppost;
 	private static HttpConnection httpConnection;
 	private static int ConnCount = 0;
+	private static int timeoutConnection = 3000;
+	private static int timeoutSocket = 3000;
 
 	public HttpConnection() {
 		// this.url = url;
 		HttpParams httpParameters = new BasicHttpParams();
 		// Set the timeout in milliseconds until a connection is established.
-		int timeoutConnection = 3000;
-		HttpConnectionParams.setConnectionTimeout(httpParameters,timeoutConnection);
+		HttpConnectionParams.setConnectionTimeout(httpParameters,
+				timeoutConnection);
 		// Set the default socket timeout (SO_TIMEOUT)in milliseconds which is
 		// the timeout for waiting for data.
-		int timeoutSocket = 6000;
 		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 
 		httpclient = new DefaultHttpClient(httpParameters);
@@ -83,6 +84,7 @@ public class HttpConnection /*
 			}
 
 		} catch (Exception e) {
+			// httpclient.getParams().setParameter(name, value);
 			Log.e("Error in http connection:", "" + e.toString());
 		}
 		try {
@@ -99,7 +101,7 @@ public class HttpConnection /*
 			// publishProgress(true);
 
 		} catch (Exception e) {
-
+			// result = null;
 			Log.e("Error converting result ", "" + e.toString());
 		}
 		return result;
