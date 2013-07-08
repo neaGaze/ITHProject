@@ -1,10 +1,9 @@
 package com.ith.project;
 
 import java.util.ArrayList;
-
-import com.ith.project.menu.CustomMenu;
+import java.util.HashMap;
+import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.menu.CustomMenuListAdapter;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -12,13 +11,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -50,6 +47,8 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 	static CustomMenuListAdapter menuAdapter;
 	private static GridItemActivity context;
 	private Dialog dialog;
+	private CallMenuDialog callDiag;
+	private HashMap<String, String> menuItems;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -105,6 +104,8 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 		gridView = (GridView) findViewById(R.id.gridView);
 		gridView.setAdapter(new GridAdapter(this, gridItemDetails));
 		gridView.setOnItemClickListener(this);
+
+		menuItems = new HashMap<String, String>();
 		pdialog.dismiss();
 
 	}
@@ -261,75 +262,12 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 			this.finish();
 
 		} else if (v.equals(homeButton)) {
-			callMenuDialog();
+
+			/** Set up the Menu **/
+			menuItems.put("Exit", "exit");
+			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
+			// callMenuDialog();
 		}
-	}
-
-	/****************************************************************************
-	 * When the Home Button is Clicked at the Menu
-	 *************************************************************************/
-	private void callMenuDialog() {
-
-		LayoutInflater menuInflater = (LayoutInflater) this
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-		linLayoutMenu = (LinearLayout) findViewById(R.id.linearLayoutCustomMenu_2);
-		menuInflater.inflate(R.layout.menu_list_view, linLayoutMenu, false);
-
-		/** To bring front the Dialog box **/
-		dialog = new Dialog(this, R.style.mydialogstyle);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		dialog.setCanceledOnTouchOutside(true);
-
-		/** To set the alignment of the Dialog box in the screen **/
-		WindowManager.LayoutParams WMLP = dialog.getWindow().getAttributes();
-		WMLP.x = getWindowManager().getDefaultDisplay().getWidth();
-		WMLP.gravity = Gravity.TOP;
-		WMLP.verticalMargin = 0.08f; // To put it below header
-		dialog.getWindow().setAttributes(WMLP);
-
-		/** To set the dialog box with the List layout in the android xml **/
-		dialog.setContentView(R.layout.menu_list_view);
-
-		menuListView = (ListView) dialog.findViewById(R.id.listView2);
-
-		/** make an arrayList of items to display at the CustomMenu **/
-		ArrayList<CustomMenu> tempArrList = new ArrayList<CustomMenu>();
-		tempArrList.add(setMenuItems("Exit", "exit"));
-
-		/** Call adapter for the list View to populate ArrayList items **/
-		menuAdapter = new CustomMenuListAdapter(GridItemActivity.this,
-				R.layout.custom_menu_2, tempArrList);
-		menuListView.setAdapter(menuAdapter);
-		menuListView.setOnItemClickListener(new OnItemClickListener() {
-
-			public void onItemClick(AdapterView<?> adapterView, View view,
-					int position, long id) {
-
-				TextView c = (TextView) view
-						.findViewById(R.id.textViewCustomMenu_2);
-				String keyword = c.getText().toString();
-
-				/** When "Exit" menu item is pressed **/
-				if (keyword.equals("Exit")) {
-					pdialog.show();
-					GridItemActivity.this.finish();
-					GridItemActivity.getGridItemActivityInstance().finish();
-					ListItemActivity.getListItemActivityInstance().finish();
-				}
-			}
-		});
-
-		dialog.show();
-
-	}
-
-	public CustomMenu setMenuItems(String menuString, String menuIcon) {
-
-		CustomMenu menu = new CustomMenu(menuString, menuIcon);
-		menu.setValues(menuString, menuIcon);
-
-		return menu;
 	}
 
 	/****************************************************************************

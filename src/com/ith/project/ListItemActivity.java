@@ -1,6 +1,8 @@
 package com.ith.project;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,6 +10,7 @@ import org.json.JSONObject;
 import com.ith.project.EntityClasses.Bulletin;
 import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.connection.HttpConnection;
+import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.menu.CustomMenu;
 import com.ith.project.menu.CustomMenuListAdapter;
 import com.ith.project.sdcard.BulletinLocal;
@@ -65,22 +68,30 @@ public class ListItemActivity extends Activity implements OnClickListener,
 	static CustomMenuListAdapter menuAdapter;
 	private static ListItemActivity context;
 	private Dialog dialog;
-	private boolean connFlag;
+	private static boolean connFlag;
+	private CallMenuDialog callDiag;
+	private HashMap<String, String> menuItems;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		pdialog = new ProgressDialog(this);
-		pdialog.setCancelable(true);
-		pdialog.setMessage("Loading ....");
-		pdialog.show();
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-		setContentView(R.layout.list_view);
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
-				R.layout.custom_title);
-		context = this;
-		init();
 
+		super.onCreate(savedInstanceState);
+
+		if (CallMenuDialog.Exit) {
+			CallMenuDialog.Exit = false;
+			this.finish();
+		} else {
+			pdialog = new ProgressDialog(this);
+			pdialog.setCancelable(true);
+			pdialog.setMessage("Loading ....");
+			pdialog.show();
+			requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+			setContentView(R.layout.list_view);
+			getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
+					R.layout.custom_title);
+			context = this;
+			init();
+		}
 	}
 
 	@Override
@@ -94,6 +105,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onResume() {
+
 		super.onResume();
 		pdialog.dismiss();
 	}
@@ -178,6 +190,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 						listView.setAdapter(listItemArrAdapter);
 						bulletinCount = listItemArrAdapter.getCount();
 						listView.setOnItemClickListener(ListItemActivity.this);
+						menuItems = new HashMap<String, String>();
 						pdialog.dismiss();
 					}
 
@@ -245,9 +258,11 @@ public class ListItemActivity extends Activity implements OnClickListener,
 			this.finish();
 
 		} else if (v.equals(homeButton)) {
-			// Toast.makeText(this, "Home Button", Toast.LENGTH_SHORT).show();
-			// v.performLongClick();
-			callMenuDialog();
+			/** Set up the Menu **/
+			menuItems.put("Exit", "exit");
+			menuItems.put("Add Bulletin", "add_employee");
+			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
+			// callMenuDialog();
 		} else if (v.equals(linLayoutMenu)) {
 			Toast.makeText(this, "Add Employee Clicked", Toast.LENGTH_SHORT)
 					.show();
@@ -456,5 +471,9 @@ public class ListItemActivity extends Activity implements OnClickListener,
 	 *************************************************************************/
 	public static ListItemActivity getListItemActivityInstance() {
 		return context;
+	}
+
+	public static boolean getConnFlag() {
+		return connFlag;
 	}
 }

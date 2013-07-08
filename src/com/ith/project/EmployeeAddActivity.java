@@ -1,39 +1,31 @@
 package com.ith.project;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.ith.project.EntityClasses.Employee;
 import com.ith.project.connection.HttpConnection;
-import com.ith.project.menu.CustomMenu;
+import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.menu.CustomMenuListAdapter;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class EmployeeAddActivity extends Activity implements OnClickListener {
 
@@ -63,12 +55,12 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 	private HttpConnection conn;
 	private ImageButton menuButton;
 	private ImageButton homeButton;
-	private LinearLayout linLayoutMenu;
-	private ListView menuListView;
 	static CustomMenuListAdapter menuAdapter;
 	private Dialog dialog;
 	private Matcher matcher;
 	private Pattern pattern;
+	private CallMenuDialog callDiag;
+	private HashMap<String, String> menuItems;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -112,6 +104,7 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 
 		pattern = Pattern.compile(EMAIL_PATTERN);
 
+		menuItems = new HashMap<String, String>();
 		pdialog.dismiss();
 
 	}
@@ -138,7 +131,11 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 			this.startActivity(intent);
 			this.finish();
 		} else if (v.equals(homeButton)) {
-			callMenuDialog();
+
+			/** Set up the Menu **/
+			menuItems.put("Exit", "exit");
+			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
+			// callMenuDialog();
 		} else {
 			boolean correctEmail = false;
 			// pdialog.show();
@@ -306,76 +303,6 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 			return false;
 		}
 
-	}
-
-	private void callMenuDialog() {
-
-		LayoutInflater menuInflater = (LayoutInflater) this
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-		linLayoutMenu = (LinearLayout) findViewById(R.id.linearLayoutCustomMenu_2);
-		// LinearLayout linLayoutMenu = new LinearLayout(this);
-		menuInflater.inflate(R.layout.menu_list_view, linLayoutMenu, false);
-
-		/** To bring front the Dialog box **/
-		dialog = new Dialog(this, R.style.mydialogstyle);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		dialog.setCanceledOnTouchOutside(true);
-
-		/** To set the alignment of the Dialog box in the screen **/
-		WindowManager.LayoutParams WMLP = dialog.getWindow().getAttributes();
-		WMLP.x = getWindowManager().getDefaultDisplay().getWidth();
-		WMLP.gravity = Gravity.TOP;
-		WMLP.verticalMargin = 0.08f; // To put it below header
-		dialog.getWindow().setAttributes(WMLP);
-
-		/** To set the dialog box with the List layout in the android xml **/
-		dialog.setContentView(R.layout.menu_list_view);
-
-		menuListView = (ListView) dialog.findViewById(R.id.listView2);
-
-		/** make an arrayList of items to display at the CustomMenu **/
-		ArrayList<CustomMenu> tempArrList = new ArrayList<CustomMenu>();
-
-		tempArrList.add(setMenuItems("Exit", "exit"));
-
-		menuAdapter = new CustomMenuListAdapter(EmployeeAddActivity.this,
-				R.layout.custom_menu_2, tempArrList);
-		menuListView.setAdapter(menuAdapter);
-		menuListView.setOnItemClickListener(new OnItemClickListener() {
-
-			public void onItemClick(AdapterView<?> adapterView, View view,
-					int position, long id) {
-
-				TextView c = (TextView) view
-						.findViewById(R.id.textViewCustomMenu_2);
-				String keyword = c.getText().toString();
-
-				/** When "Add Employee" menu item is pressed **/
-				if (keyword.equals("Exit")) {
-					pdialog.show();
-					EmployeeAddActivity.this.finish();
-					EmployeeListActivity.getEmployeeListActivityInstance()
-							.finish();
-					GridItemActivity.getGridItemActivityInstance().finish();
-					ListItemActivity.getListItemActivityInstance().finish();
-				}
-			}
-		});
-
-		dialog.show();
-
-	}
-
-	/****************************************************************************
-	 * When we have to set Menu Items in the ArrayList
-	 *************************************************************************/
-	public CustomMenu setMenuItems(String menuString, String menuIcon) {
-
-		CustomMenu menu = new CustomMenu(menuString, menuIcon);
-		menu.setValues(menuString, menuIcon);
-
-		return menu;
 	}
 
 	@Override

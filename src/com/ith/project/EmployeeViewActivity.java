@@ -1,9 +1,8 @@
 package com.ith.project;
 
-import java.util.ArrayList;
-
+import java.util.HashMap;
 import com.ith.project.EntityClasses.LoginAuthentication;
-import com.ith.project.menu.CustomMenu;
+import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.menu.CustomMenuListAdapter;
 import android.app.Activity;
 import android.app.Dialog;
@@ -12,23 +11,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class EmployeeViewActivity extends Activity implements OnClickListener {
 
@@ -47,9 +40,11 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 	private ListView menuListView;
 	static CustomMenuListAdapter menuAdapter;
 	private Dialog dialog;
-	private int position;
+	private static int position;
 	private BroadcastReceiver broadcastReceiver;
 	private IntentFilter intentFilter;
+	private CallMenuDialog callDiag;
+	private HashMap<String, String> menuItems;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -157,6 +152,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 		homeButton = (ImageButton) findViewById(R.id.home);
 		homeButton.setOnClickListener(this);
 
+		menuItems = new HashMap<String, String>();
 		pdialog.dismiss();
 	}
 
@@ -183,7 +179,16 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 			// this.startActivity(intent);
 
 		} else if (v.equals(homeButton)) {
-			callMenuDialog();
+
+			/** Set up the Menu **/
+			menuItems.put("Add Employee", "add_employee");
+			menuItems.put("Edit Contents", "edit_user");
+			menuItems.put("Send Web Message", "mail_web");
+			menuItems.put("Send SMS", "mail_sms");
+			menuItems.put("Phone Call", "call");
+			menuItems.put("Exit", "exit");
+			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
+			// callMenuDialog();
 		}
 
 	}
@@ -200,139 +205,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	private void callMenuDialog() {
-
-		LayoutInflater menuInflater = (LayoutInflater) this
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-		linLayoutMenu = (LinearLayout) findViewById(R.id.linearLayoutCustomMenu_2);
-		// LinearLayout linLayoutMenu = new LinearLayout(this);
-		menuInflater.inflate(R.layout.menu_list_view, linLayoutMenu, false);
-
-		/** To bring front the Dialog box **/
-		dialog = new Dialog(this, R.style.mydialogstyle);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		dialog.setCanceledOnTouchOutside(true);
-
-		/** To set the alignment of the Dialog box in the screen **/
-		WindowManager.LayoutParams WMLP = dialog.getWindow().getAttributes();
-		WMLP.x = getWindowManager().getDefaultDisplay().getWidth();
-		WMLP.gravity = Gravity.TOP;
-		WMLP.verticalMargin = 0.08f; // To put it below header
-		dialog.getWindow().setAttributes(WMLP);
-
-		/** To set the dialog box with the List layout in the android xml **/
-		dialog.setContentView(R.layout.menu_list_view);
-
-		menuListView = (ListView) dialog.findViewById(R.id.listView2);
-
-		/** make an arrayList of items to display at the CustomMenu **/
-		ArrayList<CustomMenu> tempArrList = new ArrayList<CustomMenu>();
-
-		/** To remove add Bulletin for normal users **/
-		if (LoginAuthentication.getUserRoleId() == 1) {
-			tempArrList.add(setMenuItems("Add Employee", "add_employee"));
-			tempArrList.add(setMenuItems("Edit Contents", "edit_user"));
-		}
-		tempArrList.add(setMenuItems("Send Web Message", "mail_web"));
-		tempArrList.add(setMenuItems("Send SMS", "mail_sms"));
-		tempArrList.add(setMenuItems("Phone Call", "call"));
-		tempArrList.add(setMenuItems("Exit", "exit"));
-
-		menuAdapter = new CustomMenuListAdapter(EmployeeViewActivity.this,
-				R.layout.custom_menu_2, tempArrList);
-		menuListView.setAdapter(menuAdapter);
-		menuListView.setOnItemClickListener(new OnItemClickListener() {
-
-			public void onItemClick(AdapterView<?> adapterView, View view,
-					int position, long id) {
-
-				TextView c = (TextView) view
-						.findViewById(R.id.textViewCustomMenu_2);
-				String keyword = c.getText().toString();
-
-				/** When "Add Employee" menu item is pressed **/
-				if (keyword.equals("Add Employee")) {
-					pdialog.show();
-					Intent intent = new Intent(EmployeeViewActivity.this,
-							EmployeeAddActivity.class);
-					EmployeeViewActivity.this.startActivity(intent);
-					EmployeeViewActivity.this.finish();
-
-				}/** When "Edit Employee" menu item is pressed **/
-				else if (keyword.equals("Edit Contents")) {
-
-					pdialog.show();
-					Intent intent = new Intent(EmployeeViewActivity.this,
-							EmployeeEditActivity.class);
-					intent.putExtra("PositionOfEmployeeEdit",
-							EmployeeViewActivity.this.position);
-					EmployeeViewActivity.this.startActivity(intent);
-					EmployeeViewActivity.this.finish();
-
-				}/** When "Send Web Message" menu item is pressed **/
-				else if (keyword.equals("Send Web Message")) {
-
-					pdialog.show();
-					Intent intent = new Intent(EmployeeViewActivity.this,
-							MessageAddActivity.class);
-					intent.putExtra(
-							"FROM_EMPLOYEE_VIEW",
-							EmployeeListActivity.getEmployeeArrayList()
-									.get(EmployeeViewActivity.this.position)
-									.getMobile());
-					EmployeeViewActivity.this.startActivity(intent);
-					EmployeeViewActivity.this.finish();
-
-				}/** When "Send SMS" menu item is pressed **/
-				else if (keyword.equals("Send SMS")) {
-
-					pdialog.show();
-					Intent intent = new Intent(Intent.ACTION_VIEW);
-					intent.putExtra(
-							"address",
-							EmployeeListActivity.getEmployeeArrayList()
-									.get(EmployeeViewActivity.this.position)
-									.getMobile());
-					intent.setType("vnd.android-dir/mms-sms");
-					EmployeeViewActivity.this.startActivity(intent);
-
-				}/** When "Call" menu item is pressed **/
-				else if (keyword.equals("Phone Call")) {
-					pdialog.show();
-					Intent intent = new Intent(Intent.ACTION_CALL);
-					intent.setData(Uri.parse("tel:"
-							+ EmployeeListActivity.getEmployeeArrayList()
-									.get(EmployeeViewActivity.this.position)
-									.getMobile()));
-					EmployeeViewActivity.this.startActivity(intent);
-
-				}
-				/** When "Exit" menu item is pressed **/
-				else if (keyword.equals("Exit")) {
-					pdialog.show();
-					EmployeeViewActivity.this.finish();
-					EmployeeListActivity.getEmployeeListActivityInstance()
-							.finish();
-					GridItemActivity.getGridItemActivityInstance().finish();
-					ListItemActivity.getListItemActivityInstance().finish();
-				}
-			}
-		});
-
-		dialog.show();
-
+	public static int getPosition(){
+		return position;
 	}
-
-	/****************************************************************************
-	 * When we have to set Menu Items in the ArrayList
-	 *************************************************************************/
-	public CustomMenu setMenuItems(String menuString, String menuIcon) {
-
-		CustomMenu menu = new CustomMenu(menuString, menuIcon);
-		menu.setValues(menuString, menuIcon);
-
-		return menu;
-	}
-
 }
