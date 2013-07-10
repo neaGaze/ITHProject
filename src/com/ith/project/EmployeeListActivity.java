@@ -38,6 +38,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Filter;
@@ -82,6 +83,9 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 	private static boolean connFlag;
 	private CallMenuDialog callDiag;
 	private HashMap<String, String> menuItems;
+	private Dialog exitDialog;
+	private Button exitCancel;
+	private Button exitConfirm;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -104,6 +108,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 		employeeSQLite.closeDB();
 		dateLogSQLite.closeDB();
 		pdialog.dismiss();
+		// exitDialog.dismiss();
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -122,6 +127,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 			public void run() {
 
+				selectedItemDetails = null;
 				JSONObject inputJson;
 				conn = HttpConnection.getSingletonConn();
 				// conn = new HttpConnection(url);
@@ -311,33 +317,80 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 		} else if (v.equals(homeButton)) {
 
 			/** Set up the Menu **/
-			menuItems.put("Send SMS", "mail_sms");
-			menuItems.put("Exit", "exit");
+			// menuItems.put("Send SMS", "mail_sms");
+			// menuItems.put("Exit", "exit");
 			menuItems.put("Add Employee", "add_employee");
-			menuItems.put("Phone Call", "call");
+			// menuItems.put("Phone Call", "call");
 			menuItems.put("Send Web Message", "mail_web");
 			menuItems.put("Delete Employee", "delete_user");
 
 			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
 			// callMenuDialog();
+		} else if (v.equals(exitConfirm)) {
+			deleteEmployee();
+		} else if (v.equals(exitCancel)) {
+
+			exitDialog.dismiss();
 		}
 
 	}
 
+	/****************************************************************************
+	 * To bring the Dialog for deleting Employees
+	 *************************************************************************/
+	public void deleteDialog() {
+		LayoutInflater prefInflater = (LayoutInflater) context
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		LinearLayout linLayoutExit = (LinearLayout) findViewById(R.id.linearLayoutExitDialog);
+		prefInflater.inflate(R.layout.preferences_screen, linLayoutExit, false);
+
+		/** To bring front the Dialog box **/
+		exitDialog = new Dialog(context);
+		exitDialog.setTitle("Confirm Delete");
+		exitDialog.setCanceledOnTouchOutside(false);
+
+		/** To set the dialog box with the List layout in the android xml **/
+		exitDialog.setContentView(R.layout.exit_dialog);
+		pdialog.dismiss();
+
+		TextView dialogQuest = (TextView) exitDialog
+				.findViewById(R.id.textViewExitConfirm);
+		dialogQuest.setText("Do you Really Want to Delete?");
+		Button delBut = (Button) exitDialog
+				.findViewById(R.id.buttonExitConfirm);
+		delBut.setText("DELETE");
+
+		exitDialog.show();
+
+		exitCancel = (Button) exitDialog.findViewById(R.id.buttonExitCancel);
+		exitCancel.setOnClickListener(context);
+
+		exitConfirm = (Button) exitDialog.findViewById(R.id.buttonExitConfirm);
+		exitConfirm.setOnClickListener(context);
+	}
+
+	/****************************************************************************
+	 * To list the selected employees through CheckBoxes
+	 *************************************************************************/
+	public static ArrayList<Employee> getSelected() {
+		ArrayList<Employee> selectedItemDetail = new ArrayList<Employee>();
+		for (int i = 0; i < employeeCount; i++) {
+			if (itemDetails.get(i).getChecked()) {
+				selectedItemDetail.add(itemDetails.get(i));
+				Log.e("Checked Items", ""
+						+ itemDetails.get(i).getEmployeeName());
+			}
+		}
+		return selectedItemDetail;
+	}
 
 	/****************************************************************************
 	 * To delete the selected employees
 	 *************************************************************************/
 	public void deleteEmployee() {
-		selectedItemDetails = new ArrayList<Employee>();
-		for (int i = 0; i < employeeCount; i++) {
-			if (itemDetails.get(i).getChecked()) {
-				selectedItemDetails.add(itemDetails.get(i));
-				Log.e("Deleted Items", ""
-						+ itemDetails.get(i).getEmployeeName());
 
-			}
-		}
+		selectedItemDetails = getSelected();
 
 		Thread delThread = new Thread(new Runnable() {
 
@@ -350,22 +403,18 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 				Log.e("Delete Emps ", "" + inputDelJson.toString());
 
 				/** To establish connection to the web service **/
-				String delEmployeesFromWS = conn.getJSONFromUrl(
-						inputDelJson, delUrl);
+				String delEmployeesFromWS = conn.getJSONFromUrl(inputDelJson,
+						delUrl);
 
-				Log.e("Employees Delete Status:", ""
-						+ delEmployeesFromWS);
+				Log.e("Employees Delete Status:", "" + delEmployeesFromWS);
 
 				try {
-					JSONObject delReplyJson = new JSONObject(
-							delEmployeesFromWS);
+					JSONObject delReplyJson = new JSONObject(delEmployeesFromWS);
 					if (delReplyJson.getBoolean("DeleteEmployeeResult")) {
-						employeeSQLite
-								.deleteEmployees(selectedItemDetails);
+						employeeSQLite.deleteEmployees(selectedItemDetails);
 					}
 				} catch (JSONException e) {
-					Log.e("JSON Parse Error @ EmplListAct",
-							"" + e.getMessage());
+					Log.e("JSON Parse Error @ EmplListAct", "" + e.getMessage());
 					e.printStackTrace();
 				}
 
@@ -373,9 +422,9 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 					public void run() {
 						pdialog.show();
+						exitDialog.dismiss();
 						EmployeeListActivity.this.finish();
-						Intent intent = new Intent(
-								EmployeeListActivity.this,
+						Intent intent = new Intent(EmployeeListActivity.this,
 								EmployeeListActivity.class);
 						EmployeeListActivity.this.startActivity(intent);
 
@@ -643,7 +692,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 	/****************************************************************************
 	 * Get the connFlag
 	 *************************************************************************/
-	
+
 	public static boolean getConnFlag() {
 		return connFlag;
 	}

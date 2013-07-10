@@ -11,7 +11,7 @@ public class LoginAuthentication {
 	private static int UserId;
 	private static int EmployeeId;
 	private static int UserRolesId;
-	private volatile boolean AutheticationStatus = false;
+	private static boolean AutheticationStatus = false;
 
 	public LoginAuthentication() {
 
@@ -67,8 +67,8 @@ public class LoginAuthentication {
 		UserRolesId = userRoleId;
 	}
 
-	public boolean getAuthStatus() {
-		return this.AutheticationStatus;
+	public static boolean getAuthStatus() {
+		return AutheticationStatus;
 	}
 
 	public static int getUserId() {

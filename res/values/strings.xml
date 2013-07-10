@@ -32,6 +32,10 @@
     <string name="MessageDesc">Message Body</string>
     <string name="MessageSubmit">Send</string>
     <string name="MessageTo">To: </string>
+    <string name="messageDateBegin">Set Message Begin Date</string>
+    <string name="messageDateEnd">Set Message End Date </string>
+    <string name="filterMessage">Filter Message By</string>
+    <string name="exitConfirm">Do You Really Want to Exit ?</string>
     
     
     

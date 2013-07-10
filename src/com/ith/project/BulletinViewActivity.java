@@ -127,7 +127,7 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 		} else if (v.equals(homeButton)) {
 
 			/** Set up the Menu **/
-			menuItems.put("Exit", "exit");
+		//	menuItems.put("Exit", "exit");
 			menuItems.put("Add Bulletin", "add_employee");
 			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
 			// callMenuDialog();

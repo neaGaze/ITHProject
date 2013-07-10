@@ -77,8 +77,9 @@ public class ListItemActivity extends Activity implements OnClickListener,
 
 		super.onCreate(savedInstanceState);
 
-		if (CallMenuDialog.Exit) {
+		if (CallMenuDialog.Exit || GridItemActivity.Exit) {
 			CallMenuDialog.Exit = false;
+			GridItemActivity.Exit = false;
 			this.finish();
 		} else {
 			pdialog = new ProgressDialog(this);
@@ -199,6 +200,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 			}
 
 		});
+
 		thread.start();
 	}
 
@@ -259,7 +261,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 
 		} else if (v.equals(homeButton)) {
 			/** Set up the Menu **/
-			menuItems.put("Exit", "exit");
+			// menuItems.put("Exit", "exit");
 			menuItems.put("Add Bulletin", "add_employee");
 			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
 			// callMenuDialog();
@@ -288,6 +290,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 		/** To set the alignment of the Dialog box in the screen **/
 		WindowManager.LayoutParams WMLP = dialog.getWindow().getAttributes();
 		WMLP.x = getWindowManager().getDefaultDisplay().getWidth();
+		WMLP.width = 20;
 		WMLP.gravity = Gravity.TOP;
 		WMLP.verticalMargin = 0.08f; // To put it below header
 		dialog.getWindow().setAttributes(WMLP);

@@ -1,18 +1,20 @@
 package com.ith.project;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import org.json.JSONObject;
 import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.EntityClasses.Message;
 import com.ith.project.connection.HttpConnection;
 import com.ith.project.menu.CallMenuDialog;
-import com.ith.project.menu.CustomMenu;
 import com.ith.project.menu.CustomMenuListAdapter;
 import com.ith.project.sqlite.DateLogSQLite;
 import com.ith.project.sqlite.EmployeeSQLite;
 import com.ith.project.sqlite.MessageSQLite;
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -27,17 +29,22 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.DatePicker.OnDateChangedListener;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class MessageListActivity extends Activity implements OnClickListener,
-		OnItemClickListener {
+		OnItemClickListener, OnDateChangedListener {
 
 	private final String url = "http://192.168.100.2/EMSWebService/Service1.svc/json/GetMessageList";
 
@@ -53,11 +60,16 @@ public class MessageListActivity extends Activity implements OnClickListener,
 	private static ArrayList<Message> itemDetails;
 	private ListView listView;
 	private static MessageItemArrayAdapter msgItemArrAdapter;
-	private LinearLayout linLayoutMenu;
+	private LinearLayout linLayoutPref;
 	private static int messageCount;
 	private static boolean connFlag;
 	private CallMenuDialog callDiag;
 	private HashMap<String, String> menuItems;
+	private Dialog prefDialog;
+	private String msgBeginDate, msgEndDate, msgSpinner;
+	private DatePicker msgBeginDatePicker, msgEndDatePicker;
+	private Button buttonDefault, buttonSet;
+	private int year1, year2, month1, month2, day1, day2;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -204,19 +216,32 @@ public class MessageListActivity extends Activity implements OnClickListener,
 		} else if (v.equals(homeButton)) {
 
 			/** Set up the Menu **/
-			menuItems.put("Send SMS", "mail_sms");
+			// menuItems.put("Send SMS", "mail_sms");
 			menuItems.put("Send Web Message", "mail_web");
-			menuItems.put("Call", "call");
-			menuItems.put("Exit", "exit");
+			menuItems.put("Preferences", "preferences");
+			// menuItems.put("Exit", "exit");
 			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
 			// callMenuDialog();
-		} else if (v.equals(linLayoutMenu)) {
-			Toast.makeText(this, "Add Message Clicked", Toast.LENGTH_SHORT)
-					.show();
+		} else if (v.equals(buttonDefault)) {
+
+			Message.isDefault = true;
+			prefDialog.dismiss();
+
+		} else if (v.equals(buttonSet)) {
+
+			Message.isDefault = false;
+			Message.setFirstCalendar(year1, month1, day1);
+			Message.setSecondCalendar(year2, month2, day2);
+			prefDialog.dismiss();
+
 		} else
 			Toast.makeText(this, "Menu Item Clicked", Toast.LENGTH_SHORT)
 					.show();
 
+	}
+
+	public static ArrayList<Message> getMessageArrayList() {
+		return itemDetails;
 	}
 
 	/****************************************************************************
@@ -226,6 +251,114 @@ public class MessageListActivity extends Activity implements OnClickListener,
 		return context;
 	}
 
+	/****************************************************************************
+	 * Show the Preferences Dialog
+	 *************************************************************************/
+	public void showPreferencesDialog() {
+		this.prefDialog = new Dialog(this);
+		LayoutInflater prefInflater = (LayoutInflater) context
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		linLayoutPref = (LinearLayout) findViewById(R.id.linearLayoutPreferences);
+		prefInflater.inflate(R.layout.preferences_screen, linLayoutPref, false);
+
+		/** To bring front the Dialog box **/
+		prefDialog = new Dialog(context);
+		prefDialog.setTitle("Message Preferences");
+		prefDialog.setCanceledOnTouchOutside(false);
+
+		/** To set the dialog box with the List layout in the android xml **/
+		prefDialog.setContentView(R.layout.preferences_screen);
+
+		/** To get current default time **/
+		// Calendar cal = Calendar.getInstance();
+		Calendar cal = Message.getFirstCalendar();
+		Log.e("FirstCalendar", "" + cal.getTime().toString());
+		msgBeginDatePicker = (DatePicker) prefDialog
+				.findViewById(R.id.datePickerMessageBegin);
+		year1 = cal.get(Calendar.YEAR);
+		month1 = cal.get(Calendar.MONTH);
+		day1 = cal.get(Calendar.DAY_OF_MONTH);
+		msgBeginDatePicker.init(year1, month1, day1, this);
+
+		/** To get 10 days before time **/
+		// cal.add(Calendar.DAY_OF_YEAR, Message.DAY_INTERVAL_MESSAGES);
+		Calendar cal2 = Message.getSecondCalendar();
+		Log.e("SecondCalendar", "" + cal2.getTime().toString());
+		msgEndDatePicker = (DatePicker) prefDialog
+				.findViewById(R.id.datePickerMessageEnd);
+		year2 = cal2.get(Calendar.YEAR);
+		month2 = cal2.get(Calendar.MONTH);
+		day2 = cal2.get(Calendar.DAY_OF_MONTH);
+		msgEndDatePicker.init(year2, month2, day2, this);
+
+		/** For setting the Spinner items **/
+		Spinner spinner = (Spinner) prefDialog
+				.findViewById(R.id.spinnerMessage);
+		ArrayList<String> spinnerItems = new ArrayList<String>();
+		spinnerItems.add("Read");
+		spinnerItems.add("UnRead");
+		spinnerItems.add("Read + UnRead");
+		msgSpinner = "Read + UnRead";
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_item, spinnerItems);
+
+		dataAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+		spinner.setAdapter(dataAdapter);
+		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int pos, long id) {
+				Log.e("Item at Spinner", ""
+						+ parent.getItemAtPosition(pos).toString());
+				msgSpinner = parent.getItemAtPosition(pos).toString();
+			}
+
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		buttonDefault = (Button) prefDialog.findViewById(R.id.buttonDefault);
+		buttonDefault.setOnClickListener(this);
+
+		buttonSet = (Button) prefDialog.findViewById(R.id.buttonSet);
+		buttonSet.setOnClickListener(this);
+
+		prefDialog.show();
+	}
+
+	/*****************************************************************************************************
+	 * For Date Picker Dialog
+	 * **************************************************************************************************/
+
+	public void onDateChanged(DatePicker view, int year, int monthOfYear,
+			int dayOfMonth) {
+
+		// perform your required operation after date has been set
+		String combinedDate = (new StringBuilder()).append(dayOfMonth)
+				.append("-").append(monthOfYear).append("-").append(year)
+				.toString(); // combinedDate == dd-mm-yyyy
+
+		if (view == msgBeginDatePicker) {
+			msgBeginDate = combinedDate;
+			// Message.setFirstCalendar(year, monthOfYear, dayOfMonth);
+			year1 = year;
+			month1 = monthOfYear;
+			day1 = dayOfMonth;
+			Log.e("msgBeginDate	@DatePicker:", "" + msgBeginDate);
+		} else if (view == msgEndDatePicker) {
+			msgEndDate = combinedDate;
+			// Message.setSecondCalendar(year, monthOfYear, dayOfMonth);
+			year2 = year;
+			month2 = monthOfYear;
+			day2 = dayOfMonth;
+			Log.e("msgEndDate	@DatePicker:", "" + msgEndDate);
+		}
+	}
 
 	/******************************************************************************************
 	 * A new ArrayAdapter Class to handle the List View
@@ -264,7 +397,7 @@ public class MessageListActivity extends Activity implements OnClickListener,
 
 				TextView textView = (TextView) view
 						.findViewById(R.id.textViewMessageTitle);
-				textView.setText(this.itemDets.get(position).getTitle());
+				textView.setText(this.itemDets.get(position).getMsgTitle());
 				textView.setFocusable(false);
 
 				EmployeeSQLite employeeSQLite = new EmployeeSQLite(
@@ -272,14 +405,16 @@ public class MessageListActivity extends Activity implements OnClickListener,
 				employeeSQLite.openDB();
 				TextView msgFrom = (TextView) view
 						.findViewById(R.id.textViewMessageSender);
-				msgFrom.setText(employeeSQLite.getEmpName(this.itemDets.get(
-						position).getMsgFrom()));
+				msgFrom.setText("Sent By >> "
+						+ employeeSQLite.getEmpName(this.itemDets.get(position)
+								.getMsgFrom()));
 				msgFrom.setFocusable(false);
 				employeeSQLite.closeDB();
 
 				TextView time = (TextView) view
 						.findViewById(R.id.textViewMessageDate);
-				time.setText(this.itemDets.get(position).getDate());
+				time.setText("Created On: "
+						+ this.itemDets.get(position).getDate());
 				textView.setFocusable(false);
 				// time.setVisibility(View.GONE);
 				inflater = null;
@@ -304,4 +439,5 @@ public class MessageListActivity extends Activity implements OnClickListener,
 			return position;
 		}
 	}
+
 }

@@ -46,11 +46,11 @@ public class ListItemArrayAdapter extends ArrayAdapter<Bulletin> {
 			textView.setFocusable(false);
 
 			TextView date = (TextView) view.findViewById(R.id.textViewListDate);
-			date.setText(this.itemDets.get(position).getDate());
+			date.setText("Date: "+this.itemDets.get(position).getDate());
 			textView.setFocusable(false);
 
 			TextView time = (TextView) view.findViewById(R.id.textViewListTime);
-			time.setText(this.itemDets.get(position).getTime());
+			time.setText("Time: "+this.itemDets.get(position).getTime());
 			textView.setFocusable(false);
 			inflater = null;
 		} //else

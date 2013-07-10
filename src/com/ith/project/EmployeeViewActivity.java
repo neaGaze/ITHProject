@@ -186,7 +186,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 			menuItems.put("Send Web Message", "mail_web");
 			menuItems.put("Send SMS", "mail_sms");
 			menuItems.put("Phone Call", "call");
-			menuItems.put("Exit", "exit");
+		//	menuItems.put("Exit", "exit");
 			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
 			// callMenuDialog();
 		}

@@ -20,5 +20,9 @@
         <menuName>Leave Application</menuName>
         <menuIcon>leave</menuIcon>
     </menuItem>
-     
+     <menuItem>
+        <menuId>5</menuId>
+        <menuName>Exit</menuName>
+        <menuIcon>exit_big</menuIcon>
+    </menuItem>
 </menuItemsList>

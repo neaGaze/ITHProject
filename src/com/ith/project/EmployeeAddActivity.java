@@ -133,8 +133,8 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 		} else if (v.equals(homeButton)) {
 
 			/** Set up the Menu **/
-			menuItems.put("Exit", "exit");
-			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
+		//	menuItems.put("Exit", "exit");
+		//	callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
 			// callMenuDialog();
 		} else {
 			boolean correctEmail = false;

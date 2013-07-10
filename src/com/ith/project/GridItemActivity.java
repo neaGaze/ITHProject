@@ -22,6 +22,7 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -33,13 +34,15 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 		OnClickListener {
 
 	private static final int MENU_EXIT = 0;
-
+	public static boolean Exit;
+	
 	private ParseListItem parser;
 	private ArrayList<GridItemDetails> gridItemDetails;
 	private GridView gridView;
 	private ProgressDialog pdialog;
 	private ImageButton menuButton;
 	private ImageButton BulletinButton;
+	private Button exitCancel, exitConfirm;
 	private ImageButton homeButton;
 	private LinearLayout linLayoutMenu;
 	private ListView menuListView;
@@ -47,6 +50,7 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 	static CustomMenuListAdapter menuAdapter;
 	private static GridItemActivity context;
 	private Dialog dialog;
+	private Dialog exitDialog;
 	private CallMenuDialog callDiag;
 	private HashMap<String, String> menuItems;
 
@@ -88,12 +92,10 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 		/** To remove add Bulletin for normal users **/
 		// if (LoginAuthentication.getUserRoleId() == 2)
 		// findViewById(R.id.bulletin_add_icon).setVisibility(View.INVISIBLE);
-
+		Exit = false;
+		
 		parser = new ParseListItem(this, "GRID_ITEM");
 		this.gridItemDetails = parser.getGridItemDetails();
-
-		// BulletinButton = (ImageButton) findViewById(R.id.bulletin_add_icon);
-		// BulletinButton.setOnClickListener(this);
 
 		menuButton = (ImageButton) findViewById(R.id.menu);
 		menuButton.setOnClickListener(this);
@@ -231,6 +233,35 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 			Log.e("This is LEAVE PAGE opening " + (position), "Great!!!!");
 			break;
 		}
+		case 4: {
+
+			LayoutInflater prefInflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+			LinearLayout linLayoutExit = (LinearLayout) findViewById(R.id.linearLayoutExitDialog);
+			prefInflater.inflate(R.layout.preferences_screen, linLayoutExit,
+					false);
+
+			/** To bring front the Dialog box **/
+			exitDialog = new Dialog(context);
+			exitDialog.setTitle("Confirm Exit");
+			exitDialog.setCanceledOnTouchOutside(false);
+
+			/** To set the dialog box with the List layout in the android xml **/
+			exitDialog.setContentView(R.layout.exit_dialog);
+			pdialog.dismiss();
+			exitDialog.show();
+
+			exitCancel = (Button) exitDialog
+					.findViewById(R.id.buttonExitCancel);
+			exitCancel.setOnClickListener(context);
+
+			exitConfirm = (Button) exitDialog
+					.findViewById(R.id.buttonExitConfirm);
+			exitConfirm.setOnClickListener(context);
+
+			break;
+		}
 		}
 	}
 
@@ -267,6 +298,21 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 			menuItems.put("Exit", "exit");
 			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
 			// callMenuDialog();
+		} else if (v.equals(exitCancel)) {
+
+			exitDialog.dismiss();
+
+		} else if (v.equals(exitConfirm)) {
+
+			pdialog.show();
+			exitDialog.dismiss();
+			context.finish();
+			Intent intent = new Intent(context, ListItemActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra("Exit", "exit_now");
+			Exit = true;
+			context.startActivity(intent);
+
 		}
 	}
 

@@ -111,7 +111,7 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 				.getEmployeeId();
 
 		employeeName = (EditText) findViewById(R.id.UserAddeditTextUserNameEmpEdit);
-		employeeName.setHint(EmployeeListActivity.getEmployeeArrayList()
+		employeeName.setText(EmployeeListActivity.getEmployeeArrayList()
 				.get(position).getEmployeeName());
 
 		employeeGenderGroup = (RadioGroup) findViewById(R.id.radioSexEmpEdit);
@@ -127,27 +127,27 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 				.getCheckedRadioButtonId());
 
 		employeeHomePhone = (EditText) findViewById(R.id.UserAddeditTextHomePhoneEmpEdit);
-		employeeHomePhone.setHint(EmployeeListActivity.getEmployeeArrayList()
+		employeeHomePhone.setText(EmployeeListActivity.getEmployeeArrayList()
 				.get(position).getHomePhone());
 
 		employeeMobile = (EditText) findViewById(R.id.UserAddeditTextMobileEmpEdit);
-		employeeMobile.setHint(EmployeeListActivity.getEmployeeArrayList()
+		employeeMobile.setText(EmployeeListActivity.getEmployeeArrayList()
 				.get(position).getMobile());
 
 		employeeEmail = (EditText) findViewById(R.id.UserAddeditTextEmailEmpEdit);
-		employeeEmail.setHint(EmployeeListActivity.getEmployeeArrayList()
+		employeeEmail.setText(EmployeeListActivity.getEmployeeArrayList()
 				.get(position).getEmail());
 
 		employeeAddress = (EditText) findViewById(R.id.UserAddeditTextLocationEmpEdit);
-		employeeAddress.setHint(EmployeeListActivity.getEmployeeArrayList()
+		employeeAddress.setText(EmployeeListActivity.getEmployeeArrayList()
 				.get(position).getAddress());
 
 		employeeDesignation = (EditText) findViewById(R.id.UserAddeditTextDesignationEmpEdit);
-		employeeDesignation.setHint(EmployeeListActivity.getEmployeeArrayList()
+		employeeDesignation.setText(EmployeeListActivity.getEmployeeArrayList()
 				.get(position).getDesignation());
 
 		employeeRemarks = (EditText) findViewById(R.id.UserAddeditTextRemarksEmpEdit);
-		employeeRemarks.setHint(EmployeeListActivity.getEmployeeArrayList()
+		employeeRemarks.setText(EmployeeListActivity.getEmployeeArrayList()
 				.get(position).getRemarks());
 
 		employeeSubmit = (Button) findViewById(R.id.UserAddbuttonEditEmpEdit);
@@ -181,7 +181,7 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 			menuItems.put("Send Web Message", "mail_web");
 			menuItems.put("Send SMS", "mail_sms");
 			menuItems.put("Phone Call", "call");
-			menuItems.put("Exit", "exit");
+	//		menuItems.put("Exit", "exit");
 			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
 			// callMenuDialog();
 		} else {
@@ -189,34 +189,34 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 			// pdialog.show();
 			empName = employeeName.getText().toString();
 			if (empName.isEmpty())
-				empName = employeeName.getHint().toString();
+				empName = employeeName.getText().toString();
 
 			empGender = ((RadioButton) findViewById(employeeGenderGroup
 					.getCheckedRadioButtonId())).getText().toString();
 
 			empHomePhone = employeeHomePhone.getText().toString();
 			if (empHomePhone.isEmpty())
-				empHomePhone = employeeHomePhone.getHint().toString();
+				empHomePhone = employeeHomePhone.getText().toString();
 
 			empMobile = employeeMobile.getText().toString();
 			if (empMobile.isEmpty())
-				empMobile = employeeMobile.getHint().toString();
+				empMobile = employeeMobile.getText().toString();
 
 			empEmail = employeeEmail.getText().toString();
 			if (empEmail.isEmpty())
-				empEmail = employeeEmail.getHint().toString();
+				empEmail = employeeEmail.getText().toString();
 
 			empAddress = employeeAddress.getText().toString();
 			if (empAddress.isEmpty())
-				empAddress = employeeAddress.getHint().toString();
+				empAddress = employeeAddress.getText().toString();
 
 			empDesignation = employeeDesignation.getText().toString();
 			if (empDesignation.isEmpty())
-				empDesignation = employeeDesignation.getHint().toString();
+				empDesignation = employeeDesignation.getText().toString();
 
 			empRemarks = employeeRemarks.getText().toString();
 			if (empRemarks.isEmpty())
-				empRemarks = employeeRemarks.getHint().toString();
+				empRemarks = employeeRemarks.getText().toString();
 
 			/** Make a json object out of form fields **/
 			insertEmployee = Employee.makeNewEditEmployeeJSON(employeeId,
@@ -315,7 +315,7 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 	public boolean phoneValidate(final String phone) {
 
 		try {
-			if (empHomePhone.equals(employeeHomePhone.getHint().toString()))
+			if (empHomePhone.equals(employeeHomePhone.getText().toString()))
 				return true;
 			int pNumber = Integer.parseInt(phone);
 			if ((pNumber < Integer.MAX_VALUE) && (pNumber > 999999))
@@ -338,7 +338,7 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 	public boolean mobileValidate(final String mobile) {
 
 		try {
-			if (empMobile.equals(employeeMobile.getHint().toString()))
+			if (empMobile.equals(employeeMobile.getText().toString()))
 				return true;
 			matcher = mobilePattern.matcher(mobile);
 			return matcher.matches();

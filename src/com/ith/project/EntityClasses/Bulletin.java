@@ -10,6 +10,8 @@ import android.util.Log;
 
 public class Bulletin {
 
+	private static int DAY_INTERVAL_BULLETINS = -7;
+	
 	private int BulletinId, EmployeeId;
 	private String Title, Description, BulletinDate, EmployeeName;
 	private String date;
@@ -164,7 +166,7 @@ public class Bulletin {
 		Log.e("CurrDate", "" + currDate);
 
 		/** Get date of 7 days from now **/
-		cal.add(Calendar.DAY_OF_YEAR, -7);
+		cal.add(Calendar.DAY_OF_YEAR, DAY_INTERVAL_BULLETINS);
 		previousDate = dtFormat.format(cal.getTime());
 		Log.e("PreviousDate", "" + previousDate);
 	}

@@ -58,7 +58,9 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onPause() {
 		loginSQLite.closeDB();
+		pdialog.dismiss();
 		super.onPause();
+		this.finish();
 	}
 
 	/**************************************************************************************
@@ -173,8 +175,7 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 									LoginAuthentication.getEmployeeId(),
 									LoginAuthentication.getUserId(),
 									LoginAuthentication.getUserRoleId());
-
-							pdialog.dismiss();
+							
 							Toast.makeText(ITHProjectActivity.this,
 									"" + workingStatus, Toast.LENGTH_SHORT)
 									.show();
@@ -183,17 +184,18 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 							intent.putExtra("UserLoginId",
 									LoginAuthentication.getUserLoginId());
 							// loginSQLite.closeDB();
-							ITHProjectActivity.this.startActivity(intent);
-							ITHProjectActivity.this.finish();
+							ITHProjectActivity.this.startActivity(intent);Log.e("OK where is SLOW factor??","End of runObUiThread ITHActivity Thread");
 						} else {
 							Toast.makeText(ITHProjectActivity.this,
 									"Login Failure", Toast.LENGTH_SHORT).show();
+							pdialog.dismiss();
 						}
 					}
 				});
 
+				
 			}
-
+			
 		});
 
 		thread.start();
