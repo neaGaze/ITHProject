@@ -35,7 +35,7 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 
 	private static final int MENU_EXIT = 0;
 	public static boolean Exit;
-	
+
 	private ParseListItem parser;
 	private ArrayList<GridItemDetails> gridItemDetails;
 	private GridView gridView;
@@ -58,10 +58,10 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		pdialog = new ProgressDialog(this);
-		pdialog.setCancelable(true);
-		pdialog.setMessage("Loading ....");
-		pdialog.show();
+		/*
+		 * pdialog = new ProgressDialog(this); pdialog.setCancelable(true);
+		 * pdialog.setMessage("Loading ...."); pdialog.show();
+		 */
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.grid_view);
@@ -74,7 +74,7 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 	@Override
 	public void onPause() {
 		super.onPause();
-		pdialog.dismiss();
+		/* pdialog.dismiss(); */
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -82,7 +82,7 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 	@Override
 	public void onResume() {
 		super.onResume();
-		pdialog.dismiss();
+		/* pdialog.dismiss(); */
 	}
 
 	/************************************************************************************
@@ -93,7 +93,7 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 		// if (LoginAuthentication.getUserRoleId() == 2)
 		// findViewById(R.id.bulletin_add_icon).setVisibility(View.INVISIBLE);
 		Exit = false;
-		
+
 		parser = new ParseListItem(this, "GRID_ITEM");
 		this.gridItemDetails = parser.getGridItemDetails();
 
@@ -108,7 +108,7 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 		gridView.setOnItemClickListener(this);
 
 		menuItems = new HashMap<String, String>();
-		pdialog.dismiss();
+		/* pdialog.dismiss(); */
 
 	}
 
@@ -147,7 +147,8 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 
 			View gridView;
 
-			if (convertView == null) {
+		//	if (convertView == null) 
+			{
 
 				gridView = new View(context);
 
@@ -170,13 +171,13 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 				// imageView.setImageResource(R.drawable.user1);
 				imageView.setImageResource(id);
 
-			} else {
-				gridView = (View) convertView;
 			}
+			//else {
+			//	gridView = (View) convertView;
+		//	}
 
 			return gridView;
 		}
-
 	}
 
 	/****************************************************************************
@@ -212,7 +213,7 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 			long id) {
 
 		Log.v("GridItemClicked @" + (position), "Great!!!!");
-		pdialog.show();
+		/* pdialog.show(); */
 
 		switch (position) {
 		case 0: {
@@ -225,12 +226,12 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 		}
 		case 2: {
 
-			Log.e("This is EVENT LIST opening " + (position), "Great!!!!");
+			this.startActivity(new Intent(this, EventListActivity.class));
 			break;
 		}
 		case 3: {
 
-			Log.e("This is LEAVE PAGE opening " + (position), "Great!!!!");
+			this.startActivity(new Intent(this, LeaveListActivity.class));
 			break;
 		}
 		case 4: {
@@ -249,7 +250,7 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 
 			/** To set the dialog box with the List layout in the android xml **/
 			exitDialog.setContentView(R.layout.exit_dialog);
-			pdialog.dismiss();
+			/* pdialog.dismiss(); */
 			exitDialog.show();
 
 			exitCancel = (Button) exitDialog
@@ -262,6 +263,10 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 
 			break;
 		}
+		case 5: {
+			this.startActivity(new Intent(this, PwdChangeActivity.class));
+			break;
+		}
 		}
 	}
 
@@ -269,7 +274,7 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
 			// do something on back.
-			pdialog.show();
+			/* pdialog.show(); */
 			this.finish();
 			return true;
 		}
@@ -279,14 +284,14 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 
 	public void onClick(View v) {
 		if (v.equals(menuButton)) {
-			pdialog.show();
+			/* pdialog.show(); */
 			Intent intent = new Intent(this, GridItemActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			this.startActivity(intent);
 			// this.finish();
-			pdialog.dismiss();
+			/* pdialog.dismiss(); */
 		} else if (v.equals(BulletinButton)) {
-			pdialog.show();
+			/* pdialog.show(); */
 			Intent intent = new Intent(GridItemActivity.this,
 					BulletinAddActivity.class);
 			this.startActivity(intent);
@@ -296,7 +301,7 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 
 			/** Set up the Menu **/
 			menuItems.put("Exit", "exit");
-			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
+			callDiag = new CallMenuDialog(this, /* pdialog, */dialog, menuItems);
 			// callMenuDialog();
 		} else if (v.equals(exitCancel)) {
 
@@ -304,7 +309,7 @@ public class GridItemActivity extends Activity implements OnItemClickListener,
 
 		} else if (v.equals(exitConfirm)) {
 
-			pdialog.show();
+			/* pdialog.show(); */
 			exitDialog.dismiss();
 			context.finish();
 			Intent intent = new Intent(context, ListItemActivity.class);

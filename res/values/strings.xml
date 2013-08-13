@@ -8,11 +8,12 @@
     <string name="bulletinName">Bulletin Title</string>
     <string name="bulletinDesc">Bulletin Description</string>
     <string name="app_name">ITHProject</string>
-    <string name="bulletinDate">Date of Created</string><string name="bulletinSubmit">Submit</string>
+    <string name="bulletinDate">Date of Created</string>
+    <string name="bulletinSubmit">Submit</string>
     <string name="bulletinAuthor">Created By</string>
     <string name="employeeName">Name *</string>
-    <string name="employeeGender">Gender *</string><string name="employeeHomePhone">HomePhone</string>
-    
+    <string name="employeeGender">Gender *</string>
+    <string name="employeeHomePhone">HomePhone</string>
     <string name="employeeMobile">Mobile *</string>
     <string name="employeeEmail">Email *</string>
     <string name="employeeAddress">Address *</string>
@@ -36,10 +37,28 @@
     <string name="messageDateEnd">Set Message End Date </string>
     <string name="filterMessage">Filter Message By</string>
     <string name="exitConfirm">Do You Really Want to Exit ?</string>
-    
-    
-    
-    
-    
+    <string name="eventName">Event Title</string>
+    <string name="eventDesc">Description</string>
+    <string name="createdBy">Created By</string>
+    <string name="eventHappeningDate">Happening On</string>
+    <string name="eventVenue">Venue</string>
+    <string name="eventDate">Happening On: 2013 07 06</string>
+    <string name="eventGoingStatus">Going Status</string>
+    <string name="inviteTo">Invite To</string>
+    <string name="eventGMap">Check Out Google Map</string>
+    <string name="pinVenue">Pin Venue</string>
+    <string name="invitedTo">Invited To</string>
+    <string name="leaveType">Leave Type</string>
+    <string name="leaveDate">Leave Date</string>
+    <string name="leaveRemarks">Remarks</string>
+    <string name="Respond">Respond</string>
+    <string name="leaveStartDate">Start Date</string>
+    <string name="leaveEndDate">End Date</string>
+    <string name="oldPwd">Current Password</string>
+    <string name="newPwd">New Password</string>
+    <string name="newPwdAgain">Re-enter Password</string>
+    <string name="image_participation">Image de participation</string>
+    <string name="api_map_key">AIzaSyAd4uRdl6Hq3EN-LNJ6IYdypuhrpawDCNs</string>
+  
 
 </resources>

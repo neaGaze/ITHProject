@@ -160,6 +160,27 @@ public class LoginSQLite {
 	}
 
 	/************************************************************************************
+	 * Change the pwd of the employee
+	 * *************************************************************************************/
+	public void changePwd(String newPwd, int employeeId) {
+
+		try {
+
+			String cipheredPwd = encrypt(newPwd);
+
+			String pwdUpdateQuery = "UPDATE " + UsersDBHelper.TABLE_USERS
+					+ " SET " + UsersDBHelper.Password + "='" + cipheredPwd
+					+ "' WHERE " + UsersDBHelper.EmployeeId + "=" + employeeId;
+
+			db.execSQL(pwdUpdateQuery);
+
+		} catch (NoSuchAlgorithmException e) {
+			Log.e("ALGORITHMEXCEPTION", "" + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	/************************************************************************************
 	 * Encrypt Password using SHA-512 Managed Encryption and salt Key
 	 * *************************************************************************************/
 	public String encrypt(String pwd) throws NoSuchAlgorithmException {
@@ -181,7 +202,7 @@ public class LoginSQLite {
 			Log.v("Encrypted string of " + pwd + " is:", "" + encrypted);
 
 		} catch (NoSuchAlgorithmException e) {
-			Log.e("NoSuchAlgorithmException", "" + e.getMessage());
+			Log.e("ALGORITHMEXCEPTION", "" + e.getMessage());
 			e.printStackTrace();
 		}
 		return encrypted;

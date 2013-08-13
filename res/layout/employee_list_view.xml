@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearLayoutEmployeeListView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ffffff"
@@ -37,11 +38,11 @@
                 android:layout_gravity="right"
                 android:text="Search"
                 android:textColor="#555555" />
-        </LinearLayout>
+        </LinearLayout>
         -->
 
         <RelativeLayout
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="45dip"
             android:layout_marginBottom="-5dp"
             android:layout_marginLeft="10dp"
@@ -58,18 +59,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
+                android:layout_gravity="center_vertical"
                 android:layout_marginBottom="3dip"
                 android:layout_marginRight="3dip"
                 android:layout_marginTop="3dip"
                 android:background="@drawable/ic_menu_search"
                 android:contentDescription="@string/searchEmployee"
-                android:layout_gravity="center_vertical"
                 android:padding="2dip" />
 
             <EditText
                 android:id="@+id/editTextSearch"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:layout_marginTop="0dp"
                 android:layout_toRightOf="@+id/buttonSearch"
                 android:background="@null"
@@ -79,10 +81,18 @@
                 android:paddingRight="4dip"
                 android:singleLine="true"
                 android:textColor="#555555"
-                android:layout_gravity="center_vertical"
                 android:textSize="15sp" />
         </RelativeLayout>
     </LinearLayout>
+
+    <Button
+        android:id="@+id/selectedEmployees"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="2dp"
+        android:text="Finished ??"
+        android:visibility="gone" />
 
     <ListView
         android:id="@+id/listView1"

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:background="#dddddd" >
+    
+     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="0dp"
+        android:layout_marginTop="3dp"
+        android:background="#dddddd"
+        android:orientation="horizontal" >
+
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="45dip"
+            android:layout_marginBottom="-5dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="2dip"
+            android:addStatesFromChildren="true"
+            android:background="@android:drawable/edit_text"
+            android:baselineAligned="false"
+            android:gravity="center_vertical" >
+
+            <ImageButton
+                android:id="@+id/employeeSearch"
+                style="@android:style/Widget.Button.Inset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginBottom="3dip"
+                android:layout_marginRight="3dip"
+                android:layout_marginTop="3dip"
+                android:background="@drawable/ic_menu_search"
+                android:contentDescription="@string/searchEmployee"
+                android:layout_gravity="center_vertical"
+                android:padding="2dip" />
+
+            <EditText
+                android:id="@+id/editTextSearchEmployees"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:layout_toRightOf="@+id/buttonSearch"
+                android:background="@null"
+                android:hint="@string/searchEmployee"
+                android:maxLines="1"
+                android:paddingLeft="4dip"
+                android:paddingRight="4dip"
+                android:singleLine="true"
+                android:textColor="#555555"
+                android:layout_gravity="center_vertical"
+                android:textSize="15sp" />
+        </RelativeLayout>
+    </LinearLayout>
+
+     
+</LinearLayout>

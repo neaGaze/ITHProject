@@ -39,6 +39,16 @@ public class BulletinSQLite {
 		usersDBHelper.close();
 	}
 
+	/***********************************************************************************
+	 * To check if the db is open or not
+	 * ************************************************************************************/
+	public boolean isOpen() {
+		if (db == null)
+			return false;
+		else
+			return db.isOpen();
+	}
+
 	/************************************************************************************
 	 * Insert the Bulletin datas into sqlite according to values
 	 * *************************************************************************************/
@@ -69,6 +79,29 @@ public class BulletinSQLite {
 			BulletinId = 0;
 			for (int i = 0; i < bulletinsArr.length(); i++) {
 
+				/** To check for occurence of quotes ' in the String **/
+				String unNormalizedBulletinTitle = bulletinsArr
+						.getJSONObject(i).getString("Title");
+				StringBuilder normalizedTitle = new StringBuilder();
+				String[] titleParts = unNormalizedBulletinTitle.split("'");
+				for (int j = 0; j < titleParts.length; j++) {
+					if (j == titleParts.length - 1)
+						normalizedTitle.append(titleParts[j]);
+					else
+						normalizedTitle.append(titleParts[j] + "''");
+				}
+
+				String unNormalizedBulletinDesc = bulletinsArr.getJSONObject(i)
+						.getString("Description");
+				StringBuilder normalizedDesc = new StringBuilder();
+				String[] descParts = unNormalizedBulletinDesc.split("'");
+				for (int j = 0; j < descParts.length; j++) {
+					if (j == descParts.length - 1)
+						normalizedDesc.append(descParts[j]);
+					else
+						normalizedDesc.append(descParts[j] + "''");
+				}
+
 				String updateQuery = "INSERT OR REPLACE INTO "
 						+ UsersDBHelper.TABLE_BULLETINS
 						+ " ( "
@@ -84,10 +117,9 @@ public class BulletinSQLite {
 						+ ") VALUES ("
 						+ (BulletinId++)
 						+ ", '"
-						+ bulletinsArr.getJSONObject(i).getString("Title")
+						+ normalizedTitle.toString()
 						+ "', '"
-						+ bulletinsArr.getJSONObject(i)
-								.getString("Description")
+						+ normalizedDesc.toString()
 						+ "', '"
 						+ bulletinsArr.getJSONObject(i).getString(
 								"BulletinDate")
@@ -118,7 +150,8 @@ public class BulletinSQLite {
 
 		ArrayList<Bulletin> tempArrList = new ArrayList<Bulletin>();
 
-		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_BULLETINS;
+		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_BULLETINS
+				+ " ORDER BY " + UsersDBHelper.BulletinId + " DESC";
 
 		// Log.v("SELECT QUERY BULLETINS", "" + readQuery);
 		Cursor cursor = db.rawQuery(readQuery, null);

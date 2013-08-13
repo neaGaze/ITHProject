@@ -40,7 +40,7 @@ public class Employee {
 	/*************************************************************************************
 	 * Make a JSONObject out of UserLoginId For Employee with DateTime
 	 * ***************************************************************************************/
-	public static JSONObject getJsonUserLoginIdEmployee(String UserLoginId,
+	public static JSONObject getEmploueeInquiry(String UserLoginId,
 			String latestDateMod) {
 
 		JSONObject tempJsonFile = new JSONObject();
@@ -107,7 +107,7 @@ public class Employee {
 
 			onlyUser.put("UserName", username);
 			onlyUser.put("Password", password);
-			onlyUser.put("UserRolesId", LoginAuthentication.getUserRoleId());
+			onlyUser.put("UserRolesId", LoginAuthentication.UserRolesId);
 
 			UserNEmployee.put("user", onlyUser);
 

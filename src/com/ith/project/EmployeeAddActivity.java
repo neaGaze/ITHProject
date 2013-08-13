@@ -29,7 +29,7 @@ import android.widget.Toast;
 
 public class EmployeeAddActivity extends Activity implements OnClickListener {
 
-	private final String url = "http://192.168.100.2/EMSWebService/Service1.svc/json/InsertEmployee";
+	private final String url = "InsertEmployee";
 	public static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
 			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
@@ -65,11 +65,11 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+/*
 		pdialog = new ProgressDialog(this);
 		pdialog.setCancelable(true);
 		pdialog.setMessage("Loading ....");
-		pdialog.show();
+		pdialog.show();*/
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.employee_add);
@@ -105,14 +105,14 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 		pattern = Pattern.compile(EMAIL_PATTERN);
 
 		menuItems = new HashMap<String, String>();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -120,7 +120,7 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 	}
 
 	public void onClick(View v) {
@@ -309,7 +309,7 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
 			// do something on back.
-			pdialog.show();
+			/*pdialog.show();*/
 			this.finish();
 			return true;
 		}

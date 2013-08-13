@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#dddddd" >
+
+    <LinearLayout
+        android:id="@+id/linearLayoutLeaveView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <!-- For Name of Leave Applicants/Approving Person -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/textViewRespectiveName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/eventName"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000088"
+                android:textSize="18dp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="right" >
+
+                <ImageView
+                    android:id="@+id/imageViewLeaveType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/leaveType"
+                    android:src="@drawable/upload" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Leave Type Description -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewLeaveType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/leaveType"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000066"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/editTextLeaveType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/customview"
+                android:ems="10"
+                android:paddingBottom="7dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="7dp"
+                android:text="@string/leaveType"
+                android:textColor="#ffffff"
+                android:textSize="15dp" >
+            </TextView>
+        </LinearLayout>
+
+        <!-- For Response Spinner -->
+
+        <LinearLayout
+            android:id="@+id/linearLayoutLeaveResponseStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/textViewEventLeaveResponse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="10dp"
+                android:paddingLeft="10dp"
+                android:text="@string/Respond"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000066"
+                android:textSize="15dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right" >
+
+                <ImageView
+                    android:id="@+id/imageViewResponse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/Respond"
+                    android:src="@drawable/pending" />
+
+                <Spinner
+                    android:id="@+id/spinnerLeaveResponse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:ems="10"
+                    android:gravity="left"
+                    android:paddingBottom="7dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="20dp"
+                    android:paddingTop="7dp"
+                    android:text="@string/eventGoingStatus"
+                    android:textColor="#ffffff"
+                    android:textSize="15dp" >
+                </Spinner>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- For Leave Date -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewLeaveDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/leaveStartDate"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000066"
+                android:textSize="15dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/textViewStartLeaveDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/customview"
+                    android:ems="10"
+                    android:paddingBottom="7dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="7dp"
+                    android:text="@string/leaveStartDate"
+                    android:textColor="#ffffff"
+                    android:textSize="15dp" >
+                </TextView>
+
+                <!-- <TextView
+                    android:id="@+id/editTextEndLeaveDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/customview"
+                    android:ems="10"
+                    android:paddingBottom="7dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="7dp"
+                    android:text="@string/leaveEndDate"
+                    android:textColor="#ffffff"
+                    android:textSize="15dp" >
+                </TextView> -->
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Leave Remarks -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewLeaveRemarks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/leaveRemarks"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000066"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/editTextLeaveRemarks"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/customview"
+                android:ems="10"
+                android:paddingBottom="7dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="7dp"
+                android:text="@string/leaveRemarks"
+                android:textColor="#ffffff"
+                android:textSize="15dp" >
+            </TextView>
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

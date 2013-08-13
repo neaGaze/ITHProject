@@ -31,7 +31,7 @@ import android.widget.Toast;
 
 public class EmployeeEditActivity extends Activity implements OnClickListener {
 
-	private final String url = "http://192.168.100.2/EMSWebService/Service1.svc/json/EditEmployee";
+	private final String url = "EditEmployee";
 	private final String mobileStrPattern = "\\d{9}";
 
 	private HttpConnection conn;
@@ -63,10 +63,10 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		pdialog = new ProgressDialog(this);
+		/*pdialog = new ProgressDialog(this);
 		pdialog.setCancelable(true);
 		pdialog.setMessage("Loading ....");
-		pdialog.show();
+		pdialog.show();*/
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.employee_edit);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
@@ -78,7 +78,7 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 	@Override
 	public void onPause() {
 		super.onPause();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -86,7 +86,7 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 	}
 
 	/************************************************************************************
@@ -164,13 +164,13 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 		mobilePattern = Pattern.compile(mobileStrPattern);
 
 		menuItems = new HashMap<String, String>();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 
 	}
 
 	public void onClick(View v) {
 		if (v.equals(menuButton)) {
-			pdialog.show();
+			/*pdialog.show();*/
 			Intent intent = new Intent(EmployeeEditActivity.this,
 					GridItemActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -182,7 +182,7 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 			menuItems.put("Send SMS", "mail_sms");
 			menuItems.put("Phone Call", "call");
 	//		menuItems.put("Exit", "exit");
-			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
+			callDiag = new CallMenuDialog(this, /*pdialog,*/ dialog, menuItems);
 			// callMenuDialog();
 		} else {
 			boolean correctEmail = false;

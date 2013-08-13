@@ -25,4 +25,9 @@
         <menuName>Exit</menuName>
         <menuIcon>exit_big</menuIcon>
     </menuItem>
+     <menuItem>
+        <menuId>6</menuId>
+        <menuName>Change Password</menuName>
+        <menuIcon>pwd</menuIcon>
+    </menuItem>
 </menuItemsList>

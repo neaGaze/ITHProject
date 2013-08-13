@@ -49,11 +49,11 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+/*
 		pdialog = new ProgressDialog(this);
 		pdialog.setCancelable(true);
 		pdialog.setMessage("Loading ....");
-		pdialog.show();
+		pdialog.show();*/
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.employee_view);
@@ -66,7 +66,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 	public void onPause() {
 		unregisterReceiver(broadcastReceiver);
 		super.onPause();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -75,7 +75,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 	public void onResume() {
 		registerReceiver(broadcastReceiver, intentFilter);
 		super.onResume();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 	}
 
 	private void init() {
@@ -100,7 +100,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 		};
 
 		/** To remove add Bulletin for normal users **/
-		modifyEmployeeAdd4Admin(LoginAuthentication.getUserRoleId());
+		modifyEmployeeAdd4Admin(LoginAuthentication.UserRolesId);
 
 		LinearLayout lin = (LinearLayout) findViewById(R.id.linearLayoutEmployee);
 		LayoutInflater inflater = (LayoutInflater) this
@@ -153,7 +153,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 		homeButton.setOnClickListener(this);
 
 		menuItems = new HashMap<String, String>();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 	}
 
 	/*********************************************************************************
@@ -173,7 +173,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 			this.finish();
 		} else if (v.equals(BulletinButton)) {
 
-			pdialog.show();
+			/*pdialog.show()*/;
 			// Toast.makeText(this, "Add Bulletin", Toast.LENGTH_SHORT).show();
 			// Intent intent = new Intent(this, EmployeeAddActivity.class);
 			// this.startActivity(intent);
@@ -187,7 +187,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 			menuItems.put("Send SMS", "mail_sms");
 			menuItems.put("Phone Call", "call");
 		//	menuItems.put("Exit", "exit");
-			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
+			callDiag = new CallMenuDialog(this,/* pdialog,*/ dialog, menuItems);
 			// callMenuDialog();
 		}
 
@@ -197,7 +197,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
 			// do something on back.
-			pdialog.show();
+			/*pdialog.show();*/
 			this.finish();
 			return true;
 		}

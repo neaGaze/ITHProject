@@ -26,7 +26,7 @@ import android.widget.Toast;
 
 public class BulletinAddActivity extends Activity implements OnClickListener {
 
-	private final String url = "http://192.168.100.2/EMSWebService/Service1.svc/json/InsertBulletins";
+	private final String url = "InsertBulletins";
 
 	private EditText bulletinTitle;
 	private EditText bulletinDesc;
@@ -46,11 +46,11 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+/*
 		pdialog = new ProgressDialog(this);
 		pdialog.setCancelable(true);
 		pdialog.setMessage("Loading ....");
-		pdialog.show();
+		pdialog.show();*/
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.bulletin_add);
@@ -62,15 +62,15 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 	@Override
 	public void onPause() {
 		super.onPause();
-		pdialog.dismiss();
-		if (dialog != null)
+		/*pdialog.dismiss();
+		*/if (dialog != null)
 			dialog.dismiss();
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 	}
 
 	private void init() {
@@ -90,7 +90,7 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 
 		menuItems = new HashMap<String, String>();
 
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 	}
 
 	public void onClick(View v) {
@@ -104,12 +104,12 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 
 			/** Set up the Menu **/
 		//	menuItems.put("Exit", "exit");
-		//	callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
+			callDiag = new CallMenuDialog(this, /*pdialog,*/ dialog, menuItems);
 			// callMenuDialog();
 		} else {
 			// pdialog.show();
 			employeeId = new StringBuilder().append(
-					LoginAuthentication.getEmployeeId()).toString();
+					LoginAuthentication.EmployeeId).toString();
 			title = bulletinTitle.getText().toString();
 			desc = bulletinDesc.getText().toString();
 			date = getCurrentDate();
@@ -178,7 +178,7 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
 			// do something on back.
-			pdialog.show();
+			/*pdialog.show();*/
 			this.finish();
 			return true;
 		}

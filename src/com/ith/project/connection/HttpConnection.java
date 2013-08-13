@@ -23,7 +23,7 @@ public class HttpConnection /*
 							 * JSONObject>
 							 */{
 	// "http://kathmandu/WcfTestApp/TestWcf.svc/json/Login";
-	// private String url = "http://kathmandu/EMSWebService/Service1.svc/json";
+	 private String mainUrl = "http://192.168.100.2/EMSWebService/Service1.svc/json/";
 
 	private HttpClient httpclient;
 	private HttpPost httppost;
@@ -56,8 +56,9 @@ public class HttpConnection /*
 	/*****************************************************************************************
 	 * read json data from the given URL
 	 * ************************************************************************************/
-	public String getJSONFromUrl(JSONObject jsonForm, String url) {
+	public String getJSONFromUrl(JSONObject jsonForm, String serviceName) {
 		// initialize
+		String url = new StringBuilder().append(mainUrl).append(serviceName).toString();
 		InputStream is = null;
 		String result = "";
 		// JSONArray jArray = null;

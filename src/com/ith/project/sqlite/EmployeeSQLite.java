@@ -16,7 +16,7 @@ public class EmployeeSQLite {
 
 	private UsersDBHelper usersDBHelper;
 	private SQLiteDatabase db;
-	private DateLogSQLite dateLogSQLite;
+	private EntryLogSQLite entryLogSQLite;
 
 	public EmployeeSQLite(Context context) {
 		// super(context, new UsersDBHelper(context));
@@ -38,14 +38,24 @@ public class EmployeeSQLite {
 		usersDBHelper.close();
 	}
 
+	/***********************************************************************************
+	 * To check if the db is open or not
+	 * ************************************************************************************/
+	public boolean isOpen() {
+		if (db == null)
+			return false;
+		else
+			return db.isOpen();
+	}
+
 	/************************************************************************************
 	 * Update the Employee datas according to JSON object
 	 * *************************************************************************************/
-	public void updateDBUsersTableJson(String bulletinFromWS,
-			DateLogSQLite dateLogSQLite) {
+	public void updateDBUsers(String bulletinFromWS,
+			EntryLogSQLite entryLogSQLite) {
 
 		try {
-			this.dateLogSQLite = dateLogSQLite;
+			this.entryLogSQLite = entryLogSQLite;
 			JSONObject employeesObj;
 			employeesObj = new JSONObject(bulletinFromWS);
 			JSONArray employeesArr = employeesObj
@@ -62,6 +72,29 @@ public class EmployeeSQLite {
 					deleteOneEmployee(employeesArr.getJSONObject(i).getInt(
 							"EmployeeId"));
 					continue;
+				}
+
+				/** To check for occurence of quotes ' in the String **/
+				String unNormalizedBulletinRemark = employeesArr.getJSONObject(
+						i).getString("Remarks");
+				StringBuilder normalizedRemark = new StringBuilder();
+				String[] remarkParts = unNormalizedBulletinRemark.split("'");
+				for (int j = 0; j < remarkParts.length; j++) {
+					if (j == remarkParts.length - 1)
+						normalizedRemark.append(remarkParts[j]);
+					else
+						normalizedRemark.append(remarkParts[j] + "''");
+				}
+
+				String unNormalizedBulletinDesc = employeesArr.getJSONObject(i)
+						.getString("Designation");
+				StringBuilder normalizedDesc = new StringBuilder();
+				String[] descParts = unNormalizedBulletinDesc.split("'");
+				for (int j = 0; j < descParts.length; j++) {
+					if (j == descParts.length - 1)
+						normalizedDesc.append(descParts[j]);
+					else
+						normalizedDesc.append(descParts[j] + "''");
 				}
 
 				String updateQuery = "INSERT OR REPLACE INTO "
@@ -95,8 +128,7 @@ public class EmployeeSQLite {
 						+ "0"
 						+ ", '"
 						+ employeesArr.getJSONObject(i).getString(
-								"EmployeeName")
-						+ "', '"
+								"EmployeeName") + "', '"
 						+ employeesArr.getJSONObject(i).getString("Gender")
 						+ "', '"
 						+ employeesArr.getJSONObject(i).getString("HomePhone")
@@ -106,17 +138,15 @@ public class EmployeeSQLite {
 						+ employeesArr.getJSONObject(i).getString("Email")
 						+ "', '"
 						+ employeesArr.getJSONObject(i).getString("Address")
-						+ "', '"
-						+ employeesArr.getJSONObject(i)
-								.getString("Designation") + "', '"
-						+ employeesArr.getJSONObject(i).getString("Remarks")
-						+ "', '" + updateDateMod(currDate) + "')";
+						+ "', '" + normalizedDesc.toString() + "', '"
+						+ normalizedRemark.toString() + "', '"
+						+ updateDateMod(currDate) + "')";
 
 				Log.v("UPDATE QUERY BULLETINS", "" + updateQuery);
 				db.execSQL(updateQuery);
 			}
 			// this.dateLogSQLite.openDB();
-			this.dateLogSQLite.updateDateLog(currDate);
+			this.entryLogSQLite.updateEntryLog(currDate);
 
 		} catch (JSONException e) {
 			Log.e("JSONException probably because u r updateTODate / OFFLINE",
@@ -128,7 +158,7 @@ public class EmployeeSQLite {
 	/*****************************************************************************************
 	 * read all Employees rows and populate Arraylist of Employee
 	 * ************************************************************************************/
-	public ArrayList<Employee> getJSONFromDB() {
+	public ArrayList<Employee> getEmpListFromDB() {
 
 		ArrayList<Employee> tempArrList = new ArrayList<Employee>();
 
@@ -174,7 +204,7 @@ public class EmployeeSQLite {
 			cursor.close();
 			return tempArrList;
 		} else {
-			Log.e("NO ROW FOUND at EMPLOYEE TABLE", "Cursor Size is 0");
+			Log.e("NO ROW FOUND at EMPLOYEE TABLE", "Cursor Size is 0 ");
 		}
 		cursor.close();
 		return null;

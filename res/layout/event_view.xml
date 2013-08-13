@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#dddddd" >
+
+    <LinearLayout
+        android:id="@+id/linearLayoutEvent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#dddddd"
+        android:orientation="vertical" >
+
+        <!-- For Description of Events -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewEventName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/eventName"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000088"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- For Event Description -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewEventDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/eventDesc"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000066"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/editTextEventDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/customview"
+                android:ems="10"
+                android:paddingBottom="7dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="7dp"
+                android:text="@string/eventDesc"
+                android:textColor="#ffffff"
+                android:textSize="15sp" >
+            </TextView>
+        </LinearLayout>
+
+        <!-- For Created By -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewEventCreator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/createdBy"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000066"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/editTextEventCreator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/customview"
+                android:ems="10"
+                android:paddingBottom="7dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="7dp"
+                android:text="@string/createdBy"
+                android:textColor="#ffffff"
+                android:textSize="15sp" >
+            </TextView>
+        </LinearLayout>
+
+        <!-- For Event Date -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewEventDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/eventHappeningDate"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000066"
+                android:textSize="15sp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" >
+
+                <TextView
+                    android:id="@+id/editTextEventDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/customview"
+                    android:ems="10"
+                    android:gravity="left"
+                    android:paddingBottom="7dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="7dp"
+                    android:text="@string/eventHappeningDate"
+                    android:textColor="#ffffff"
+                    android:textSize="15sp" >
+                </TextView>
+
+                <!--
+                     <Button
+                    android:id="@+id/buttonUpdateGoingStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:text="Postpone Event"/>
+                -->
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/datePostponeEvent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:paddingLeft="10dp" >
+
+                <TextView
+                    android:id="@+id/textViewEventPostponeDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingRight="20dp"
+                    android:text="Date"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000077"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/textViewEventPostponeTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingRight="20dp"
+                    android:text="Time"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="#000077"
+                    android:textSize="15sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right" >
+
+                    <ImageButton
+                        android:id="@+id/imageViewEventPostponeDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:background="@null"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:paddingRight="5dp"
+                        android:src="@drawable/date" />
+
+                    <ImageButton
+                        android:id="@+id/imageViewEventPostponeTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:src="@drawable/time" />
+
+                    <Button
+                        android:id="@+id/buttonPostpone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PostPone" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- For Event Venue -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewEventVenue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/eventVenue"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000066"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/editTextEventVenue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/customview"
+                android:ems="10"
+                android:gravity="left"
+                android:paddingBottom="7dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="7dp"
+                android:text="@string/eventVenue"
+                android:textColor="#ffffff"
+                android:textSize="15sp" >
+            </TextView>
+        </LinearLayout>
+
+        <!-- For IsGoing Status -->
+
+        <LinearLayout
+            android:id="@+id/linearLayoutIsGoingStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewEventGoingStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/eventGoingStatus"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000066"
+                android:textSize="15sp" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <Spinner
+                    android:id="@+id/spinnerGoingStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:ems="10"
+                    android:gravity="left"
+                    android:paddingBottom="7dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="20dp"
+                    android:paddingTop="7dp"
+                    android:text="@string/eventGoingStatus"
+                    android:textColor="#ffffff"
+                    android:textSize="15sp" >
+                </Spinner>
+            </RelativeLayout>
+        </LinearLayout>
+
+        <!-- For Checking Google Map -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/textViewEventGoogleMap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/eventGMap"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000066"
+                android:textSize="15sp" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right" >
+
+                <ImageButton
+                    android:id="@+id/buttonGoogleMap"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/gmap"
+                    android:ems="10"
+                    android:gravity="right"
+                    android:paddingBottom="7dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="7dp"
+                    android:text="@string/eventGMap"
+                    android:textColor="#ffffff"
+                    android:textSize="15sp" >
+                </ImageButton>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- To show the list View of participants with their Going Status -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewToReceivers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/invitedTo"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#000066"
+                android:textSize="15sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <ImageButton
+                    android:id="@+id/buttonShowParticipants"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/down"
+                    android:contentDescription="dropdown"
+                    android:ems="10"
+                    android:paddingBottom="7dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="7dp"
+                    android:textColor="#ffffff" >
+                </ImageButton>
+
+                <ImageButton
+                    android:id="@+id/buttonHideParticipants"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/up"
+                    android:contentDescription="dropup"
+                    android:ems="10"
+                    android:paddingBottom="7dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="7dp"
+                    android:textColor="#ffffff" >
+                </ImageButton>
+            </LinearLayout>
+
+            <ListView
+                android:id="@+id/listViewToReceivers"
+                android:layout_width="fill_parent"
+                android:layout_height="100dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="0dp"
+                android:layout_weight="1"
+                android:cacheColorHint="@android:color/transparent"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp" >
+            </ListView>
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

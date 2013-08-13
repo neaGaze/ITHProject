@@ -294,7 +294,7 @@
                     android:text="@string/employeePwdReenter"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:textColor="#000055"
-                    android:textSize="15dp" />
+                    android:textSize="15sp" />
 
                 <EditText
                     android:id="@+id/UserAddeditTextPassword2"
@@ -303,7 +303,7 @@
                     android:layout_weight="0.35"
                     android:ems="10"
                     android:inputType="textPassword"
-                    android:textSize="15dp" />
+                    android:textSize="15sp" />
             </TableRow>
             <!-- For Designation -->
 

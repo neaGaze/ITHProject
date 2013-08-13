@@ -2,20 +2,16 @@ package com.ith.project;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.ith.project.EntityClasses.Bulletin;
 import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.connection.HttpConnection;
 import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.menu.CustomMenu;
 import com.ith.project.menu.CustomMenuListAdapter;
-import com.ith.project.sdcard.BulletinLocal;
 import com.ith.project.sqlite.BulletinSQLite;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -48,7 +44,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 		OnItemClickListener {
 
 	private static final int MENU_EXIT = 0;
-	private final String url = "http://192.168.100.2/EMSWebService/Service1.svc/json/GetBulletins";
+	private final String url = "GetBulletins";
 
 	private static ArrayList<Bulletin> itemDetails;
 	private ListView listView;
@@ -57,7 +53,6 @@ public class ListItemActivity extends Activity implements OnClickListener,
 	private ImageButton BulletinButton;
 	private ImageButton homeButton;
 	private HttpConnection conn;
-	private BulletinLocal bulletinLocal;
 	private BulletinSQLite bulletinSQLite;
 	private Bulletin bulletin;
 	static ListItemArrayAdapter listItemArrAdapter;
@@ -82,10 +77,10 @@ public class ListItemActivity extends Activity implements OnClickListener,
 			GridItemActivity.Exit = false;
 			this.finish();
 		} else {
-			pdialog = new ProgressDialog(this);
-			pdialog.setCancelable(true);
-			pdialog.setMessage("Loading ....");
-			pdialog.show();
+			/*
+			 * pdialog = new ProgressDialog(this); pdialog.setCancelable(true);
+			 * pdialog.setMessage("Loading ...."); pdialog.show();
+			 */
 			requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 			setContentView(R.layout.list_view);
 			getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
@@ -98,17 +93,19 @@ public class ListItemActivity extends Activity implements OnClickListener,
 	@Override
 	public void onPause() {
 		super.onPause();
-		bulletinSQLite.closeDB();
-		pdialog.dismiss();
+		if (bulletinSQLite != null)
+			bulletinSQLite.closeDB();
+		/* pdialog.dismiss(); */
 		if (dialog != null)
 			dialog.dismiss();
+		this.finish();
 	}
 
 	@Override
 	public void onResume() {
 
 		super.onResume();
-		pdialog.dismiss();
+		/* pdialog.dismiss(); */
 	}
 
 	/************************************************************************************
@@ -126,18 +123,19 @@ public class ListItemActivity extends Activity implements OnClickListener,
 				// bulletinLocal = new BulletinLocal();
 
 				bulletinSQLite = new BulletinSQLite(ListItemActivity.this);
-				bulletinSQLite.openDB();
+				if (!bulletinSQLite.isOpen())
+					bulletinSQLite.openDB();
 
 				bulletin = new Bulletin();
 
 				/** Make a json Object out of UserLoginId **/
-				inputJson = bulletin.getJsonUserLoginId(LoginAuthentication
-						.getUserLoginId());
+				inputJson = bulletin
+						.getJsonUserLoginId(LoginAuthentication.UserloginId);
 
 				Log.v("getBulletin inquiry", "" + inputJson.toString());
 
 				/** To remove add Bulletin for normal users **/
-				modifyBulletinAdd4Admin(LoginAuthentication.getUserRoleId());
+			//	modifyBulletinAdd4Admin(LoginAuthentication.UserRolesId);
 
 				/** To establish connection to the web service **/
 				String bulletinsFromWS = conn.getJSONFromUrl(inputJson, url);
@@ -146,7 +144,8 @@ public class ListItemActivity extends Activity implements OnClickListener,
 
 				/** Update the local file according to the web service **/
 				// bulletinLocal.updateLocalFiles(inputJson, bulletinsFromWS);
-				if (!bulletinsFromWS.equals("")) {
+				if (bulletinsFromWS.startsWith("{")
+				/* || (!bulletinsFromWS.equals("")) */) {
 					connFlag = false;
 					Log.e("Empty Bulletins Response",
 							"So don't delete Bulletins");
@@ -164,38 +163,53 @@ public class ListItemActivity extends Activity implements OnClickListener,
 
 				// Log.v("Bulletins:",""+
 				// bulletinLocal.getJSONFromLocal(inputJson).toString());
+				homeButton = (ImageButton) findViewById(R.id.home);
+				homeButton.setClickable(false);
 
+				menuButton = (ImageButton) findViewById(R.id.menu);
+				menuButton.setOnClickListener(ListItemActivity.this);
+
+				// registerForContextMenu(homeButton);
+
+				homeButton = (ImageButton) findViewById(R.id.home);
+				homeButton.setClickable(false);
+				homeButton.setClickable(true);
+				homeButton.setOnClickListener(ListItemActivity.this);
+
+				menuButton = (ImageButton) findViewById(R.id.menu);
+				menuButton.setOnClickListener(ListItemActivity.this);
+				menuItems = new HashMap<String, String>();
 				/**
 				 * To run the main thread after completion of the connection
 				 * thread
 				 **/
-				runOnUiThread(new Runnable() {
+				if (itemDetails != null)
+				/** If list is null do not run this thread :D **/
+				{
+					runOnUiThread(new Runnable() {
 
-					public void run() {
+						public void run() {
 
-						// ExitBut = (Button) findViewById(R.id.exitButton);
-						// ExitBut.setOnClickListener(ListItemActivity.this);
+							// ExitBut = (Button) findViewById(R.id.exitButton);
+							// ExitBut.setOnClickListener(ListItemActivity.this);
 
-						menuButton = (ImageButton) findViewById(R.id.menu);
-						menuButton.setOnClickListener(ListItemActivity.this);
+							listView = (ListView) findViewById(R.id.listView1);
 
-						homeButton = (ImageButton) findViewById(R.id.home);
-						homeButton.setOnClickListener(ListItemActivity.this);
-						registerForContextMenu(homeButton);
-						listView = (ListView) findViewById(R.id.listView1);
+							Log.d("***Welcome to ListView***", ".......");
+							listItemArrAdapter = new ListItemArrayAdapter(
+									ListItemActivity.this, R.layout.list_items,
+									itemDetails);
+							listView.setAdapter(listItemArrAdapter);
+							bulletinCount = listItemArrAdapter.getCount();
+							listView.setOnItemClickListener(ListItemActivity.this);
+							menuItems = new HashMap<String, String>();
+							/* pdialog.dismiss(); */
+						}
 
-						Log.d("***Welcome to ListView***", ".......");
-						listItemArrAdapter = new ListItemArrayAdapter(
-								ListItemActivity.this, R.layout.list_items,
-								itemDetails);
-						listView.setAdapter(listItemArrAdapter);
-						bulletinCount = listItemArrAdapter.getCount();
-						listView.setOnItemClickListener(ListItemActivity.this);
-						menuItems = new HashMap<String, String>();
-						pdialog.dismiss();
-					}
+					});
+				} else {
 
-				});
+				}
 
 			}
 
@@ -246,13 +260,13 @@ public class ListItemActivity extends Activity implements OnClickListener,
 			this.startActivity(intent);
 			// this.finish();
 		} else if (v.equals(menuButton)) {
-			pdialog.show();
+			/* pdialog.show(); */
 			Intent intent = new Intent(ListItemActivity.this,
 					GridItemActivity.class);
 			this.startActivity(intent);
 			// this.finish();
 		} else if (v.equals(BulletinButton)) {
-			pdialog.show();
+			/* pdialog.show(); */
 			// Toast.makeText(this, "Add Bulletin", Toast.LENGTH_SHORT).show();
 			Intent intent = new Intent(ListItemActivity.this,
 					BulletinAddActivity.class);
@@ -263,7 +277,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 			/** Set up the Menu **/
 			// menuItems.put("Exit", "exit");
 			menuItems.put("Add Bulletin", "add_employee");
-			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
+			callDiag = new CallMenuDialog(this, /* pdialog, */dialog, menuItems);
 			// callMenuDialog();
 		} else if (v.equals(linLayoutMenu)) {
 			Toast.makeText(this, "Add Employee Clicked", Toast.LENGTH_SHORT)
@@ -274,111 +288,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 
 	}
 
-	private void callMenuDialog() {
-		LayoutInflater menuInflater = (LayoutInflater) this
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		linLayoutMenu = (LinearLayout) findViewById(R.id.linearLayoutCustomMenu_2);
-		// LinearLayout linLayoutMenu = new LinearLayout(this);
-		menuInflater.inflate(R.layout.menu_list_view, linLayoutMenu, false);
-
-		/** To bring front the Dialog box **/
-		dialog = new Dialog(this, R.style.mydialogstyle);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		dialog.setCanceledOnTouchOutside(true);
-
-		/** To set the alignment of the Dialog box in the screen **/
-		WindowManager.LayoutParams WMLP = dialog.getWindow().getAttributes();
-		WMLP.x = getWindowManager().getDefaultDisplay().getWidth();
-		WMLP.width = 20;
-		WMLP.gravity = Gravity.TOP;
-		WMLP.verticalMargin = 0.08f; // To put it below header
-		dialog.getWindow().setAttributes(WMLP);
-
-		/** To set the dialog box with the List layout in the android xml **/
-		dialog.setContentView(R.layout.menu_list_view);
-
-		menuListView = (ListView) dialog.findViewById(R.id.listView2);
-
-		/** make an arrayList of items to display at the CustomMenu **/
-		ArrayList<CustomMenu> tempArrList = new ArrayList<CustomMenu>();
-
-		/** To remove add Bulletin for normal users **/
-		if (LoginAuthentication.getUserRoleId() == 1)
-			tempArrList.add(setMenuItems("Add Bulletin", "add_employee"));
-		tempArrList.add(setMenuItems("Exit", "exit"));
-
-		menuAdapter = new CustomMenuListAdapter(ListItemActivity.this,
-				R.layout.custom_menu_2, tempArrList);
-		menuListView.setAdapter(menuAdapter);
-		menuListView.setOnItemClickListener(new OnItemClickListener() {
-
-			public void onItemClick(AdapterView<?> adapterView, View view,
-					int position, long id) {
-
-				TextView c = (TextView) view
-						.findViewById(R.id.textViewCustomMenu_2);
-				String keyword = c.getText().toString();
-
-				/** When "Add Bulletin" menu item is pressed **/
-				if (keyword.equals("Add Bulletin")) {
-					if (!connFlag) {
-						pdialog.show();
-						Intent intent = new Intent(ListItemActivity.this,
-								BulletinAddActivity.class);
-						ListItemActivity.this.startActivity(intent);
-					} else {
-						Toast.makeText(ListItemActivity.this,
-								"Can't add while you're Offline",
-								Toast.LENGTH_SHORT).show();
-						Log.e("Attempted Bulletin Add While Offline",
-								"Go Online and then try");
-					}
-				}
-				/** When "Exit" menu item is pressed **/
-				else if (keyword.equals("Exit")) {
-					pdialog.show();
-					ListItemActivity.this.finish();
-				}
-			}
-		});
-		/*
-		 * TextView text1 = (TextView) dialog
-		 * .findViewById(R.id.textViewCustomMenu1);
-		 * text1.setText("Add Employee"); text1.setOnClickListener(this);
-		 * ImageView image1 = (ImageView) dialog
-		 * .findViewById(R.id.imageViewCustomMenu1);
-		 * image1.setImageResource(R.drawable.add_employee);
-		 * image1.setOnClickListener(this);
-		 * 
-		 * linLayoutMenu = (LinearLayout) dialog
-		 * .findViewById(R.id.linearLayoutCustomMenu2);
-		 * menuInflater.inflate(R.layout.custom_menu, linLayoutMenu, false);
-		 * linLayoutMenu.setOnClickListener(this); TextView text2 = (TextView)
-		 * dialog .findViewById(R.id.textViewCustomMenu2);
-		 * text2.setText("Send Messages"); text2.setOnClickListener(this);
-		 * ImageView image2 = (ImageView) dialog
-		 * .findViewById(R.id.imageViewCustomMenu2);
-		 * image2.setImageResource(R.drawable.send_mail);
-		 * image2.setOnClickListener(this);
-		 * 
-		 * linLayoutMenu = (LinearLayout) dialog
-		 * .findViewById(R.id.linearLayoutCustomMenu3);
-		 * menuInflater.inflate(R.layout.custom_menu, linLayoutMenu, false);
-		 * linLayoutMenu.setOnClickListener(this); TextView text3 = (TextView)
-		 * dialog .findViewById(R.id.textViewCustomMenu3);
-		 * text3.setText("Send SMS"); text3.setOnClickListener(this); ImageView
-		 * image3 = (ImageView) dialog .findViewById(R.id.imageViewCustomMenu2);
-		 * image3.setImageResource(R.drawable.send_mail);
-		 * image3.setOnClickListener(this);
-		 * 
-		 * linLayoutMenu = (LinearLayout) dialog
-		 * .findViewById(R.id.linearLayoutCustomMenu4);
-		 * menuInflater.inflate(R.layout.custom_menu, linLayoutMenu, false);
-		 * linLayoutMenu.removeAllViewsInLayout();
-		 */
-		dialog.show();
-	}
 
 	/****************************************************************************
 	 * When we have to set Menu Items in the ArrayList
@@ -442,7 +352,7 @@ public class ListItemActivity extends Activity implements OnClickListener,
 		Log.v("listItemClicked @" + (bulletinCount - position - 1),
 				"HOOOrAyyy!!!!");
 
-		pdialog.show();
+		/* pdialog.show(); */
 
 		Intent intent = new Intent(ListItemActivity.this,
 				BulletinViewActivity.class);
@@ -457,7 +367,10 @@ public class ListItemActivity extends Activity implements OnClickListener,
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
 			// do something on back.
-			pdialog.show();
+			/* pdialog.show(); */
+			Intent intent = new Intent(ListItemActivity.this,
+					GridItemActivity.class);
+			this.startActivity(intent);
 			this.finish();
 			return true;
 		}

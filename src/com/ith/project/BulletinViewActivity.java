@@ -36,11 +36,11 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+/*
 		pdialog = new ProgressDialog(this);
 		pdialog.setCancelable(true);
 		pdialog.setMessage("Loading ....");
-		pdialog.show();
+		pdialog.show();*/
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.bulletin_view);
@@ -53,7 +53,7 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 	@Override
 	public void onPause() {
 		super.onPause();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -61,7 +61,7 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 	}
 
 	private void init() {
@@ -108,7 +108,7 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 		homeButton.setOnClickListener(BulletinViewActivity.this);
 
 		menuItems = new HashMap<String, String>();
-		pdialog.dismiss();
+		/*pdialog.dismiss();*/
 	}
 
 	public void onClick(View v) {
@@ -119,7 +119,7 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 			this.finish();
 		} else if (v.equals(BulletinButton)) {
 
-			pdialog.show();
+			/*pdialog.show();*/
 			// Toast.makeText(this, "Add Bulletin", Toast.LENGTH_SHORT).show();
 			Intent intent = new Intent(this, BulletinAddActivity.class);
 			this.startActivity(intent);
@@ -129,7 +129,7 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 			/** Set up the Menu **/
 		//	menuItems.put("Exit", "exit");
 			menuItems.put("Add Bulletin", "add_employee");
-			callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
+			callDiag = new CallMenuDialog(this, /*pdialog,*/ dialog, menuItems);
 			// callMenuDialog();
 		}
 	}
@@ -138,7 +138,7 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
 			// do something on back.
-			pdialog.show();
+			/*pdialog.show();*/
 			this.finish();
 			return true;
 		}

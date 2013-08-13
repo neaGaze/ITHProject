@@ -1,12 +1,10 @@
 package com.ith.project;
 
+import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.connection.HttpConnection;
-import com.ith.project.sdcard.LoginLocal;
 import com.ith.project.sqlite.LoginSQLite;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -27,12 +25,11 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 	 * **/
 
 	private static volatile boolean loginStatus = false;
-	private final String url = "http://192.168.100.2/EMSWebService/Service1.svc/json/Login";
+	private final String url = "Login";
 
 	private Button LoginBut;
 	private EditText uName, pwd;
 	private HttpConnection conn;
-	private LoginLocal loginLocal;
 	private LoginSQLite loginSQLite;
 	private LoginAuthentication auth;
 	private String uname, pass;
@@ -45,20 +42,22 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		ProgressDialog pdialog = new ProgressDialog(this);
-		pdialog.setCancelable(true);
-		pdialog.setMessage("Loading ....");
-		pdialog.show();
+		/*
+		 * ProgressDialog pdialog = new ProgressDialog(this);
+		 * pdialog.setCancelable(true); pdialog.setMessage("Loading ....");
+		 * pdialog.show();
+		 */
 		setContentView(R.layout.login_screen);
-		pdialog.cancel();
+		/* pdialog.cancel(); */
 		initialize();
 
 	}
 
 	@Override
 	protected void onPause() {
-		loginSQLite.closeDB();
-		pdialog.dismiss();
+		if (loginSQLite != null)
+			loginSQLite.closeDB();
+		/* pdialog.dismiss(); */
 		super.onPause();
 		this.finish();
 	}
@@ -70,9 +69,10 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 		uName = (EditText) findViewById(R.id.editText1);
 		pwd = (EditText) findViewById(R.id.editText2);
 		LoginBut = (Button) findViewById(R.id.button1);
-		pdialog = new ProgressDialog(ITHProjectActivity.this);
-		pdialog.setCancelable(true);
-		pdialog.setMessage("Loading ....");
+		/*
+		 * pdialog = new ProgressDialog(ITHProjectActivity.this);
+		 * pdialog.setCancelable(true); pdialog.setMessage("Loading ....");
+		 */
 		LoginBut.setOnClickListener(this);
 	}
 
@@ -81,7 +81,7 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 	 * ******************************************************************************/
 	public synchronized void onClick(View arg0) {
 
-		pdialog.show();
+		/* pdialog.show(); */
 
 		Thread thread = new Thread(new Runnable() {
 
@@ -91,28 +91,29 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 				pass = pwd.getText().toString();
 				conn = HttpConnection.getSingletonConn();
 				// conn = new HttpConnection(url);
-				loginLocal = new LoginLocal();
 
 				/** Initialize the loginSQLite **/
 				loginSQLite = new LoginSQLite(ITHProjectActivity.this);
+
 				loginSQLite.openDB();
 
 				auth = new LoginAuthentication();
-				tempObject = auth.jsonFormValues(uname, pass);
+				tempObject = jsonFormValues(uname, pass);
 				// auth.execute(tempObject);
 				try {
 					ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 					NetworkInfo netInfo = conMgr.getActiveNetworkInfo();
 
-					if (conMgr.getActiveNetworkInfo() != null
-							&& conMgr.getActiveNetworkInfo().isAvailable()
-							&& conMgr.getActiveNetworkInfo().isConnected()
-							&& netInfo != null && netInfo.isConnected()) {
+					if (netInfo != null && netInfo.isAvailable()
+							&& netInfo.isConnected()) {
 
 						String connected = conn.getJSONFromUrl(tempObject, url);
-						if (!connected.equals(""))
+						Log.e("Login return", ": " + connected);
+						if (/* !connected.equals("") || */connected
+								.startsWith("{")) {
 							jsonRemoteWebservice = new JSONObject(connected);
-						Log.e("Login auth return", "" + connected);
+							Log.e("Login auth return", "" + connected);
+						}
 					}
 
 					/** Know that Internet is connected OR not connected **/
@@ -124,6 +125,9 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 							// tempObject contains Username and password
 							loginSQLite.updateDBUsersTableJson(
 									jsonRemoteWebservice, tempObject);
+						} else {
+							Log.e("Web service returned false authentication",
+									"Please check your uname and pwd");
 						}
 
 					} else {
@@ -138,26 +142,28 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 					workingJson = loginSQLite.getJSONFromDB(tempObject);
 
 				} catch (Exception e) {
-					Log.e("JSONException", "" + e.getMessage());
+					Log.e("Exception caught", "" + e.getMessage());
 					// pdialog.dismiss();
 					e.printStackTrace();
 				}
 
+				Log.e("Working Json", "is: " + workingJson.toString());
 				auth.setFlagFromAuth(workingJson);
 
 				runOnUiThread(new Runnable() {
 					public void run() {
-						Log.v("Login status", "" + auth.getAuthStatus());
-						if (auth.getAuthStatus()) {
+						Log.e("Login status", ""
+								+ LoginAuthentication.AutheticationStatus);
+						if (LoginAuthentication.AutheticationStatus) {
 
 							// loginLocal.updateLocalFiles(workingJson,tempObject);
 							// tempObject contains Username and password
-							loginSQLite.updateDBUsersTableJson(workingJson,
-									tempObject);
 
-							Log.v("loginStatus @main Thread",
-									"" + auth.getAuthStatus());
-							auth.setValues();
+							/*
+							 * loginSQLite.updateDBUsersTableJson(workingJson,
+							 * tempObject);
+							 */
+							auth.setValues(workingJson);
 							/** here store locally for offline data **/
 							// LoginLocal loginLocal = new LoginLocal();
 							/**
@@ -170,43 +176,67 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 							 * 
 							 * loginLocal.writeFile2Sdcard(jsonLocal);
 							 */
-							loginSQLite.insertDBUsersTableValues(uname, pass,
-									LoginAuthentication.getUserLoginId(),
-									LoginAuthentication.getEmployeeId(),
-									LoginAuthentication.getUserId(),
-									LoginAuthentication.getUserRoleId());
-							
+
+							/*
+							 * loginSQLite.insertDBUsersTableValues(uname, pass,
+							 * LoginAuthentication.UserloginId,
+							 * LoginAuthentication.EmployeeId,
+							 * LoginAuthentication.UserId,
+							 * LoginAuthentication.UserRolesId);
+							 */
+
 							Toast.makeText(ITHProjectActivity.this,
 									"" + workingStatus, Toast.LENGTH_SHORT)
 									.show();
 							Intent intent = new Intent(ITHProjectActivity.this,
 									ListItemActivity.class);
 							intent.putExtra("UserLoginId",
-									LoginAuthentication.getUserLoginId());
+									LoginAuthentication.UserloginId);
 							// loginSQLite.closeDB();
-							ITHProjectActivity.this.startActivity(intent);Log.e("OK where is SLOW factor??","End of runObUiThread ITHActivity Thread");
+							ITHProjectActivity.this.startActivity(intent);
 						} else {
 							Toast.makeText(ITHProjectActivity.this,
 									"Login Failure", Toast.LENGTH_SHORT).show();
-							pdialog.dismiss();
+							/* pdialog.dismiss(); */
 						}
 					}
 				});
 
-				
 			}
-			
+
 		});
 
 		thread.start();
 	}
 
-	/****************************************************************************************
-	 * update loginStatus
+	/*************************************************************************************
+	 * Make a JSONObject out of username & password
 	 * ***************************************************************************************/
-	public static synchronized void updateLoginStatus(boolean tmpStatus) {
-		loginStatus = tmpStatus;
-		Log.v("loginStatus @updateLoginstatus()", "" + loginStatus);
+	public JSONObject jsonFormValues(String username, String password) {
+		JSONObject tempJsonFile = new JSONObject();
+		try {
+			tempJsonFile.put("Password", password);
+			tempJsonFile.put("Username", username);
+
+			Log.e("login info", "" + tempJsonFile.toString());
+		} catch (JSONException e) {
+			Log.e("Could not convert to JSONObject", ":P :P :P");
+			e.printStackTrace();
+		}
+		return tempJsonFile;
 	}
+
+	private void finishActivity() {
+		this.finish();
+	}
+	//
+	// /****************************************************************************************
+	// * update loginStatus
+	// *
+	// ***************************************************************************************/
+	// public static void updateLoginStatus(boolean tmpStatus) {
+	// loginStatus = tmpStatus;
+	// Log.v("loginStatus @updateLoginstatus()", "" + loginStatus);
+	// }
 
 }

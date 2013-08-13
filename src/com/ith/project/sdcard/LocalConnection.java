@@ -1,6 +1,7 @@
 package com.ith.project.sdcard;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -43,10 +44,24 @@ public class LocalConnection {
 			File newTextFile = new File(url + fileName);
 			if (!newTextFile.exists()) {
 				newTextFile.createNewFile();
-				FileWriter fileWriter = new FileWriter(newTextFile);
-				fileWriter.write(content);
-				fileWriter.close();
 			}
+
+			String pastString = getStringFromLocal("/sdcard/EMS/SQL/sql.txt");
+
+			FileWriter fileWriter = new FileWriter(newTextFile);
+			/*
+			 * fileWriter.write(content); fileWriter.close();
+			 */
+			BufferedWriter bufferWritter = new BufferedWriter(fileWriter);
+			bufferWritter.write(content +"; \n"+ pastString);
+			bufferWritter.close();
+
+			/*
+			 * else{ FileWriter fileWritter = new
+			 * FileWriter(newTextFile.getName(),true); BufferedWriter
+			 * bufferWritter = new BufferedWriter(fileWritter);
+			 * bufferWritter.write(content); bufferWritter.close(); }
+			 */
 			// fileWriter.close();
 		} catch (FileNotFoundException e) {
 			Log.e("FILENOTFOUND Exception", "" + e.getMessage());

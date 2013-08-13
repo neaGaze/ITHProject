@@ -5,11 +5,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-public class DateLogSQLite {
+public class EntryLogSQLite {
 
 	private UsersDBHelper usersDBHelper;
 	private SQLiteDatabase db;
-	public DateLogSQLite(Context context) {
+
+	public EntryLogSQLite(Context context) {
 		// super(context, new UsersDBHelper(context));
 		usersDBHelper = new UsersDBHelper(context);
 	}
@@ -29,15 +30,25 @@ public class DateLogSQLite {
 		usersDBHelper.close();
 	}
 
-	/************************************************************************************
-	 * Update the DateLog datas according to the date provided
-	 * *************************************************************************************/
-	public void updateDateLog(String currDate) {
+	/***********************************************************************************
+	 * To check if the db is open or not
+	 * ************************************************************************************/
+	public boolean isOpen() {
+		if (db == null)
+			return false;
+		else
+			return db.isOpen();
+	}
 
-		String updateDateLog = "INSERT INTO " + UsersDBHelper.TABLE_DATELOG
+	/************************************************************************************
+	 * Update the ENTRYLOG datas according to the date provided
+	 * *************************************************************************************/
+	public void updateEntryLog(String currDate) {
+
+		String updateDateLog = "INSERT INTO " + UsersDBHelper.TABLE_ENTRYLOG
 				+ " ( " + UsersDBHelper.LatestDate + ") VALUES (" + "'"
 				+ currDate + "')";
-		Log.e("INSERT DATELOG Query", "" + updateDateLog);
+		Log.e("INSERT ENTRYLOG Query", "" + updateDateLog);
 		db.execSQL(updateDateLog);
 
 	}
@@ -48,14 +59,14 @@ public class DateLogSQLite {
 	public String getLatestDateModified() {
 
 		String ModDateViewQuery = "SELECT " + UsersDBHelper.LatestDate
-				+ " FROM " + UsersDBHelper.TABLE_DATELOG + " ORDER BY "
+				+ " FROM " + UsersDBHelper.TABLE_ENTRYLOG + " ORDER BY "
 				+ UsersDBHelper.LogId + " DESC limit 1";
 
 		Cursor cursor = db.rawQuery(ModDateViewQuery, null);
 		if (cursor.moveToFirst()) {
 			String returnLatestDate = cursor.getString(cursor
 					.getColumnIndex(UsersDBHelper.LatestDate));
-			Log.e("Latest Date from DATELOG", "" + returnLatestDate);
+			Log.e("Latest Date from ENTRYLOG", "" + returnLatestDate);
 			return returnLatestDate;
 		} else {
 			return null;
