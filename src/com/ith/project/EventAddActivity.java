@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONException;
@@ -14,7 +15,6 @@ import com.ith.project.EntityClasses.Event;
 import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.connection.HttpConnection;
 import com.ith.project.googlemap.GoogleMapActivity;
-import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.sqlite.EmployeeSQLite;
 import com.ith.project.sqlite.EventSQLite;
 import android.app.Activity;
@@ -35,7 +35,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -47,11 +46,10 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TimePicker;
 
 public class EventAddActivity extends Activity implements OnClickListener,
-		TextWatcher, OnItemClickListener {
+		TextWatcher {
 
 	private final static String AddUrl = "CreateEvent";
 
@@ -64,19 +62,17 @@ public class EventAddActivity extends Activity implements OnClickListener,
 			eventVenueStr, eventDateTimeStr;
 	public static String longitude, latitude;
 	private Dialog dialog, empSelectDialog;
-	private HashMap<String, String> menuItems;
 	private HttpConnection conn;
 	private static int employeeCount;
 	private JSONObject insertEvent;
-	// private static EmployeeListItemArrayAdapter listItemArrAdapter;
 	private EmployeeSQLite employeeSQLite;
 	private EventSQLite eventSQLite;
-	private static ArrayList<Employee> itemDetails, returnItemDetails;
+	private static ArrayList<Employee> itemDetails;
 	private static EmployeeListItemArrayAdapter listItemArrAdapter;
 	private Event eventAdd;
 	private Integer[] receiversId;
 	private ListView empListView;
-	private int currPos, msgFrom, msgTo;
+	private int msgFrom;
 	private String day, month, year, hour, minute;
 
 	@Override
@@ -88,6 +84,18 @@ public class EventAddActivity extends Activity implements OnClickListener,
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
 				R.layout.custom_title);
 		init();
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		if (dialog != null)
+			dialog.dismiss();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
 	}
 
 	private void init() {
@@ -111,10 +119,11 @@ public class EventAddActivity extends Activity implements OnClickListener,
 		year = "";
 		hour = "";
 		minute = "";
+
 		/** To set the Email of persons in the "eventTo" field **/
 		LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		LinearLayout linLayout = (LinearLayout) findViewById(R.id.linearLayoutAddEvent);
-		// LinearLayout linLayoutMenu = new LinearLayout(this);
+
 		layoutInflater.inflate(R.layout.event_add, linLayout, false);
 
 		ArrayList<Employee> selectedEmployees = EmployeeListActivity
@@ -126,7 +135,6 @@ public class EventAddActivity extends Activity implements OnClickListener,
 		eventTo.setFocusable(false);
 		eventTo.setClickable(true);
 		eventTo.setFocusableInTouchMode(true);
-		// eventTo.setOnClickListener(this);
 
 		empSearch.setOnClickListener(this);
 
@@ -142,9 +150,6 @@ public class EventAddActivity extends Activity implements OnClickListener,
 		googleMapButton.setOnClickListener(this);
 		eventSubmit.setOnClickListener(this);
 
-		menuItems = new HashMap<String, String>();
-		/* pdialog.dismiss(); */
-
 		EmployeeListActivity.clearEmployeeChecked();
 
 		/** To open up the Database and query for the EmployeeList **/
@@ -152,32 +157,7 @@ public class EventAddActivity extends Activity implements OnClickListener,
 		if (!employeeSQLite.isOpen())
 			employeeSQLite.openDB();
 		itemDetails = employeeSQLite.getEmpListFromDB();
-
-		/**
-		 * Here returnItemDetails is required to store the searched list. By
-		 * default it is always equals to itemDetails
-		 **/
-		returnItemDetails = itemDetails;
 		employeeSQLite.closeDB();
-
-	}
-
-	@Override
-	public void onPause() {
-		super.onPause();
-		/* pdialog.dismiss(); */
-		if (dialog != null)
-			dialog.dismiss();
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		/* pdialog.dismiss(); */
-	}
-
-	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -206,17 +186,12 @@ public class EventAddActivity extends Activity implements OnClickListener,
 	public void onClick(View v) {
 
 		if (v.equals(menuButton)) {
-			/* pdialog.show(); */
 			Intent intent = new Intent(this, GridItemActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			this.startActivity(intent);
 			this.finish();
 		} else if (v.equals(homeButton)) {
 
-			/** Set up the Menu **/
-			// menuItems.put("Exit", "exit");
-			// callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
-			// callMenuDialog();
 		} else if (v.equals(empSearch)) {
 
 			callEmployeeSearch();
@@ -230,13 +205,12 @@ public class EventAddActivity extends Activity implements OnClickListener,
 			if (year == "" && month == "" && day == "") {
 				Calendar currDate = Calendar.getInstance();
 				SimpleDateFormat dtFormat = new SimpleDateFormat(
-						"yyyyMMddHHmmss");
+						"yyyyMMddHHmmss", Locale.US);
 				saf = dtFormat.format(currDate.getTime());
 
 				year = saf.subSequence(0, 4).toString();
 				month = saf.subSequence(4, 6).toString();
 				day = saf.subSequence(6, 8).toString();
-
 			}
 
 			Log.e("Date are: ", "" + year + "-" + month + "-" + day);
@@ -270,9 +244,7 @@ public class EventAddActivity extends Activity implements OnClickListener,
 		 **/
 		else if (v.equals(eventSubmit)) {
 
-			// pdialog.show();
 			msgFrom = LoginAuthentication.EmployeeId;
-			// msgTo = Integer.parseInt(eventTo.getText().toString());
 			eventTitleStr = eventTitle.getText().toString();
 			eventDescStr = eventDesc.getText().toString();
 			eventVenueStr = eventVenue.getText().toString();
@@ -284,8 +256,6 @@ public class EventAddActivity extends Activity implements OnClickListener,
 				latitude = longitude = "";
 			else
 				Log.e("lat/Long ", "is :" + latitude + " & " + longitude);
-			// msgDate = getCurrentDate();
-			// Log.d("Event Send Date", "" + msgDate);
 
 			/** Make an inquiry json object **/
 			convertNamesToId();
@@ -308,49 +278,45 @@ public class EventAddActivity extends Activity implements OnClickListener,
 					Log.e("Here comes insertStatusStr", "" + insertStatusStr);
 					eventSQLite = new EventSQLite(EventAddActivity.this);
 					eventSQLite.openDB();
+
+					boolean insertStatus = false;
 					try {
 
 						JSONObject insertStatusJson = new JSONObject(
 								insertStatusStr);
 
-						boolean insertStatus = (Boolean) insertStatusJson
+						insertStatus = (Boolean) insertStatusJson
 								.get("CreateEventResult");
-
-						if (insertStatus) {
-
-							Log.e("Event has been sent",
-									"EVENT sent successfully !!!");
-						} else {
-
-							eventSQLite.saveEventDraft(msgFrom, receiversId,
-									eventTitleStr, eventDescStr,
-									eventDateTimeStr, eventVenueStr, longitude,
-									latitude, "pending", 0, 0, "eventPending");
-
-							Log.e("Problem Sending Event ",
-									"Event saved as draft" + insertStatus);
-						}
-
 					} catch (JSONException e) {
 						/**
-						 * Save the typed msgs as draft in sqlite if connection
-						 * return is *JPT*
+						 * Assuming that error can only occur while extracting
+						 * the boolean value, 'cause our json creation is fine
 						 **/
 						eventSQLite.saveEventDraft(msgFrom, receiversId,
 								eventTitleStr, eventDescStr, eventDateTimeStr,
 								eventVenueStr, longitude, latitude, "pending",
-								0, 1, "eventPending");
-
-						// Toast.makeText(EventAddActivity.this,"Event Saved as draft",
-						// Toast.LENGTH_SHORT)
-						// .show();
+								0, 0, "eventPending");
 
 						Log.e("JSONException while sending event",
 								"" + e.getMessage());
-						Log.e("Events Saved as Draft",
-								"Saved events will be sent next time");
 						e.printStackTrace();
 					}
+					/** If returned true from web service insert in our local DB **/
+					if (insertStatus) {
+
+						Log.e("Event has been sent",
+								"EVENT sent successfully !!!");
+					} else {
+
+						eventSQLite.saveEventDraft(msgFrom, receiversId,
+								eventTitleStr, eventDescStr, eventDateTimeStr,
+								eventVenueStr, longitude, latitude, "pending",
+								0, 0, "eventPending");
+
+						Log.e("Problem Sending Event ", "Event saved as draft"
+								+ insertStatus);
+					}
+
 					eventSQLite.closeDB();
 					runOnUiThread(new Runnable() {
 
@@ -360,7 +326,6 @@ public class EventAddActivity extends Activity implements OnClickListener,
 							intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 							startActivity(intent);
 
-							// BulletinAddActivity.this.finish();
 						}
 					});
 				}
@@ -393,7 +358,8 @@ public class EventAddActivity extends Activity implements OnClickListener,
 				.iterator();
 		while (hMapIterator.hasNext()) {
 
-			Map.Entry<String, Integer> value = (Map.Entry) hMapIterator.next();
+			Map.Entry<String, Integer> value = (Map.Entry<String, Integer>) hMapIterator
+					.next();
 			receiversId[i++] = value.getValue();
 			Log.e("Msg Send Names",
 					"" + value.getKey() + " : " + value.getValue());
@@ -465,10 +431,6 @@ public class EventAddActivity extends Activity implements OnClickListener,
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		LinearLayout linLayoutEmpListItem = null;
-		// linLayoutEmpListItem = (LinearLayout)
-		// findViewById(R.id.linearLayoutEmployeeListItems);
-		// linLayoutEmpListItem = (LinearLayout)
-		// findViewById(android.R.layout.simple_spinner_dropdown_item);
 
 		/** To bring front the Dialog box **/
 		empSelectDialog = new Dialog(this);
@@ -497,11 +459,6 @@ public class EventAddActivity extends Activity implements OnClickListener,
 		parent.addView(hawaInflater.inflate(R.layout.employee_list_view, null),
 				500, 2);
 
-		/**
-		 * For intializing the linearLayout for selected Employees \w cross sign
-		 **/
-		// inflateEmployees("name");
-
 		/** for initializing EmpSelectBut and searchBox **/
 		empSelectBut = (Button) empSelectDialog
 				.findViewById(R.id.selectedEmployees);
@@ -515,23 +472,13 @@ public class EventAddActivity extends Activity implements OnClickListener,
 
 		empListView = (ListView) empSelectDialog.findViewById(R.id.listView1);
 
-		/** To open up the Database and query for the EmployeeList **/
-		/*
-		 * employeeSQLite = new EmployeeSQLite(this); employeeSQLite.openDB();
-		 * itemDetails = employeeSQLite.getJSONFromDB(); returnItemDetails =
-		 * itemDetails; employeeSQLite.closeDB();
-		 */
-
 		/** Add the listener to the list of Employees items **/
 		listItemArrAdapter = new EmployeeListItemArrayAdapter(this,
 				R.id.linearLayoutEmployeeListItems, itemDetails);
 		empListView.setAdapter(listItemArrAdapter);
 		employeeCount = listItemArrAdapter.getCount();
 
-		empListView.setOnItemClickListener(this);
-
 		empSelectDialog.show();
-		/* pdialog.dismiss(); */
 
 	}
 
@@ -556,80 +503,72 @@ public class EventAddActivity extends Activity implements OnClickListener,
 			LayoutInflater inflater = (LayoutInflater) cntxt
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-			currPos = position;
-
 			View view;
-			// if (convertView == null)
-			{
-				view = new View(this.cntxt);
 
-				view = inflater.inflate(R.layout.employee_list_items, parent,
-						false);
+			view = new View(this.cntxt);
 
-				parent.setBackgroundColor(Color.rgb(221, 221, 221));
+			view = inflater
+					.inflate(R.layout.employee_list_items, parent, false);
 
-				TextView textView = (TextView) view
-						.findViewById(R.id.textViewEmployeeName);
-				textView.setText(this.itemDets.get(position).getEmployeeName());
-				textView.setFocusable(false);
+			parent.setBackgroundColor(Color.rgb(221, 221, 221));
 
-				TextView location = (TextView) view
-						.findViewById(R.id.textViewEmployeeLocation);
-				location.setText(this.itemDets.get(position).getAddress());
-				location.setFocusable(false);
+			TextView textView = (TextView) view
+					.findViewById(R.id.textViewEmployeeName);
+			textView.setText(this.itemDets.get(position).getEmployeeName());
+			textView.setFocusable(false);
 
-				CheckBox checkBox = (CheckBox) view
-						.findViewById(R.id.checkBox1);
-				view.setTag(checkBox);
+			TextView location = (TextView) view
+					.findViewById(R.id.textViewEmployeeLocation);
+			location.setText(this.itemDets.get(position).getAddress());
+			location.setFocusable(false);
 
-				checkBox.setOnClickListener(new OnClickListener() {
+			CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkBox1);
+			view.setTag(checkBox);
 
-					public void onClick(View v) {
-						CheckBox chkBox = (CheckBox) v;
-						Employee emp = (Employee) chkBox.getTag();
-						Log.e("CheckBox check@", "" + chkBox.isChecked());
-						emp.setChecked(chkBox.isChecked());
-					}
+			checkBox.setOnClickListener(new OnClickListener() {
 
-				});
+				public void onClick(View v) {
+					CheckBox chkBox = (CheckBox) v;
+					Employee emp = (Employee) chkBox.getTag();
+					Log.e("CheckBox check@", "" + chkBox.isChecked());
+					emp.setChecked(chkBox.isChecked());
+				}
 
-				inflater = null;
+			});
 
-				Employee employee = itemDets.get(position);
-				checkBox.setChecked(employee.getChecked());
-				// holder.name.setChecked(employee.getChecked());
-				// holder.name.setTag(employee);
-				checkBox.setTag(employee);
+			inflater = null;
 
-				/** When Finished ?? button is clicked **/
-				empSelectBut.setOnClickListener(new OnClickListener() {
+			Employee employee = itemDets.get(position);
+			checkBox.setChecked(employee.getChecked());
+			checkBox.setTag(employee);
 
-					public void onClick(View v) {
-						empSelectDialog.dismiss();
-						ArrayList<Employee> selectedItemDetail = new ArrayList<Employee>();
-						for (int i = 0; i < employeeCount; i++) {
-							if (itemDetails.get(i).getChecked()) {
-								selectedItemDetail.add(itemDetails.get(i));
-								Log.e("Checked Items", ""
-										+ itemDetails.get(i).getEmployeeName());
-							}
+			/** When Finished ?? button is clicked **/
+			empSelectBut.setOnClickListener(new OnClickListener() {
+
+				public void onClick(View v) {
+					empSelectDialog.dismiss();
+					ArrayList<Employee> selectedItemDetail = new ArrayList<Employee>();
+					for (int i = 0; i < employeeCount; i++) {
+						if (itemDetails.get(i).getChecked()) {
+							selectedItemDetail.add(itemDetails.get(i));
+							Log.e("Checked Items", ""
+									+ itemDetails.get(i).getEmployeeName());
 						}
-						String numbers = getEmployeeName(selectedItemDetail);
-						if (numbers == null)
-							numbers = "";
-						String numberFromMsgTo = eventTo.getText().toString();
-						if (!numberFromMsgTo.isEmpty()) {
-							if (numbers.equals(""))
-								numbers = numberFromMsgTo;
-							else
-								numbers = numberFromMsgTo + "; " + numbers;
-							Log.e("Numbers from eventTo", "" + numbers);
-						}
-						eventTo.setText(numbers);
 					}
-				});
-			} // else
-				// view = (View) convertView;
+					String numbers = getEmployeeName(selectedItemDetail);
+					if (numbers == null)
+						numbers = "";
+					String numberFromMsgTo = eventTo.getText().toString();
+					if (!numberFromMsgTo.isEmpty()) {
+						if (numbers.equals(""))
+							numbers = numberFromMsgTo;
+						else
+							numbers = numberFromMsgTo + "; " + numbers;
+						Log.e("Numbers from eventTo", "" + numbers);
+					}
+					eventTo.setText(numbers);
+				}
+			});
 
 			return view;
 		}
@@ -670,7 +609,6 @@ public class EventAddActivity extends Activity implements OnClickListener,
 
 						results.values = itemDetails;
 						results.count = itemDetails.size();
-						returnItemDetails = itemDetails;
 					}
 					/** If constraint is not null */
 					else {
@@ -686,11 +624,11 @@ public class EventAddActivity extends Activity implements OnClickListener,
 
 						results.count = FilteredItemDetails.size();
 						results.values = FilteredItemDetails;
-						returnItemDetails = FilteredItemDetails;
 					}
 					return results;
 				}
 
+				@SuppressWarnings("unchecked")
 				@Override
 				protected void publishResults(CharSequence constraint,
 						FilterResults results) {

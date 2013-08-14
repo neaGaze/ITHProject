@@ -16,14 +16,14 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONObject;
+
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
-public class HttpConnection /*
-							 * extends AsyncTask<JSONObject, Boolean,
-							 * JSONObject>
-							 */{
-	// "http://kathmandu/WcfTestApp/TestWcf.svc/json/Login";
-	 private String mainUrl = "http://192.168.100.2/EMSWebService/Service1.svc/json/";
+public class HttpConnection {
+	private String mainUrl = "http://192.168.100.2/EMSWebService/Service1.svc/json/";
 
 	private HttpClient httpclient;
 	private HttpPost httppost;
@@ -33,7 +33,6 @@ public class HttpConnection /*
 	private static int timeoutSocket = 3000;
 
 	public HttpConnection() {
-		// this.url = url;
 		HttpParams httpParameters = new BasicHttpParams();
 		// Set the timeout in milliseconds until a connection is established.
 		HttpConnectionParams.setConnectionTimeout(httpParameters,
@@ -58,17 +57,16 @@ public class HttpConnection /*
 	 * ************************************************************************************/
 	public String getJSONFromUrl(JSONObject jsonForm, String serviceName) {
 		// initialize
-		String url = new StringBuilder().append(mainUrl).append(serviceName).toString();
+		String url = new StringBuilder().append(mainUrl).append(serviceName)
+				.toString();
 		InputStream is = null;
 		String result = "";
-		// JSONArray jArray = null;
 
-		// http post
+		
 		try {
 			httppost = new HttpPost(url);
 			httppost.setHeader(HTTP.CONTENT_TYPE,
 					"application/json; charset=utf-8");
-			// httppost.setHeader("Accept", "application/json");
 			String tempNetworkJson = jsonForm.toString();
 			StringEntity se = new StringEntity(tempNetworkJson);
 			httppost.setEntity(se);
@@ -85,7 +83,6 @@ public class HttpConnection /*
 			}
 
 		} catch (Exception e) {
-			// httpclient.getParams().setParameter(name, value);
 			Log.e("Error in http connection:", "" + e.toString());
 		}
 		try {
@@ -99,36 +96,26 @@ public class HttpConnection /*
 			}
 			is.close();
 			result = sb.toString();
-			// publishProgress(true);
 
 		} catch (Exception e) {
-			// result = null;
 			Log.e("Error converting result ", "" + e.toString());
 		}
 		return result;
-		/*
-		 * try { // try parse the string to a JSON object try { // jArray = new
-		 * JSONObject(result); jArray = new JSONArray(result); } catch
-		 * (JSONException e) { Log.e("log_tag", "Error parsing data " +
-		 * e.toString()); }
-		 * 
-		 * return jArray; // return result;
-		 */
+
 	}
-	/*
-	 * @Override protected void onPreExecute() { super.onPreExecute(); //
-	 * displayProgressBar("Downloading..."); }
-	 * 
-	 * @Override protected void onProgressUpdate(Boolean... values) {
-	 * super.onProgressUpdate(values);
-	 * 
-	 * }
-	 * 
-	 * @Override protected void onPostExecute(JSONObject jsonObject) {
-	 * super.onPostExecute(jsonObject); // dismissProgressBar(); }
-	 * 
-	 * @Override protected JSONObject doInBackground(JSONObject... params) {
-	 * JSONObject tempJson = getJSONFromUrl(params[0]); Log.v("JsonObj Value",
-	 * "" + tempJson.toString()); return tempJson; }
-	 */
+
+	/*****************************************************************************************
+	 * get Connection Availability
+	 * ************************************************************************************/
+	public static boolean getConnectionAvailable(Context context) {
+		ConnectivityManager conMgr = (ConnectivityManager) context
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo netInfo = conMgr.getActiveNetworkInfo();
+
+		if (netInfo != null && netInfo.isAvailable() && netInfo.isConnected())
+			return true;
+		else
+			return false;
+	}
+
 }

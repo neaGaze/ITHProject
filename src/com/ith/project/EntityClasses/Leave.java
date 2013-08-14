@@ -1,6 +1,5 @@
 package com.ith.project.EntityClasses;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,7 +13,7 @@ public class Leave {
 	 * **/
 	private int leaveId, applicantId, approvalId, leaveTypeId, leaveStatus;
 	private String remarks, leaveStartDate, leaveEndDate, formattedStartDate,
-			formattedEndDate, leaveType, applicantName, approvalName;
+			leaveType, applicantName, approvalName;
 	private boolean isNotificationSent;
 
 	public Leave() {
@@ -165,6 +164,9 @@ public class Leave {
 		this.leaveType = leaveType;
 	}
 
+	/**
+	 * To make the json Object out of 
+	 * **/
 	public static JSONObject makeNewLeaveJSON(int applicantId2,
 			int approvalId2, int leaveSpinner, String leaveDateTimeStr,
 			String leaveRemarkStr) {

@@ -3,19 +3,19 @@ package com.ith.project.sdcard;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import android.annotation.SuppressLint;
 import android.util.Log;
 
+@SuppressLint("SdCardPath")
 public class BulletinLocal extends LocalConnection {
 
-	private String urlLocal = "/sdcard/EMS";
+	private final String urlLocal = "/sdcard/EMS";
 	private String usersFolder = "/Bulletins";
 	private String bulletinsDetails = "/bulletins.json";
 
-	private JSONObject tempJsonFile;
 	private static int localBulletinId;
 
 	public BulletinLocal() {
-		tempJsonFile = new JSONObject();
 		localBulletinId = 0;
 	}
 

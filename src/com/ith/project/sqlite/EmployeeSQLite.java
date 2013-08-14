@@ -3,6 +3,8 @@ package com.ith.project.sqlite;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,7 +21,6 @@ public class EmployeeSQLite {
 	private EntryLogSQLite entryLogSQLite;
 
 	public EmployeeSQLite(Context context) {
-		// super(context, new UsersDBHelper(context));
 		usersDBHelper = new UsersDBHelper(context);
 	}
 
@@ -28,7 +29,6 @@ public class EmployeeSQLite {
 	 * ************************************************************************************/
 	public void openDB() {
 		db = usersDBHelper.getWritableDatabase();
-		// db.execSQL("PRAGMA foreign_keys = ON;");
 	}
 
 	/***********************************************************************************
@@ -51,18 +51,18 @@ public class EmployeeSQLite {
 	/************************************************************************************
 	 * Update the Employee datas according to JSON object
 	 * *************************************************************************************/
-	public void updateDBUsers(String bulletinFromWS,
+	public void updateDBEmployees(String employeeFromWS,
 			EntryLogSQLite entryLogSQLite) {
 
 		try {
 			this.entryLogSQLite = entryLogSQLite;
 			JSONObject employeesObj;
-			employeesObj = new JSONObject(bulletinFromWS);
+			employeesObj = new JSONObject(employeeFromWS);
 			JSONArray employeesArr = employeesObj
 					.getJSONArray("GetEmployeeListResult");
 			/** Calculate the current Date and Time **/
 			Calendar cal = Calendar.getInstance();
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss",Locale.US);
 			String currDate = dateFormat.format(cal.getTime());
 
 			for (int i = 0; i < employeesArr.length(); i++) {
@@ -75,10 +75,10 @@ public class EmployeeSQLite {
 				}
 
 				/** To check for occurence of quotes ' in the String **/
-				String unNormalizedBulletinRemark = employeesArr.getJSONObject(
+				String unNormalizedEmployeeRemark = employeesArr.getJSONObject(
 						i).getString("Remarks");
 				StringBuilder normalizedRemark = new StringBuilder();
-				String[] remarkParts = unNormalizedBulletinRemark.split("'");
+				String[] remarkParts = unNormalizedEmployeeRemark.split("'");
 				for (int j = 0; j < remarkParts.length; j++) {
 					if (j == remarkParts.length - 1)
 						normalizedRemark.append(remarkParts[j]);
@@ -86,10 +86,10 @@ public class EmployeeSQLite {
 						normalizedRemark.append(remarkParts[j] + "''");
 				}
 
-				String unNormalizedBulletinDesc = employeesArr.getJSONObject(i)
+				String unNormalizedEmployeeDesc = employeesArr.getJSONObject(i)
 						.getString("Designation");
 				StringBuilder normalizedDesc = new StringBuilder();
-				String[] descParts = unNormalizedBulletinDesc.split("'");
+				String[] descParts = unNormalizedEmployeeDesc.split("'");
 				for (int j = 0; j < descParts.length; j++) {
 					if (j == descParts.length - 1)
 						normalizedDesc.append(descParts[j]);
@@ -142,10 +142,9 @@ public class EmployeeSQLite {
 						+ normalizedRemark.toString() + "', '"
 						+ updateDateMod(currDate) + "')";
 
-				Log.v("UPDATE QUERY BULLETINS", "" + updateQuery);
+				Log.v("UPDATE QUERY EmployeeS", "" + updateQuery);
 				db.execSQL(updateQuery);
 			}
-			// this.dateLogSQLite.openDB();
 			this.entryLogSQLite.updateEntryLog(currDate);
 
 		} catch (JSONException e) {
@@ -164,7 +163,6 @@ public class EmployeeSQLite {
 
 		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_EMPLOYEES;
 
-		// Log.v("SELECT QUERY EMPLOYEES", "" + readQuery);
 		Cursor cursor = db.rawQuery(readQuery, null);
 		Log.v("CURSOR EMPLOYEES SIZE:", "" + cursor.getCount());
 
@@ -227,7 +225,7 @@ public class EmployeeSQLite {
 		String deleteQuery = "DELETE FROM " + UsersDBHelper.TABLE_EMPLOYEES
 				+ " WHERE " + UsersDBHelper.EmployeeId + " = " + empId;
 
-		Log.v("DELETE QUERY BULLETINS", "" + deleteQuery);
+		Log.v("DELETE QUERY EmployeeS", "" + deleteQuery);
 		db.execSQL(deleteQuery);
 	}
 
@@ -262,5 +260,55 @@ public class EmployeeSQLite {
 					.getColumnIndex(UsersDBHelper.EmployeeName));
 		return empName;
 
+	}
+
+	/*****************************************************************************************
+	 * read the Employee of Viewed Item
+	 * ************************************************************************************/
+	public Employee getViewedEmployee(int employeeId) {
+
+		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_EMPLOYEES
+				+ " WHERE " + UsersDBHelper.EmployeeId + "=" + employeeId
+				+ " ORDER BY " + UsersDBHelper.EmployeeId + " DESC";
+
+		Cursor cursor = db.rawQuery(readQuery, null);
+		Log.v("CURSOR Viewed Employee SIZE:", "" + cursor.getCount());
+
+		/**
+		 * If the cursor is able to move to First, at least 1 value is present
+		 **/
+		if (cursor.moveToFirst()) {
+
+			Employee tempEmployee = new Employee();
+			while (!cursor.isAfterLast()) {
+
+				tempEmployee.setEmployeeId(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.EmployeeId)));
+				tempEmployee.setEmployeeName(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.EmployeeName)));
+				tempEmployee.setGender(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.Gender)));
+				tempEmployee.setHomePhone(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.HomePhone)));
+				tempEmployee.setMobile(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.Mobile)));
+				tempEmployee.setEmail(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.Email)));
+				tempEmployee.setAddress(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.Address)));
+				tempEmployee.setDesignation(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.Designation)));
+				tempEmployee.setRemarks(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.Remarks)));
+				tempEmployee.setDateModified(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.DateModified)));
+
+				cursor.moveToNext();
+			}
+
+			cursor.close();
+			return tempEmployee;
+		}
+		return null;
 	}
 }

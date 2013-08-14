@@ -9,7 +9,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.ith.project.R;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
@@ -27,7 +26,7 @@ public class PinGMapActivity extends FragmentActivity {
 		GooglePlayServicesUtil
 				.isGooglePlayServicesAvailable(getApplicationContext());
 		setContentView(R.layout.google_map);
-		
+
 		fragmentManager = getSupportFragmentManager();
 		Bundle bundle = getIntent().getExtras();
 		latitude = bundle.getDouble("latitude");
@@ -40,8 +39,7 @@ public class PinGMapActivity extends FragmentActivity {
 	private void setUpMapIfNeeded() {
 		if (gMap == null) {
 			/*
-			 * I avoid Crashing, if Google_Play_Services is not Updated or
-			 * Unavailable
+			 * Avoid if Google_Play_Services is not Updated or Unavailable
 			 */
 			gMap = ((SupportMapFragment) fragmentManager
 					.findFragmentById(R.id.map)).getMap();
@@ -70,7 +68,7 @@ public class PinGMapActivity extends FragmentActivity {
 		/*
 		 * Add Snippet when clicked on marker
 		 */
-		.snippet("Success it is haha"));
+		.snippet("Event Happening here"));
 
 		/*
 		 * NormalMapView

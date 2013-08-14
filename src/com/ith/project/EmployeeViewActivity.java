@@ -1,12 +1,12 @@
 package com.ith.project;
 
 import java.util.HashMap;
-import com.ith.project.EntityClasses.LoginAuthentication;
+import com.ith.project.EntityClasses.Employee;
 import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.menu.CustomMenuListAdapter;
+import com.ith.project.sqlite.EmployeeSQLite;
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,7 +20,6 @@ import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 public class EmployeeViewActivity extends Activity implements OnClickListener {
@@ -35,25 +34,17 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 	private ImageButton menuButton;
 	private ImageButton BulletinButton;
 	private ImageButton homeButton;
-	private ProgressDialog pdialog;
-	private LinearLayout linLayoutMenu;
-	private ListView menuListView;
+	private EmployeeSQLite employeeSQLite;
 	static CustomMenuListAdapter menuAdapter;
 	private Dialog dialog;
 	private static int position;
 	private BroadcastReceiver broadcastReceiver;
 	private IntentFilter intentFilter;
-	private CallMenuDialog callDiag;
 	private HashMap<String, String> menuItems;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-/*
-		pdialog = new ProgressDialog(this);
-		pdialog.setCancelable(true);
-		pdialog.setMessage("Loading ....");
-		pdialog.show();*/
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.employee_view);
@@ -66,7 +57,9 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 	public void onPause() {
 		unregisterReceiver(broadcastReceiver);
 		super.onPause();
-		/*pdialog.dismiss();*/
+
+		if (employeeSQLite != null)
+			employeeSQLite.closeDB();
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -75,7 +68,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 	public void onResume() {
 		registerReceiver(broadcastReceiver, intentFilter);
 		super.onResume();
-		/*pdialog.dismiss();*/
+
 	}
 
 	private void init() {
@@ -99,69 +92,52 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 			}
 		};
 
-		/** To remove add Bulletin for normal users **/
-		modifyEmployeeAdd4Admin(LoginAuthentication.UserRolesId);
-
 		LinearLayout lin = (LinearLayout) findViewById(R.id.linearLayoutEmployee);
 		LayoutInflater inflater = (LayoutInflater) this
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		inflater.inflate(R.layout.employee_view, lin, false);
 		Bundle bundle = getIntent().getExtras();
-		position = bundle.getInt("PositionOfEmployee");
+		position = bundle.getInt("EmployeeId");
 
-		Log.v("Employee Name", ""
-				+ EmployeeListActivity.getEmployeeArrayList().get(position)
-						.getEmployeeName());
+		employeeSQLite = new EmployeeSQLite(EmployeeViewActivity.this);
+		if (!employeeSQLite.isOpen())
+			employeeSQLite.openDB();
+
+		Employee ViewedEmployee = employeeSQLite.getViewedEmployee(position);
+
+		Log.v("Employee Name", "" + ViewedEmployee.getEmployeeName());
 
 		employeeName = (TextView) findViewById(R.id.textViewEmployeeName);
-		employeeName.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getEmployeeName());
+		employeeName.setText(ViewedEmployee.getEmployeeName());
 
 		employeeGender = (TextView) findViewById(R.id.editTextEmployeeGender);
-		employeeGender.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getGender());
+		employeeGender.setText(ViewedEmployee.getGender());
 
 		employeeHomePhone = (TextView) findViewById(R.id.editTextEmployeeHomePhone);
-		employeeHomePhone.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getHomePhone());
+		employeeHomePhone.setText(ViewedEmployee.getHomePhone());
 
 		employeeMobile = (TextView) findViewById(R.id.editTextEmployeeMobile);
-		employeeMobile.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getMobile());
+		employeeMobile.setText(ViewedEmployee.getMobile());
 
 		employeeEmail = (TextView) findViewById(R.id.editTextEmployeeEmail);
-		employeeEmail.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getEmail());
+		employeeEmail.setText(ViewedEmployee.getEmail());
 
 		employeeAddress = (TextView) findViewById(R.id.editTextEmployeeAddress);
-		employeeAddress.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getAddress());
+		employeeAddress.setText(ViewedEmployee.getAddress());
 
 		employeeDesignation = (TextView) findViewById(R.id.editTextEmployeeDesignation);
-		employeeDesignation.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getDesignation());
+		employeeDesignation.setText(ViewedEmployee.getDesignation());
 
 		/** For top menu **/
 		menuButton = (ImageButton) findViewById(R.id.menu);
 		menuButton.setOnClickListener(this);
 
-		// BulletinButton = (ImageButton) findViewById(R.id.bulletin_add_icon);
-		// BulletinButton.setOnClickListener(this);
-
 		homeButton = (ImageButton) findViewById(R.id.home);
 		homeButton.setOnClickListener(this);
 
 		menuItems = new HashMap<String, String>();
-		/*pdialog.dismiss();*/
-	}
 
-	/*********************************************************************************
-	 * Called when the LExit Button is Clicked
-	 * ******************************************************************************/
-	public void modifyEmployeeAdd4Admin(int userRolesId) {
-		// if (userRolesId == 2)
-		// findViewById(R.id.bulletin_add_icon).setVisibility(View.INVISIBLE);
 	}
 
 	public void onClick(View v) {
@@ -173,11 +149,6 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 			this.finish();
 		} else if (v.equals(BulletinButton)) {
 
-			/*pdialog.show()*/;
-			// Toast.makeText(this, "Add Bulletin", Toast.LENGTH_SHORT).show();
-			// Intent intent = new Intent(this, EmployeeAddActivity.class);
-			// this.startActivity(intent);
-
 		} else if (v.equals(homeButton)) {
 
 			/** Set up the Menu **/
@@ -186,9 +157,8 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 			menuItems.put("Send Web Message", "mail_web");
 			menuItems.put("Send SMS", "mail_sms");
 			menuItems.put("Phone Call", "call");
-		//	menuItems.put("Exit", "exit");
-			callDiag = new CallMenuDialog(this,/* pdialog,*/ dialog, menuItems);
-			// callMenuDialog();
+			new CallMenuDialog(this, dialog, menuItems);
+
 		}
 
 	}
@@ -196,8 +166,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-			// do something on back.
-			/*pdialog.show();*/
+
 			this.finish();
 			return true;
 		}
@@ -205,7 +174,7 @@ public class EmployeeViewActivity extends Activity implements OnClickListener {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	public static int getPosition(){
+	public static int getPosition() {
 		return position;
 	}
 }

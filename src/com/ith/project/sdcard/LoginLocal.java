@@ -1,14 +1,15 @@
 package com.ith.project.sdcard;
 
-import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
+@SuppressLint("SdCardPath")
 public class LoginLocal extends LocalConnection {
 
 	private String urlLocal = "/sdcard/EMS";

@@ -4,25 +4,20 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
-import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.ith.project.EventAddActivity;
 import com.ith.project.R;
-
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 public class GoogleMapActivity extends FragmentActivity implements
-		OnClickListener, OnMapLongClickListener, OnMapClickListener {
+		OnMapClickListener {
 
 	private FragmentManager fragmentManager;
 	private GoogleMap googleMap;
@@ -45,7 +40,6 @@ public class GoogleMapActivity extends FragmentActivity implements
 		// googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
 		// googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
 
-		googleMap.setOnMapLongClickListener(this);
 		googleMap.setOnMapClickListener(this);
 
 	}
@@ -65,40 +59,6 @@ public class GoogleMapActivity extends FragmentActivity implements
 			GooglePlayServicesUtil.getErrorDialog(resultCode, this, 1);
 		}
 
-	}
-
-	public void onClick(View arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void onMapLongClick(LatLng point) {
-		MarkerOptions markerOptions = new MarkerOptions()
-				.position(point)
-				.title("Event is here")
-				.icon(BitmapDescriptorFactory
-						.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-
-		googleMap.addMarker(markerOptions);
-
-		Toast.makeText(getApplicationContext(),
-				"New marker added @" + point.toString(), Toast.LENGTH_LONG)
-				.show();
-		Log.e("Marker pinned @", "" + point.toString());
-		Log.e("Latitude:", "" + point.toString());
-
-		latitude = Double.toString(point.latitude);
-		longitude = Double.toString(point.longitude);
-
-		Log.e("lat/Log before return", "is: " + latitude + " & " + longitude);
-		Intent intent = new Intent(GoogleMapActivity.this,
-				EventAddActivity.class);
-
-		EventAddActivity.latitude = latitude;
-		EventAddActivity.longitude = longitude;
-
-		// startActivity(intent);
-		GoogleMapActivity.this.finish();
 	}
 
 	public void onMapClick(LatLng point) {
@@ -121,13 +81,10 @@ public class GoogleMapActivity extends FragmentActivity implements
 		longitude = Double.toString(point.longitude);
 
 		Log.e("lat/Log before return", "is: " + latitude + " & " + longitude);
-		Intent intent = new Intent(GoogleMapActivity.this,
-				EventAddActivity.class);
 
 		EventAddActivity.latitude = latitude;
 		EventAddActivity.longitude = longitude;
 
-		// startActivity(intent);
 		GoogleMapActivity.this.finish();
 
 	}

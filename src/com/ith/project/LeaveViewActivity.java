@@ -1,12 +1,11 @@
 package com.ith.project;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.ith.project.EntityClasses.Leave;
 import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.connection.HttpConnection;
-import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.sqlite.EmployeeSQLite;
 import com.ith.project.sqlite.LeaveSQLite;
 import android.app.Activity;
@@ -36,14 +35,12 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 	private Dialog dialog;
 	private ImageButton menuButton, homeButton;
 	private ImageView leaveView, statusImage;
-	private CallMenuDialog callDiag;
-	private HashMap<String, String> menuItems;
 	private JSONObject readLeaveInquiry, updateStatusInquiry;
 	private EmployeeSQLite employeeSQLite;
 	private LeaveSQLite leaveSQLite;
+	private Leave viewedLeave;
 	private HttpConnection conn;
-	private int position, empId, leaveId, respondSpinner, responseItem,
-			leaveUpdateStatus;
+	private int position, empId, leaveId, responseItem, leaveUpdateStatus;
 	private boolean isNotificationSent, readStatusUpdated;
 	private Spinner leaveReponseSpinner;
 	private ArrayList<String> spinnerItems;
@@ -53,11 +50,6 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		/*
-		 * pdialog = new ProgressDialog(this); pdialog.setCancelable(true);
-		 * pdialog.setLeave("Loading ...."); pdialog.show();
-		 */
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.leave_view);
@@ -70,7 +62,6 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 	@Override
 	public void onPause() {
 		super.onPause();
-		/* pdialog.dismiss(); */
 		if (employeeSQLite != null)
 			employeeSQLite.closeDB();
 		if (leaveSQLite != null)
@@ -84,7 +75,6 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		/* pdialog.dismiss(); */
 	}
 
 	private void init() {
@@ -95,7 +85,7 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 
 		inflater.inflate(R.layout.leave_view, lin, false);
 		Bundle bundle = getIntent().getExtras();
-		position = bundle.getInt("PositionOfLeave");
+		position = bundle.getInt("LeaveId");
 
 		employeeSQLite = new EmployeeSQLite(LeaveViewActivity.this);
 		if (!employeeSQLite.isOpen())
@@ -104,30 +94,24 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 		if (!leaveSQLite.isOpen())
 			leaveSQLite.openDB();
 
+		viewedLeave = leaveSQLite.getViewedLeave(position);
+
 		EmployeeName = (TextView) findViewById(R.id.textViewRespectiveName);
 		String empName = employeeSQLite
-				.getEmpName(LeaveListActivity.getLeaveArrayList().get(position)
-						.getApplicantId() == LoginAuthentication.EmployeeId ? (LeaveListActivity
-						.getLeaveArrayList().get(position).getApprovalId())
-						: (LeaveListActivity.getLeaveArrayList().get(position)
-								.getApplicantId()));
+				.getEmpName(viewedLeave.getApplicantId() == LoginAuthentication.EmployeeId ? (viewedLeave
+						.getApprovalId()) : (viewedLeave.getApplicantId()));
 		EmployeeName.setText(empName);
 
 		leaveView = (ImageView) findViewById(R.id.imageViewLeaveType);
-		String imageName = LeaveListActivity.getLeaveArrayList().get(position)
-				.getApplicantId() == LoginAuthentication.EmployeeId ? "upload"
+		String imageName = viewedLeave.getApplicantId() == LoginAuthentication.EmployeeId ? "upload"
 				: "download";
 		int id = getResources().getIdentifier(imageName, "drawable",
 				this.getPackageName());
 		leaveView.setImageResource(id);
 
-		int leaveStatus = LeaveListActivity.getLeaveArrayList().get(position)
-				.getLeaveStatus();
-
 		LeaveType = (TextView) findViewById(R.id.editTextLeaveType);
 		String leaveCause;
-		int tempId = LeaveListActivity.getLeaveArrayList().get(position)
-				.getLeaveTypeId();
+		int tempId = viewedLeave.getLeaveTypeId();
 		if (tempId == 1)
 			leaveCause = "Sick";
 		else if (tempId == 2)
@@ -140,24 +124,19 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 
 		LeaveDate = (TextView) findViewById(R.id.textViewStartLeaveDate);
 		String leaveDateStr = new StringBuilder().append(
-				LeaveListActivity.getLeaveArrayList().get(position)
-						.getLeaveStartDate()).toString();
+				viewedLeave.getLeaveStartDate()).toString();
 		LeaveDate.setText(leaveDateStr);
 
 		LeaveRemarks = (TextView) findViewById(R.id.editTextLeaveRemarks);
-		String leaveRemark = LeaveListActivity.getLeaveArrayList()
-				.get(position).getLeaveRemarks();
+		String leaveRemark = viewedLeave.getLeaveRemarks();
 		LeaveRemarks.setText(leaveRemark);
 
-		LinearLayout leaveStatusLinLayout = (LinearLayout) findViewById(R.id.linearLayoutLeaveResponseStatus);
 		leaveReponseSpinner = (Spinner) findViewById(R.id.spinnerLeaveResponse);
 
-		if (LeaveListActivity.getLeaveArrayList().get(position)
-				.getLeaveStatus() == 3) {
+		if (viewedLeave.getLeaveStatus() == 3) {
 			responseItem = 2;
 			leaveImageName = "thumbs_down";
-		} else if (LeaveListActivity.getLeaveArrayList().get(position)
-				.getLeaveStatus() == 2) {
+		} else if (viewedLeave.getLeaveStatus() == 2) {
 			responseItem = 1;
 			leaveImageName = "thumbs_up";
 		} else {
@@ -168,8 +147,7 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 		statusImage.setImageResource(getResources().getIdentifier(
 				leaveImageName, "drawable", this.getPackageName()));
 
-		if (LeaveListActivity.getLeaveArrayList().get(position)
-				.getApplicantId() == LoginAuthentication.EmployeeId) {
+		if (viewedLeave.getApplicantId() == LoginAuthentication.EmployeeId) {
 			leaveReponseSpinner.setVisibility(View.GONE);
 		} else {
 			spinnerItems = new ArrayList<String>();
@@ -194,8 +172,6 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 		homeButton = (ImageButton) findViewById(R.id.home);
 		homeButton.setOnClickListener(LeaveViewActivity.this);
 
-		menuItems = new HashMap<String, String>();
-
 		/** Check for spinner item change Listener **/
 		leaveReponseSpinner
 				.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -206,7 +182,6 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 								"" + parent.getItemAtPosition(pos).toString());
 						responseItem = pos;
 
-						String leaveStats;
 						if (responseItem == 1)
 							leaveImageName = "thumbs_up";
 						else if (responseItem == 2)
@@ -240,13 +215,11 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 	private void updateIsNotificationSent() {
 
 		empId = LoginAuthentication.EmployeeId;
-		leaveId = LeaveListActivity.getLeaveArrayList().get(position)
-				.getLeaveId();
+		leaveId = viewedLeave.getLeaveId();
 
 		isNotificationSent = LeaveListActivity.getLeaveArrayList()
 				.get(position).getNotificationSentStatus();
-		isPending = LeaveListActivity.getLeaveArrayList().get(position)
-				.getLeaveType();
+		isPending = viewedLeave.getLeaveType();
 
 		Log.e("Let's see the isNotificationSent Flag",
 				"isNotificationSent Flag is : " + isNotificationSent);
@@ -260,9 +233,8 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 
 			/** make Notification status in local sqlite as true **/
 			leaveSQLite.updateLeaveNotificationSent(leaveId);
-			// LeaveSQLite.closeDB();
+
 			readLeaveInquiry = makeLeaveNotificationSentJson(empId, leaveId);
-			// Log.e("readLeaveINquiry", "" + readLeaveInquiry.toString());
 		}
 		/**
 		 * ApprovalStatus can be synced if isNotificationSent = true && Leave is
@@ -298,10 +270,8 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 						 * LeaveType="readUpdatePending" if connection is
 						 * refused
 						 **/
-						// leaveSQLite.openDB();
 						leaveSQLite.updateLeaveNotificationSentPending(leaveId,
 								"notificationSentPending");
-						// leaveSQLite.closeDB();
 
 						Log.e("Problem Sending leave ",
 								"Pending Read leaves saved as draft"
@@ -312,10 +282,8 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 					 * Save the read leave in sqlite if connection return is
 					 * *JPT*
 					 **/
-					// leaveSQLite.openDB();
 					leaveSQLite.updateLeaveNotificationSentPending(leaveId,
 							"notificationSentPending");
-					// leaveSQLite.closeDB();
 
 					Log.e("JSONException while Updating read Status",
 							"" + e.getMessage());
@@ -324,21 +292,6 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 					e.printStackTrace();
 				}
 
-				runOnUiThread(new Runnable() {
-
-					public void run() {
-						/* pdialog.show(); */
-						// exitDialog.dismiss();
-						/*
-						 * leaveViewActivity.this.finish(); Intent intent = new
-						 * Intent(leaveViewActivity.this,
-						 * leaveListActivity.class);
-						 * leaveViewActivity.this.startActivity(intent);
-						 */
-
-					}
-
-				});
 			}
 		});
 		if ((!isNotificationSent && (isPending == null || isPending.equals(""))))
@@ -375,8 +328,7 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 		leaveUpdateStatus = leaveStatus + 1;
 
 		if (((isPending == null || isPending.equals("")))) {
-			leaveSQLite.updateLeaveStatus(leaveId, leaveUpdateStatus);
-			// leaveSQLite.closeDB();
+
 			int approvalEmpId = LeaveListActivity.getLeaveArrayList()
 					.get(position).getApprovalId();
 			updateStatusInquiry = makeLeaveStatusInquiryJson(leaveId,
@@ -412,10 +364,8 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 						 * LeaveType="leaveUpdatePending" if connection is
 						 * refused
 						 **/
-						// leaveSQLite.openDB();
 						leaveSQLite.updateLeaveStatusPending(leaveId,
 								"approvalUpdatePending");
-						// leaveSQLite.closeDB();
 
 						Log.e("Problem Sending Update Leave Status ",
 								"Pending Leave Status saved as draft"
@@ -426,10 +376,8 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 					 * Save the going leave in sqlite if connection return is
 					 * *JPT*
 					 **/
-					// leaveSQLite.openDB();
 					leaveSQLite.updateLeaveStatusPending(leaveId,
 							"approvalUpdatePending");
-					// leaveSQLite.closeDB();
 
 					Log.e("JSONException while Updating Leave Status",
 							"" + e.getMessage());
@@ -461,10 +409,7 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 			readInquiry.put("userLoginId", LoginAuthentication.UserloginId);
 			readInquiry.put("leaveStatus",
 					new StringBuilder().append(leaveStatus).toString());
-			/*
-			 * readInquiry.put("GoingStatus", new
-			 * StringBuilder().append(goingStatus).toString());
-			 */
+
 			return readInquiry;
 		} catch (JSONException e) {
 			Log.e("Could not convert to JSONObject", "" + e.getMessage());

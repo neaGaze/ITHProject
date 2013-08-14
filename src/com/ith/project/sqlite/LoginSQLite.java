@@ -19,7 +19,6 @@ public class LoginSQLite {
 	private SQLiteDatabase db;
 
 	public LoginSQLite(Context context) {
-		// super(context, new UsersDBHelper(context));
 		usersDBHelper = new UsersDBHelper(context);
 	}
 
@@ -28,7 +27,6 @@ public class LoginSQLite {
 	 * ************************************************************************************/
 	public void openDB() {
 		db = usersDBHelper.getWritableDatabase();
-		// db.execSQL("PRAGMA foreign_keys = ON;");
 	}
 
 	/***********************************************************************************
@@ -88,7 +86,6 @@ public class LoginSQLite {
 					+ otherAttr.getInt("UserRolesId") + ", "
 					+ otherAttr.getInt("EmployeeId") + " )";
 
-			// Log.v("UPDATE QUERY", "" + updateQuery);
 			db.execSQL(updateQuery);
 
 		} catch (NoSuchAlgorithmException e) {
@@ -118,7 +115,6 @@ public class LoginSQLite {
 					+ jsonForm.getString("Username") + "' AND "
 					+ UsersDBHelper.Password + " = '" + cipheredPwd + "'";
 
-			// Log.v("SELECT QUERY", "" + readQuery);
 			Cursor cursor = db.rawQuery(readQuery, null);
 			Log.v("CURSOR SIZE:", "" + cursor.getCount());
 
@@ -191,8 +187,6 @@ public class LoginSQLite {
 			md.update(pwd.getBytes());
 			byte[] mb = md.digest();
 
-			// Log.v("Direct encryption is of " + pwd + " is:", "" +
-			// mb.toString()+ " : " + mb.length);
 			for (int i = 0; i < mb.length; i++) {
 				byte temp = mb[i];
 				String tempStr = Integer.toHexString(temp);

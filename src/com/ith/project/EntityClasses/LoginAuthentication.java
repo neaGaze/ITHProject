@@ -6,7 +6,6 @@ import android.util.Log;
 
 public class LoginAuthentication {
 
-	// private JSONObject remoteJson;
 	public static String UserloginId;
 	public static int UserId;
 	public static int EmployeeId;
@@ -57,9 +56,6 @@ public class LoginAuthentication {
 			Log.e("NullPointerException", "" + e.getMessage());
 			e.printStackTrace();
 		}
-
-		// Log.v("AutheticationStatus@onPostExecute is:", "" +
-		// this.AutheticationStatus);
 
 	}
 

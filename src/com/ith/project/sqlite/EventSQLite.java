@@ -3,17 +3,13 @@ package com.ith.project.sqlite;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.ith.project.EntityClasses.Event;
 import com.ith.project.EntityClasses.LoginAuthentication;
-import com.ith.project.EntityClasses.Event;
-import com.ith.project.EntityClasses.Message;
 import com.ith.project.sdcard.SQLQueryStore;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -28,7 +24,6 @@ public class EventSQLite {
 	private SQLQueryStore sqlSave;
 
 	public EventSQLite(Context context) {
-		// super(context, new UsersDBHelper(context));
 		usersDBHelper = new UsersDBHelper(context);
 		eventGoingSQLite = new EventGoingSQLite(context);
 		sqlSave = new SQLQueryStore();
@@ -39,7 +34,6 @@ public class EventSQLite {
 	 * ************************************************************************************/
 	public void openDB() {
 		db = usersDBHelper.getWritableDatabase();
-		// db.execSQL("PRAGMA foreign_keys = ON;");
 	}
 
 	/***********************************************************************************
@@ -56,6 +50,9 @@ public class EventSQLite {
 			return db.isOpen();
 	}
 
+	/************************************************************************************
+	 * INSERT OR UPDATE the Event data according to JSON object
+	 * *************************************************************************************/
 	public void updateEventTable(String eventsFromWS,
 			MsgEntryLogSQLite eventEntryLogSQLite) {
 
@@ -69,7 +66,8 @@ public class EventSQLite {
 
 			/** Calculate the current Date and Time **/
 			Calendar cal = Calendar.getInstance();
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+			SimpleDateFormat dateFormat = new SimpleDateFormat(
+					"yyyyMMddHHmmss", Locale.US);
 			String currDate = dateFormat.format(cal.getTime());
 
 			for (int i = 0; i < eventsArr.length(); i++) {
@@ -95,21 +93,10 @@ public class EventSQLite {
 					else
 						GoingStatsOfAll[j] = "Pending";
 
-					// GoingStatsOfAll[j] =
-					// eventParticipantsStatus.getString(j);
-
 					if (eventParticipantsName.getInt(j) == LoginAuthentication.EmployeeId) {
 
 						goingStatus = GoingStatsOfAll[j];
-						/*
-						 * int eventGoingCode =
-						 * eventParticipantsStatus.getInt(j);
-						 * 
-						 * if (eventGoingCode == 2) goingStatus = "Going"; else
-						 * if (eventGoingCode == 1) goingStatus = "NotGoing";
-						 * else goingStatus = "Pending";
-						 */
-						// break;
+
 					}
 				}
 
@@ -143,23 +130,8 @@ public class EventSQLite {
 						+ UsersDBHelper.EventRealId
 						+ "="
 						+ Integer.parseInt(eventsArr.getJSONObject(i)
-								.getString("EventId")) /*
-														 * + " AND " +
-														 * UsersDBHelper
-														 * .MessageDesc + "='" +
-														 * eventsArr
-														 * .getJSONObject
-														 * (i).getString
-														 * ("Description") +
-														 * "' AND " +
-														 * UsersDBHelper
-														 * .MessageFrom + "=" +
-														 * eventsArr
-														 * .getJSONObject
-														 * (i).getInt
-														 * ("FromEmployeeId")
-														 */
-						+ " AND " + UsersDBHelper.EventTo + "="
+								.getString("EventId")) + " AND "
+						+ UsersDBHelper.EventTo + "="
 						+ LoginAuthentication.EmployeeId;
 
 				Log.e("SELECT QUERY @updateEventTable", "" + checkQuery);
@@ -275,9 +247,6 @@ public class EventSQLite {
 							+ "', '"
 							+ goingStatus
 							+ "', "
-							// +
-							// eventsArr.getJSONObject(i).getInt("MessageTo")
-
 							+ eventsArr.getJSONObject(i).getInt("IsEventRead")
 							+ ", "
 							+ eventsArr.getJSONObject(i)
@@ -300,7 +269,7 @@ public class EventSQLite {
 			}
 			this.eventEntryLogSQLite.updateMsgEntryLog(currDate, "eventLog");
 		} catch (JSONException e) {
-			Log.e("JSONException", "" + e.getMessage());
+			Log.e("Json has wrong values or parameters", "" + e.getMessage());
 			e.printStackTrace();
 		}
 
@@ -367,7 +336,6 @@ public class EventSQLite {
 					"Pending Events Cursor Size = 0");
 		}
 		cursor.close();
-		// db.execSQL(getPendingQuery);
 		return null;
 	}
 
@@ -463,8 +431,6 @@ public class EventSQLite {
 				+ " SET " + UsersDBHelper.EventType + "='" + pendingStatus
 				+ "' WHERE " + UsersDBHelper.EventTo + "=" + eventTo + " AND "
 				+ UsersDBHelper.EventRealId + "=" + eventRealId;
-		// UPDATE EVENTS SET EventType='goingUpdatePending' WHERE
-		// EventTo=10 AND EventRealId=2;
 		db.execSQL(updateReadQuery);
 
 		sqlSave.writeFile2Sdcard(updateReadQuery);
@@ -496,8 +462,6 @@ public class EventSQLite {
 				+ LoginAuthentication.EmployeeId + " ORDER BY "
 				+ UsersDBHelper.EventId + " DESC";
 
-		// Log.e("EmployeeId is:", "" + LoginAuthentication.EmployeeId);
-		// Log.v("SELECT QUERY BULLETINS", "" + readQuery);
 		Cursor cursor = db.rawQuery(readQuery, null);
 
 		sqlSave.writeFile2Sdcard(readQuery);
@@ -540,18 +504,8 @@ public class EventSQLite {
 						.getColumnIndex(UsersDBHelper.EventType)));
 				tempEvent.setEventStatus(cursor.getInt(cursor
 						.getColumnIndex(UsersDBHelper.EventStatus)));
-
-				// String dateTime = cursor.getString(cursor
-				// .getColumnIndex(UsersDBHelper.EventDate));
-				// if (dateTime == null || dateTime.equals("") ||
-				// dateTime.equals(null))
-				// Log.e("tait auda ", "huwa fucchheee !!!");
-				// else {
-
-				// Log.e("tait auda ", "huwa kutttteeee !!!");
 				tempEvent.parseDateTime(cursor.getString(cursor
 						.getColumnIndex(UsersDBHelper.EventDate)));
-				// }
 				tempArrList.add(tempEvent);
 
 				cursor.moveToNext();
@@ -588,11 +542,9 @@ public class EventSQLite {
 					+ UsersDBHelper.EventType + ") VALUES ('" + eventTitleStr
 					+ "', '" + eventDescStr + "', " + eventFrom + ", "
 					+ receiversId[i] + ", '" + eventVenueStr + "', '"
-					+ eventDateTimeStr + "', '" + 0.0/* latitude */+ "', '"
-					+ 0.0/* longitude */
+					+ eventDateTimeStr + "', '" + latitude + "', '" + longitude
 					+ "', '" + goingStatus + "', " + isRead + "," + eventStatus
 					+ ",'" + pending + "')";
-			// Log.v("Save Event as Draft", "" + updateQuery);
 
 			/*
 			 * INSERT INTO EVENTS ( EventName, EventDesc, EventFrom, EventTo,
@@ -625,6 +577,66 @@ public class EventSQLite {
 		db.execSQL(postponeQuery);
 		sqlSave.writeFile2Sdcard(postponeQuery);
 
+	}
+
+	/*****************************************************************************************
+	 * read the Event of Viewed Item
+	 * ************************************************************************************/
+	public Event getViewedEvent(int eventId) {
+
+		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_EVENT
+				+ " WHERE " + UsersDBHelper.EventId + "=" + eventId
+				+ " ORDER BY " + UsersDBHelper.EventId + " DESC";
+
+		Cursor cursor = db.rawQuery(readQuery, null);
+		Log.v("CURSOR Viewed Event SIZE:", "" + cursor.getCount());
+
+		/**
+		 * If the cursor is able to move to First, at least 1 value is present
+		 **/
+		if (cursor.moveToFirst()) {
+
+			Event tempEvent = new Event();
+			while (!cursor.isAfterLast()) {
+
+				tempEvent.setEventId(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.EventId)));
+				tempEvent.setEventRealId(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.EventRealId)));
+				tempEvent.setEventName(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.EventName)));
+				tempEvent.setEventDesc(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.EventDesc)));
+				tempEvent.setEventDateTime(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.EventDate)));
+				tempEvent.setEventPlace(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.EventPlace)));
+				tempEvent.setEventCreator(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.EventFrom)));
+				tempEvent.setEventTo(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.EventTo)));
+				tempEvent.setEventRead(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.IsEventRead)));
+				tempEvent.setEventParticipation(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.GoingStatus)));
+				tempEvent.setEventLongitude(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.Longitude)));
+				tempEvent.setEventLatitude(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.Latitude)));
+				tempEvent.setEventType(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.EventType)));
+				tempEvent.setEventStatus(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.EventStatus)));
+				tempEvent.parseDateTime(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.EventDate)));
+
+				cursor.moveToNext();
+			}
+
+			cursor.close();
+			return tempEvent;
+		}
+		return null;
 	}
 
 }

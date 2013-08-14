@@ -11,12 +11,11 @@ import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.connection.HttpConnection;
 import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.menu.CustomMenuListAdapter;
-import com.ith.project.sdcard.EmployeeLocal;
 import com.ith.project.sqlite.EntryLogSQLite;
 import com.ith.project.sqlite.EmployeeSQLite;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -24,19 +23,13 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -48,13 +41,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class EmployeeListActivity extends Activity implements OnClickListener,
 		OnItemClickListener, TextWatcher {
 
-	private static final int MENU_EXIT = 0;
 	private final String url = "GetEmployeeList";
 	private final String delUrl = "DeleteEmployee";
 
@@ -67,21 +58,14 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 	private ImageButton homeButton;
 	private EditText searchBox;
 	private ImageButton searchButton;
-	private CheckBox checkBox;
-	private int currPos;
 	private HttpConnection conn;
-	private EmployeeLocal employeeLocal;
 	private EmployeeSQLite employeeSQLite;
 	private EntryLogSQLite entryLogSQLite;
-	private Employee employee;
 	private static EmployeeListItemArrayAdapter listItemArrAdapter;
 	private static int employeeCount;
-	private ProgressDialog pdialog;
 	static CustomMenuListAdapter menuAdapter;
 	private Dialog dialog;
 	private static EmployeeListActivity context;
-	private static boolean connFlag;
-	private CallMenuDialog callDiag;
 	private HashMap<String, String> menuItems;
 	private Dialog exitDialog;
 	private Button exitCancel;
@@ -90,10 +74,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * pdialog = new ProgressDialog(this); pdialog.setCancelable(true);
-		 * pdialog.setMessage("Loading ...."); pdialog.show();
-		 */
+
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.employee_list_view);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
@@ -109,8 +90,6 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 			employeeSQLite.closeDB();
 		if (entryLogSQLite != null)
 			entryLogSQLite.closeDB();
-		/* pdialog.dismiss(); */
-		// exitDialog.dismiss();
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -118,13 +97,22 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 	@Override
 	public void onResume() {
 		super.onResume();
-		/* pdialog.dismiss(); */
 	}
 
 	/************************************************************************************
 	 * Initialize values first
 	 * ***********************************************************************************/
 	private void init() {
+
+		homeButton = (ImageButton) findViewById(R.id.home);
+		homeButton.setClickable(false);
+
+		searchButton = (ImageButton) findViewById(R.id.buttonSearch);
+		searchButton.setClickable(false);
+
+		homeButton.setClickable(true);
+		homeButton.setOnClickListener(EmployeeListActivity.this);
+
 		new Thread(new Runnable() {
 
 			public void run() {
@@ -132,8 +120,6 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 				selectedItemDetails = null;
 				JSONObject inputJson;
 				conn = HttpConnection.getSingletonConn();
-				// conn = new HttpConnection(url);
-				// employeeLocal = new EmployeeLocal();
 
 				employeeSQLite = new EmployeeSQLite(EmployeeListActivity.this);
 				entryLogSQLite = new EntryLogSQLite(EmployeeListActivity.this);
@@ -142,66 +128,37 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 				if (!entryLogSQLite.isOpen())
 					entryLogSQLite.openDB();
 
-				// employee = new Employee();
-
 				inputJson = Employee.getEmploueeInquiry(
 						LoginAuthentication.UserloginId,
 						entryLogSQLite.getLatestDateModified());
 
 				Log.v("getemployee inquiry", "" + inputJson.toString());
 
-				/**
-				 * To remove add Bulletin for normal users and change the logo
-				 * as well
-				 **/
-				modifyEmployeeAdd4Admin(LoginAuthentication.UserRolesId);
-
 				/** To establish connection to the web service **/
 				String employeesFromWS = conn.getJSONFromUrl(inputJson, url);
-				connFlag = true;
 
 				Log.v("Employees:", "here: " + employeesFromWS);
-				if (!employeesFromWS.equals("")) {
-					connFlag = false;
+				if (employeesFromWS.startsWith("{")) {
 
 					/** Update the local file according to the web service **/
-					// employeeLocal.updateLocalFiles(inputJson,
-					// employeesFromWS);
-					employeeSQLite.updateDBUsers(employeesFromWS,
+					employeeSQLite.updateDBEmployees(employeesFromWS,
 							entryLogSQLite);
-					// employeeLocal.updateLocalFiles();
 				}
+
 				/** Now read from the local DB always **/
-				// JSONArray outputJson = employeeLocal
-				// .getJSONFromLocal(inputJson);
-
-				// Log.v("JsonArray:", "" + outputJson.toString());
-
-				// itemDetails = setEmployee(outputJson);
 				itemDetails = employeeSQLite.getEmpListFromDB();
 				returnItemDetails = itemDetails;
 
-				// Log.v("Employees:",""+
-				// employeeLocal.getJSONFromLocal(inputJson).toString());
-
-				homeButton = (ImageButton) findViewById(R.id.home);
-				homeButton.setClickable(false);
-
-				menuButton = (ImageButton) findViewById(R.id.menu);
-				menuButton.setOnClickListener(EmployeeListActivity.this);
-
-				searchButton = (ImageButton) findViewById(R.id.buttonSearch);
-				searchButton.setClickable(false);
-
-				// registerForContextMenu(homeButton);
 				/**
 				 * To run the main thread after completion of the connection
 				 * thread
 				 **/
-				if (itemDetails != null) {
-					runOnUiThread(new Runnable() {
 
-						public void run() {
+				runOnUiThread(new Runnable() {
+
+					public void run() {
+
+						if (itemDetails != null) {
 
 							searchBox = (EditText) findViewById(R.id.editTextSearch);
 							searchBox.setFocusable(true);
@@ -213,37 +170,32 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 							searchButton
 									.setOnClickListener(EmployeeListActivity.this);
 
-							homeButton.setClickable(true);
-							homeButton
+							menuButton = (ImageButton) findViewById(R.id.menu);
+							menuButton
 									.setOnClickListener(EmployeeListActivity.this);
-
-							// EmployeeButton = (ImageButton)
-							// findViewById(R.id.bulletin_add_icon);
-							// EmployeeButton.setOnClickListener(EmployeeListActivity.this);
 
 							listView = (ListView) findViewById(R.id.listView1);
 
-							Log.d("***Welcome to ListView***", ".......");
+							Log.d("***Welcome to Employee ListView***",
+									".......");
+
 							if (itemDetails != null) {
 								listItemArrAdapter = new EmployeeListItemArrayAdapter(
 										EmployeeListActivity.this,
 										R.layout.employee_list_items,
 										itemDetails);
 								listView.setAdapter(listItemArrAdapter);
-								employeeCount = listItemArrAdapter.getCount();
 								listView.setOnItemClickListener(EmployeeListActivity.this);
-
+								employeeCount = itemDetails.size();
 								menuItems = new HashMap<String, String>();
 							} else {
 								Log.e("Row returned null",
 										"SO itemdetails is null");
 							}
-							/* pdialog.dismiss(); */
 						}
-					});
-				} else {
+					}
+				});
 
-				}
 			}
 
 		}).start();
@@ -274,25 +226,6 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 		return tempArrList;
 	}
 
-	/*********************************************************************************
-	 * Called when the LExit Button is Clicked [DEPRECIATED]
-	 * ******************************************************************************/
-	public void modifyEmployeeAdd4Admin(int userRolesId) {
-
-		LinearLayout lin = (LinearLayout) findViewById(R.id.linearLayoutCustomTitle);
-		LayoutInflater inflater = (LayoutInflater) this
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-		inflater.inflate(R.layout.custom_title, lin, false);
-		// ImageButton addEmployeeBut = (ImageButton)
-		// findViewById(R.id.bulletin_add_icon);
-		int id = getResources().getIdentifier("add_employee", "drawable",
-				getApplicationContext().getPackageName());
-		// addEmployeeBut.setImageResource(id);
-		// if (userRolesId == 2)
-		// findViewById(R.id.bulletin_add_icon).setVisibility(View.INVISIBLE);
-	}
-
 	/****************************************************************************
 	 * Get the correct employee ID
 	 *************************************************************************/
@@ -306,26 +239,25 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 	public void onItemClick(AdapterView<?> adapterView, View view,
 			int position, long id) {
 
-		/* pdialog.show(); */
 		Log.v("Employee LIst Item clicked", "@ " + position);
 		Intent intent = new Intent(EmployeeListActivity.this,
 				EmployeeViewActivity.class);
-		intent.putExtra("PositionOfEmployee", (position));
+		intent.putExtra("EmployeeId",
+				(returnItemDetails.get(position).getEmployeeId()));
 		EmployeeListActivity.this.startActivity(intent);
 
 	}
 
 	public void onClick(View v) {
 		if (v.equals(menuButton)) {
-			/* pdialog.show(); */
+
 			Intent intent = new Intent(EmployeeListActivity.this,
 					GridItemActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			this.startActivity(intent);
-			// this.finish();
+
 		} else if (v.equals(EmployeeButton)) {
-			/* pdialog.show(); */
-			// Toast.makeText(this, "Add Bulletin", Toast.LENGTH_SHORT).show();
+
 			Intent intent = new Intent(EmployeeListActivity.this,
 					EmployeeAddActivity.class);
 			this.startActivity(intent);
@@ -334,15 +266,12 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 		} else if (v.equals(homeButton)) {
 
 			/** Set up the Menu **/
-			// menuItems.put("Send SMS", "mail_sms");
-			// menuItems.put("Exit", "exit");
 			menuItems.put("Add Employee", "add_employee");
-			// menuItems.put("Phone Call", "call");
 			menuItems.put("Send Web Message", "mail_web");
 			menuItems.put("Delete Employee", "delete_user");
 
-			callDiag = new CallMenuDialog(this, /* pdialog, */dialog, menuItems);
-			// callMenuDialog();
+			new CallMenuDialog(this, dialog, menuItems);
+
 		} else if (v.equals(exitConfirm)) {
 			deleteEmployee();
 		} else if (v.equals(exitCancel)) {
@@ -369,21 +298,18 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 		/** To set the dialog box with the List layout in the android xml **/
 		exitDialog.setContentView(R.layout.exit_dialog);
-		/* pdialog.dismiss(); */
 
 		TextView dialogQuest = (TextView) exitDialog
 				.findViewById(R.id.textViewExitConfirm);
 		dialogQuest.setText("Do you Really Want to Delete?");
-		Button delBut = (Button) exitDialog
-				.findViewById(R.id.buttonExitConfirm);
-		delBut.setText("DELETE");
+		exitConfirm = (Button) exitDialog.findViewById(R.id.buttonExitConfirm);
+		exitConfirm.setText("DELETE");
 
 		exitDialog.show();
 
 		exitCancel = (Button) exitDialog.findViewById(R.id.buttonExitCancel);
 		exitCancel.setOnClickListener(context);
 
-		exitConfirm = (Button) exitDialog.findViewById(R.id.buttonExitConfirm);
 		exitConfirm.setOnClickListener(context);
 	}
 
@@ -448,7 +374,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 				runOnUiThread(new Runnable() {
 
 					public void run() {
-						/* pdialog.show(); */
+
 						exitDialog.dismiss();
 						EmployeeListActivity.this.finish();
 						Intent intent = new Intent(EmployeeListActivity.this,
@@ -465,70 +391,10 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 	}
 
-	/****************************************************************************
-	 * When Home Button is Clicked
-	 *************************************************************************/
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.context_menu, menu);
-
-	}
-
-	/*
-	*//****************************************************************************
-	 * When the custom menu item is clicked
-	 *************************************************************************/
-	/*
-	 * public boolean onContextItemSelected(MenuItem item) {
-	 * AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-	 * .getMenuInfo(); // String[] names =
-	 * getResources().getStringArray(R.array.names); switch (item.getItemId()) {
-	 * case R.id.itemAddEmployee: Toast.makeText(this, "Add  Employee",
-	 * Toast.LENGTH_SHORT).show(); pdialog.show(); // Toast.makeText(this,
-	 * "Add Bulletin", Toast.LENGTH_SHORT).show(); Intent intent = new
-	 * Intent(EmployeeListActivity.this, EmployeeAddActivity.class);
-	 * this.startActivity(intent); this.finish(); return true;
-	 * 
-	 * default: return super.onContextItemSelected(item); } }
-	 */
-
-	/****************************************************************************
-	 * Menu Item Creation
-	 *************************************************************************/
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-
-		menu.add(0, MENU_EXIT, 0, "Exit").setIcon(R.drawable.exit);
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	/****************************************************************************
-	 * Menu Item Clicked
-	 *************************************************************************/
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		switch (item.getItemId()) {
-		case MENU_EXIT: {
-			// When Exit Button is clicked
-			this.finish();
-		}
-
-		default:
-			break;
-
-		}
-		return super.onOptionsItemSelected(item);
-	}
-
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-			// do something on back.
-			/* pdialog.show(); */
+
 			this.finish();
 			return true;
 		}
@@ -557,60 +423,52 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 			LayoutInflater inflater = (LayoutInflater) cntxt
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-			currPos = position;
-
 			View view;
-			// if (convertView == null)
-			{
-				view = new View(this.cntxt);
 
-				view = inflater.inflate(R.layout.employee_list_items, parent,
-						false);
+			view = new View(this.cntxt);
 
-				parent.setBackgroundColor(Color.rgb(221, 221, 221));
+			view = inflater
+					.inflate(R.layout.employee_list_items, parent, false);
 
-				TextView textView = (TextView) view
-						.findViewById(R.id.textViewEmployeeName);
-				textView.setText(this.itemDets.get(position).getEmployeeName());
-				textView.setFocusable(false);
+			parent.setBackgroundColor(Color.rgb(221, 221, 221));
 
-				TextView location = (TextView) view
-						.findViewById(R.id.textViewEmployeeLocation);
-				location.setText(this.itemDets.get(position).getAddress());
-				location.setFocusable(false);
+			TextView textView = (TextView) view
+					.findViewById(R.id.textViewEmployeeName);
+			textView.setText(this.itemDets.get(position).getEmployeeName());
+			textView.setFocusable(false);
 
-				ImageView imageView = (ImageView) view
-						.findViewById(R.id.imageViewEmployee);
-				if (this.itemDets.get(position).getGender().equals("Female"))
-					imageView.setBackgroundResource(R.drawable.female_employee);
-				else
-					imageView.setBackgroundResource(R.drawable.male_employee);
-				imageView.setFocusable(false);
+			TextView location = (TextView) view
+					.findViewById(R.id.textViewEmployeeLocation);
+			location.setText(this.itemDets.get(position).getAddress());
+			location.setFocusable(false);
 
-				CheckBox checkBox = (CheckBox) view
-						.findViewById(R.id.checkBox1);
+			ImageView imageView = (ImageView) view
+					.findViewById(R.id.imageViewEmployee);
+			if (this.itemDets.get(position).getGender().equals("Female"))
+				imageView.setBackgroundResource(R.drawable.female_employee);
+			else
+				imageView.setBackgroundResource(R.drawable.male_employee);
+			imageView.setFocusable(false);
 
-				view.setTag(checkBox);
+			CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkBox1);
 
-				checkBox.setOnClickListener(new OnClickListener() {
+			view.setTag(checkBox);
 
-					public void onClick(View v) {
-						CheckBox chkBox = (CheckBox) v;
-						Employee emp = (Employee) chkBox.getTag();
-						Log.e("CheckBox check@", "" + chkBox.isChecked());
-						emp.setChecked(chkBox.isChecked());
-					}
+			checkBox.setOnClickListener(new OnClickListener() {
 
-				});
-				inflater = null;
+				public void onClick(View v) {
+					CheckBox chkBox = (CheckBox) v;
+					Employee emp = (Employee) chkBox.getTag();
+					Log.e("CheckBox check@", "" + chkBox.isChecked());
+					emp.setChecked(chkBox.isChecked());
+				}
 
-				Employee employee = itemDets.get(position);
-				checkBox.setChecked(employee.getChecked());
-				// holder.name.setChecked(employee.getChecked());
-				// holder.name.setTag(employee);
-				checkBox.setTag(employee);
-			} // else
-				// view = (View) convertView;
+			});
+			inflater = null;
+
+			Employee employee = itemDets.get(position);
+			checkBox.setChecked(employee.getChecked());
+			checkBox.setTag(employee);
 
 			return view;
 		}
@@ -640,6 +498,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 
 			Filter filter = new Filter() {
 
+				@SuppressLint("DefaultLocale")
 				@Override
 				protected FilterResults performFiltering(CharSequence constraint) {
 
@@ -672,6 +531,7 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 					return results;
 				}
 
+				@SuppressWarnings("unchecked")
 				@Override
 				protected void publishResults(CharSequence constraint,
 						FilterResults results) {
@@ -709,14 +569,6 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 	 *************************************************************************/
 	public static EmployeeListActivity getEmployeeListActivityInstance() {
 		return context;
-	}
-
-	/****************************************************************************
-	 * Get the connFlag
-	 *************************************************************************/
-
-	public static boolean getConnFlag() {
-		return connFlag;
 	}
 
 }

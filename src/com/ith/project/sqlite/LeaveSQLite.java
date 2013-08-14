@@ -3,11 +3,10 @@ package com.ith.project.sqlite;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.ith.project.EntityClasses.Event;
 import com.ith.project.EntityClasses.Leave;
 import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.sdcard.SQLQueryStore;
@@ -24,7 +23,6 @@ public class LeaveSQLite {
 	private SQLQueryStore sqlSave;
 
 	public LeaveSQLite(Context context) {
-		// super(context, new UsersDBHelper(context));
 		usersDBHelper = new UsersDBHelper(context);
 		sqlSave = new SQLQueryStore();
 	}
@@ -34,7 +32,6 @@ public class LeaveSQLite {
 	 * ************************************************************************************/
 	public void openDB() {
 		db = usersDBHelper.getWritableDatabase();
-		// db.execSQL("PRAGMA foreign_keys = ON;");
 	}
 
 	/***********************************************************************************
@@ -68,7 +65,8 @@ public class LeaveSQLite {
 
 			/** Calculate the current Date and Time **/
 			Calendar cal = Calendar.getInstance();
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+			SimpleDateFormat dateFormat = new SimpleDateFormat(
+					"yyyyMMddHHmmss", Locale.US);
 			String currDate = dateFormat.format(cal.getTime());
 
 			for (int i = 0; i < leaveArr.length(); i++) {
@@ -165,7 +163,7 @@ public class LeaveSQLite {
 							+ leaveArr.getJSONObject(i).getString(
 									"IsNotificationSent") + ", '"
 							// +
-							// messagesArr.getJSONObject(i).getInt("MessageTo")
+							// leavesArr.getJSONObject(i).getInt("LeaveTo")
 							+ leaveArr.getJSONObject(i).getString(
 									"StringLeaveDateTime") + "', ''" + ")";
 
@@ -408,7 +406,55 @@ public class LeaveSQLite {
 					"Pending Leave Cursor Size = 0");
 		}
 		cursor.close();
-		// db.execSQL(getPendingQuery);
 		return null;
 	}
+
+	/*****************************************************************************************
+	 * read the Leave of Viewed Item
+	 * ************************************************************************************/
+	public Leave getViewedLeave(int leaveId) {
+
+		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_LEAVE
+				+ " WHERE " + UsersDBHelper.LeaveRqId + "=" + leaveId
+				+ " ORDER BY " + UsersDBHelper.LeaveRqId + " DESC";
+
+		Cursor cursor = db.rawQuery(readQuery, null);
+		Log.v("CURSOR Viewed Leave SIZE:", "" + cursor.getCount());
+
+		/**
+		 * If the cursor is able to move to First, at least 1 value is present
+		 **/
+		if (cursor.moveToFirst()) {
+
+			Leave tempLeave = new Leave();
+			while (!cursor.isAfterLast()) {
+
+				tempLeave.setLeaveId(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.LeaveRqId)));
+				tempLeave.setApplicantId((cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.ApplicantId))));
+				tempLeave.setApprovalId((cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.ApprovalId))));
+				tempLeave.setLeaveTypeId(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.LeaveTypeId)));
+				tempLeave.setLeaveStatus(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.LeaveStatusId)));
+				tempLeave.setLeaveStartDate(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.LeaveStartDate)));
+				tempLeave.setRemarks(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.Remark)));
+				tempLeave.setIsNotificationSent(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.IsNotificationSent)));
+				tempLeave.setLeaveType(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.LeaveType)));
+
+				cursor.moveToNext();
+			}
+
+			cursor.close();
+			return tempLeave;
+		}
+		return null;
+	}
+
 }

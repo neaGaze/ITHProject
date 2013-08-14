@@ -1,17 +1,14 @@
 package com.ith.project;
 
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.ith.project.EntityClasses.Employee;
 import com.ith.project.connection.HttpConnection;
-import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.menu.CustomMenuListAdapter;
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,8 +18,6 @@ import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -35,7 +30,6 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 
 	private EditText employeeName;
 	private RadioGroup employeeGenderGroup;
-	private RadioButton employeeGender;
 	private EditText employeeHomePhone;
 	private EditText employeeMobile;
 	private EditText employeeEmail;
@@ -50,7 +44,6 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 	private String empName, empGender, empHomePhone, empMobile, empEmail,
 			empAddress, empDesignation, empRemarks, empUserName, empPwd1,
 			empPwd2;
-	private ProgressDialog pdialog;
 	private JSONObject insertEmployee;
 	private HttpConnection conn;
 	private ImageButton menuButton;
@@ -59,17 +52,10 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 	private Dialog dialog;
 	private Matcher matcher;
 	private Pattern pattern;
-	private CallMenuDialog callDiag;
-	private HashMap<String, String> menuItems;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-/*
-		pdialog = new ProgressDialog(this);
-		pdialog.setCancelable(true);
-		pdialog.setMessage("Loading ....");
-		pdialog.show();*/
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.employee_add);
@@ -81,8 +67,6 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 	private void init() {
 		employeeAdd = new Employee();
 		employeeGenderGroup = (RadioGroup) findViewById(R.id.radioSex);
-		employeeGender = (RadioButton) findViewById(employeeGenderGroup
-				.getCheckedRadioButtonId());
 		employeeName = (EditText) findViewById(R.id.UserAddeditTextUserName);
 		employeeHomePhone = (EditText) findViewById(R.id.UserAddeditTextHomePhone);
 		employeeMobile = (EditText) findViewById(R.id.UserAddeditTextMobile);
@@ -104,15 +88,13 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 
 		pattern = Pattern.compile(EMAIL_PATTERN);
 
-		menuItems = new HashMap<String, String>();
-		/*pdialog.dismiss();*/
 
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		/*pdialog.dismiss();*/
+		
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -120,7 +102,7 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		/*pdialog.dismiss();*/
+		
 	}
 
 	public void onClick(View v) {
@@ -133,14 +115,11 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 		} else if (v.equals(homeButton)) {
 
 			/** Set up the Menu **/
-		//	menuItems.put("Exit", "exit");
-		//	callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
-			// callMenuDialog();
+	
 		} else {
 			boolean correctEmail = false;
-			// pdialog.show();
+			
 			empName = employeeName.getText().toString();
-			// empGender = employeeGender.getText().toString();
 			empGender = ((RadioButton) findViewById(employeeGenderGroup
 					.getCheckedRadioButtonId())).getText().toString();
 			empHomePhone = employeeHomePhone.getText().toString();
@@ -194,7 +173,7 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 									.get("InsertEmployeeResult");
 
 							if (insertStatus) {
-								// Toast.makeText(EmployeeAddActivity.this,"Successfully Employee Added",Toast.LENGTH_SHORT).show();
+								
 								Log.e("Succesfully Added Employee ",
 										"InsertStatus From Web Service is: "
 												+ insertStatus);
@@ -217,9 +196,7 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 										EmployeeAddActivity.this,
 										EmployeeListActivity.class);
 								intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-								startActivity(intent);
-
-								// EmployeeAddActivity.this.finish();
+								startActivity(intent);								
 							}
 						});
 					}
@@ -308,8 +285,7 @@ public class EmployeeAddActivity extends Activity implements OnClickListener {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-			// do something on back.
-			/*pdialog.show();*/
+		
 			this.finish();
 			return true;
 		}

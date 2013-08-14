@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.ith.project.EntityClasses.Event;
@@ -39,32 +40,29 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 public class EventViewActivity extends Activity implements OnClickListener {
 
-	private final String url = "ReadEvent";
 	private final String readUrl = "MarkEventAsIsRead";
 	private final String goingUrl = "SetUserEventStatus";
 	private final String postponeUrl = "PostponeEvent";
 
 	private Dialog dialog;
 	private ImageButton menuButton, homeButton;
-	private CallMenuDialog callDiag;
 	private HashMap<String, String> menuItems;
 	private JSONObject readEventInquiry, goingEventInquiry, postponeInquiry;
 	private EmployeeSQLite employeeSQLite;
+	private Event viewedEvent;
 	private EventSQLite eventSQLite;
 	private HttpConnection conn;
 	private int position, eventTo, eventRealId, msgSpinner;
 	private boolean isEventRead, readStatusUpdated;
 	private ArrayList<String> spinnerItems;
 	private String isPending, GoingStatus, day, month, year, hour, minute,
-			latitudeStr, longitudeStr, eventDateStr, eventTimeStr,
-			eventDateTimeStr;
+			latitudeStr, longitudeStr, eventDateTimeStr;
 	private double latitude, longitude;
 	private TextView EventName, EventDesc, EventDate, EventCreator, EventVenue,
 			postponeDate, postponeTime;
@@ -80,11 +78,6 @@ public class EventViewActivity extends Activity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		/*
-		 * pdialog = new ProgressDialog(this); pdialog.setCancelable(true);
-		 * pdialog.setEvent("Loading ...."); pdialog.show();
-		 */
-
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.event_view);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
@@ -96,7 +89,6 @@ public class EventViewActivity extends Activity implements OnClickListener {
 	@Override
 	public void onPause() {
 		super.onPause();
-		/* pdialog.dismiss(); */
 		if (employeeSQLite != null)
 			employeeSQLite.closeDB();
 		if (eventSQLite != null)
@@ -110,7 +102,6 @@ public class EventViewActivity extends Activity implements OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		/* pdialog.dismiss(); */
 	}
 
 	private void init() {
@@ -120,38 +111,34 @@ public class EventViewActivity extends Activity implements OnClickListener {
 
 		inflater.inflate(R.layout.event_view, lin, false);
 		Bundle bundle = getIntent().getExtras();
-		position = bundle.getInt("PositionOfEvent");
+		position = bundle.getInt("EventId");
 
-		Log.v("EventName",
-				""
-						+ EventListActivity.getEventArrayList().get(position)
-								.getEventName());
+		eventSQLite = new EventSQLite(EventViewActivity.this);
+		if (!eventSQLite.isOpen())
+			eventSQLite.openDB();
+
+		viewedEvent = eventSQLite.getViewedEvent(position);
+		Log.v("EventName", "" + viewedEvent.getEventName());
 
 		EventName = (TextView) findViewById(R.id.textViewEventName);
-		EventName.setText(EventListActivity.getEventArrayList().get(position)
-				.getEventName());
+		EventName.setText(viewedEvent.getEventName());
 
 		EventDesc = (TextView) findViewById(R.id.editTextEventDesc);
-		EventDesc.setText(EventListActivity.getEventArrayList().get(position)
-				.getEventDesc());
+		EventDesc.setText(viewedEvent.getEventDesc());
 
-		int eventStatus = EventListActivity.getEventArrayList().get(position)
-				.getEventStatus();
+		int eventStatus = viewedEvent.getEventStatus();
 
 		employeeSQLite = new EmployeeSQLite(EventViewActivity.this);
-		employeeSQLite.openDB();
+		if (!employeeSQLite.isOpen())
+			employeeSQLite.openDB();
 
 		EventCreator = (TextView) findViewById(R.id.editTextEventCreator);
-		EventCreator.setText(employeeSQLite.getEmpName(EventListActivity
-				.getEventArrayList().get(position).getEventCreator()));
+		EventCreator.setText(employeeSQLite.getEmpName(viewedEvent
+				.getEventCreator()));
 
 		EventDate = (TextView) findViewById(R.id.editTextEventDate);
-		String eventDateStr = new StringBuilder()
-				.append(EventListActivity.getEventArrayList().get(position)
-						.getDate())
-				.append(" @")
-				.append(EventListActivity.getEventArrayList().get(position)
-						.getTime()).toString();
+		String eventDateStr = new StringBuilder().append(viewedEvent.getDate())
+				.append(" @").append(viewedEvent.getTime()).toString();
 
 		if (eventStatus == 2)
 			EventDate.setText("COMPLETED");
@@ -161,22 +148,15 @@ public class EventViewActivity extends Activity implements OnClickListener {
 			EventDate.setText(eventDateStr + " [POSTPONED]");
 		} else
 			EventDate.setText(eventDateStr);
-		/*
-		 * postponeButton = (Button) findViewById(R.id.buttonUpdateGoingStatus);
-		 */
+
 		postponeLayout = (LinearLayout) findViewById(R.id.datePostponeEvent);
 
-		if (LoginAuthentication.EmployeeId != EventListActivity
-				.getEventArrayList().get(position).getEventCreator()
-				|| (EventListActivity.getEventArrayList().get(position)
-						.getEventStatus() == 2)
-				|| (EventListActivity.getEventArrayList().get(position)
-						.getEventStatus() == 3)) {
-			/* postponeButton.setVisibility(View.GONE); */
+		if (LoginAuthentication.EmployeeId != viewedEvent.getEventCreator()
+				|| (viewedEvent.getEventStatus() == 2)
+				|| (viewedEvent.getEventStatus() == 3)) {
+
 			postponeLayout.setVisibility(View.GONE);
 		} else {
-			/* postponeButton.setOnClickListener(this); */
-			// postponeLayout.setVisibility(View.INVISIBLE);
 
 			dateButton = (ImageButton) findViewById(R.id.imageViewEventPostponeDate);
 			timeButton = (ImageButton) findViewById(R.id.imageViewEventPostponeTime);
@@ -198,24 +178,21 @@ public class EventViewActivity extends Activity implements OnClickListener {
 		}
 
 		EventVenue = (TextView) findViewById(R.id.editTextEventVenue);
-		EventVenue.setText(EventListActivity.getEventArrayList().get(position)
-				.getEventPlace());
+		EventVenue.setText(viewedEvent.getEventPlace());
 
-		latitudeStr = EventListActivity.getEventArrayList().get(position)
-				.getLatitude();
-		longitudeStr = EventListActivity.getEventArrayList().get(position)
-				.getLongitude();
+		latitudeStr = viewedEvent.getLatitude();
+		longitudeStr = viewedEvent.getLongitude();
 		Log.e("Latitude ra longitude", "" + latitudeStr + ", " + longitudeStr);
 
 		if (latitudeStr.equals("") || latitudeStr == null)
-			latitude = 10.10;
+			latitude = 15.15;
 		else
 			latitude = Double.valueOf(latitudeStr).doubleValue();
 
 		if (longitudeStr.equals("") || longitudeStr == null)
-			longitude = 10.10;
-		else
-			longitude = Double.valueOf(longitudeStr).doubleValue();
+			longitude = 15.15;
+		
+		longitude = Double.valueOf(longitudeStr).doubleValue();
 
 		LinearLayout eventStatusLinLayout = (LinearLayout) findViewById(R.id.linearLayoutIsGoingStatus);
 		GoingStatusSpinner = (Spinner) findViewById(R.id.spinnerGoingStatus);
@@ -230,11 +207,9 @@ public class EventViewActivity extends Activity implements OnClickListener {
 			spinnerItems.add("Not Going");
 			spinnerItems.add("Pending");
 
-			if (EventListActivity.getEventArrayList().get(position)
-					.getParticipationStatus().equals("Going"))
+			if (viewedEvent.getParticipationStatus().equals("Going"))
 				msgSpinner = 0;
-			else if (EventListActivity.getEventArrayList().get(position)
-					.getParticipationStatus().equals("NotGoing"))
+			else if (viewedEvent.getParticipationStatus().equals("NotGoing"))
 				msgSpinner = 1;
 			else
 				msgSpinner = 2;
@@ -247,12 +222,6 @@ public class EventViewActivity extends Activity implements OnClickListener {
 			GoingStatusSpinner.setAdapter(dataAdapter);
 			GoingStatusSpinner.setSelection(msgSpinner);
 		}
-
-		/*
-		 * goingUpdateButton = (Button)
-		 * findViewById(R.id.buttonUpdateGoingStatus);
-		 * goingUpdateButton.setOnClickListener(this);
-		 */
 
 		gMapButton = (ImageButton) findViewById(R.id.buttonGoogleMap);
 		gMapButton.setOnClickListener(this);
@@ -282,8 +251,7 @@ public class EventViewActivity extends Activity implements OnClickListener {
 							View view, int pos, long id) {
 						Log.e("Item at Spinner",
 								"" + parent.getItemAtPosition(pos).toString());
-						// msgSpinner =
-						// parent.getItemAtPosition(pos).toString();
+
 						msgSpinner = pos;
 						/** Now sync only when read Status in main DB is true **/
 						if (readStatusUpdated) {
@@ -303,16 +271,11 @@ public class EventViewActivity extends Activity implements OnClickListener {
 	 * ***********************************************************************************/
 	private void updateReadStatus() {
 
-		// eventTo = EventListActivity.getEventArrayList().get(position)
-		// .geteventTo();
 		eventTo = LoginAuthentication.EmployeeId;
-		eventRealId = EventListActivity.getEventArrayList().get(position)
-				.getEventRealId();
+		eventRealId = viewedEvent.getEventRealId();
 
-		isEventRead = EventListActivity.getEventArrayList().get(position)
-				.getEventReadStatus();
-		isPending = EventListActivity.getEventArrayList().get(position)
-				.getEventType();
+		isEventRead = viewedEvent.getEventReadStatus();
+		isPending = viewedEvent.getEventType();
 
 		Log.e("Let's see the isEventRead Flag", "eventRead Flag is : "
 				+ isEventRead);
@@ -328,9 +291,8 @@ public class EventViewActivity extends Activity implements OnClickListener {
 		if ((!isEventRead && (isPending == null || isPending.equals("")))) {
 
 			eventSQLite.updateEventRead(eventTo, eventRealId);
-			// eventSQLite.closeDB();
+
 			readEventInquiry = makeEventReadJson(eventTo, eventRealId);
-			// Log.e("readEventINquiry", "" + readEventInquiry.toString());
 		}
 		/**
 		 * GoingStatus can be synced if isEventRead = true && event is in sync
@@ -365,10 +327,8 @@ public class EventViewActivity extends Activity implements OnClickListener {
 						 * EventType="readUpdatePending" if connection is
 						 * refused
 						 **/
-						// eventSQLite.openDB();
 						eventSQLite.updateEventReadPending(eventTo,
 								eventRealId, "readUpdatePending");
-						// eventSQLite.closeDB();
 
 						Log.e("Problem Sending Event ",
 								"Pending Read Events saved as draft"
@@ -379,10 +339,8 @@ public class EventViewActivity extends Activity implements OnClickListener {
 					 * Save the read event in sqlite if connection return is
 					 * *JPT*
 					 **/
-					// eventSQLite.openDB();
 					eventSQLite.updateEventReadPending(eventTo, eventRealId,
 							"readUpdatePending");
-					// eventSQLite.closeDB();
 
 					Log.e("JSONException while Updating read Status",
 							"" + e.getMessage());
@@ -394,14 +352,6 @@ public class EventViewActivity extends Activity implements OnClickListener {
 				runOnUiThread(new Runnable() {
 
 					public void run() {
-						/* pdialog.show(); */
-						// exitDialog.dismiss();
-						/*
-						 * EventViewActivity.this.finish(); Intent intent = new
-						 * Intent(EventViewActivity.this,
-						 * EventListActivity.class);
-						 * EventViewActivity.this.startActivity(intent);
-						 */
 
 					}
 
@@ -418,8 +368,7 @@ public class EventViewActivity extends Activity implements OnClickListener {
 	 * ***********************************************************************************/
 	protected void updateGoingStatus(int goingStatus) {
 
-		GoingStatus = EventListActivity.getEventArrayList().get(position)
-				.getParticipationStatus();
+		GoingStatus = viewedEvent.getParticipationStatus();
 
 		if (goingStatus == 0)
 			GoingStatus = "Going";
@@ -429,12 +378,10 @@ public class EventViewActivity extends Activity implements OnClickListener {
 			GoingStatus = "Pending";
 
 		if (((isPending == null || isPending.equals("")))) {
-			// eventSQLite = new EventSQLite(EventViewActivity.this);
-			// eventSQLite.openDB();
 			Log.e("La hai going Status ko ho",
 					"sqlite will be updated below this");
 			eventSQLite.updateEventGoing(eventTo, eventRealId, GoingStatus);
-			// eventSQLite.closeDB();
+
 			goingEventInquiry = makeEventGoingJson(eventTo, eventRealId,
 					GoingStatus);
 
@@ -469,10 +416,8 @@ public class EventViewActivity extends Activity implements OnClickListener {
 						 * EventType="goingUpdatePending" if connection is
 						 * refused
 						 **/
-						// eventSQLite.openDB();
 						eventSQLite.updateGoingPending(eventTo, eventRealId,
 								"goingUpdatePending");
-						// eventSQLite.closeDB();
 
 						Log.e("Problem Sending Going Event ",
 								"Pending Going Events saved as draft"
@@ -483,10 +428,8 @@ public class EventViewActivity extends Activity implements OnClickListener {
 					 * Save the going event in sqlite if connection return is
 					 * *JPT*
 					 **/
-					// eventSQLite.openDB();
 					eventSQLite.updateGoingPending(eventTo, eventRealId,
 							"goingUpdatePending");
-					// eventSQLite.closeDB();
 
 					Log.e("JSONException while Updating going Status",
 							"" + e.getMessage());
@@ -511,34 +454,21 @@ public class EventViewActivity extends Activity implements OnClickListener {
 
 			/** Set up the Menu **/
 			menuItems.put("Send Events", "mail_web");
-			// menuItems.put("Exit", "exit");
-			callDiag = new CallMenuDialog(this, /* pdialog, */dialog, menuItems);
-		}
-		/*	*//** Update the goingStatus in sqlite3 and in main DB **/
-		/*
-		 * else if (v.equals(goingUpdateButton)) {
-		 * 
-		 * // updateGoingStatus(); }
-		 */else if (v.equals(showInvited)) {
+			new CallMenuDialog(this, dialog, menuItems);
+		} else if (v.equals(showInvited)) {
 			showInvitedList();
 		} else if (v.equals(hideInvited)) {
 			ListView listView = (ListView) findViewById(R.id.listViewToReceivers);
 			listView.setVisibility(View.INVISIBLE);
 		}
 		/** Launch DateSet Dialog **/
-		/*
-		 * else if (v.equals(postponeButton)) {
-		 * 
-		 * postponeLayout.setVisibility(View.VISIBLE);
-		 * 
-		 * }
-		 */else if (v.equals(dateButton)) {
+		else if (v.equals(dateButton)) {
 			String saf = null;
 
 			if (year == "" && month == "" && day == "") {
 				Calendar currDate = Calendar.getInstance();
 				SimpleDateFormat dtFormat = new SimpleDateFormat(
-						"yyyyMMddHHmmss");
+						"yyyyMMddHHmmss", Locale.US);
 				saf = dtFormat.format(currDate.getTime());
 
 				year = saf.subSequence(0, 4).toString();
@@ -572,9 +502,8 @@ public class EventViewActivity extends Activity implements OnClickListener {
 						.append(minute).append("00").toString();
 
 				postponeInquiry = postponeEventJson(eventDateTimeStr,
-						LoginAuthentication.EmployeeId, EventListActivity
-								.getEventArrayList().get(position)
-								.getEventRealId());
+						LoginAuthentication.EmployeeId,
+						viewedEvent.getEventRealId());
 
 				Log.v("postponeEvent status", "" + postponeInquiry.toString());
 			}
@@ -622,10 +551,6 @@ public class EventViewActivity extends Activity implements OnClickListener {
 						eventSQLite.updateEventPostponed(eventRealId,
 								eventDateTimeStr, "eventPostponed");
 
-						// Toast.makeText(EventAddActivity.this,"Event Saved as draft",
-						// Toast.LENGTH_SHORT)
-						// .show();
-
 						Log.e("JSONException while postponding event",
 								"" + e.getMessage());
 						Log.e("Postponed Events Saved as Draft",
@@ -641,7 +566,6 @@ public class EventViewActivity extends Activity implements OnClickListener {
 							intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 							startActivity(intent);
 
-							// BulletinAddActivity.this.finish();
 						}
 					});
 				}
@@ -678,10 +602,6 @@ public class EventViewActivity extends Activity implements OnClickListener {
 					.toString());
 			postponeInquiry.put("userLoginId", LoginAuthentication.UserloginId);
 			postponeInquiry.put("eventPostponedDate", eventDateTime);
-			/*
-			 * readInquiry.put("GoingStatus", new
-			 * StringBuilder().append(goingStatus).toString());
-			 */
 			return postponeInquiry;
 		} catch (JSONException e) {
 			Log.e("Could not convert to JSONObject", "" + e.getMessage());
@@ -755,8 +675,8 @@ public class EventViewActivity extends Activity implements OnClickListener {
 		if (!eventGoingSQLite.isOpen())
 			eventGoingSQLite.openDB();
 
-		eventsParticipants = eventGoingSQLite.getEventGoing(EventListActivity
-				.getEventArrayList().get(position).getEventRealId());
+		eventsParticipants = eventGoingSQLite.getEventGoing(viewedEvent
+				.getEventRealId());
 		eventGoingSQLite.closeDB();
 
 		if (eventsParticipants != null) {
@@ -805,10 +725,7 @@ public class EventViewActivity extends Activity implements OnClickListener {
 					.toString());
 			readInquiry.put("userLoginId", LoginAuthentication.UserloginId);
 			readInquiry.put("eventStatus", goingStatus);
-			/*
-			 * readInquiry.put("GoingStatus", new
-			 * StringBuilder().append(goingStatus).toString());
-			 */
+
 			return readInquiry;
 		} catch (JSONException e) {
 			Log.e("Could not convert to JSONObject", "" + e.getMessage());
@@ -821,8 +738,7 @@ public class EventViewActivity extends Activity implements OnClickListener {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-			// do something on back.
-			/* pdialog.show(); */
+
 			this.finish();
 			return true;
 		}
@@ -856,9 +772,6 @@ public class EventViewActivity extends Activity implements OnClickListener {
 
 			parent.setBackgroundColor(Color.rgb(221, 221, 221));
 
-			TableLayout tableLayout = (TableLayout) view
-					.findViewById(R.id.tableLayoutParticipants);
-
 			EmployeeSQLite employeeSQLite = new EmployeeSQLite(
 					EventViewActivity.this);
 			employeeSQLite.openDB();
@@ -866,8 +779,6 @@ public class EventViewActivity extends Activity implements OnClickListener {
 					.findViewById(R.id.textViewParticipants);
 			textView.setText(employeeSQLite.getEmpName(this.itemDets.get(
 					position).getToEmployeeId()));
-			// To set the names use >>
-			// employeeSQLite.getEmpName(this.itemDets.get(position)
 			textView.setFocusable(false);
 			employeeSQLite.closeDB();
 
@@ -885,7 +796,6 @@ public class EventViewActivity extends Activity implements OnClickListener {
 			int id = getResources().getIdentifier(viewImage, "drawable",
 					getApplicationContext().getPackageName());
 
-			// imageView.setImageResource(R.drawable.user1);
 			imageView.setImageResource(id);
 
 			return view;

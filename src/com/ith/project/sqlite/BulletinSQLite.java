@@ -20,7 +20,6 @@ public class BulletinSQLite {
 	private static int BulletinId = 0;
 
 	public BulletinSQLite(Context context) {
-		// super(context, new UsersDBHelper(context));
 		usersDBHelper = new UsersDBHelper(context);
 	}
 
@@ -29,7 +28,6 @@ public class BulletinSQLite {
 	 * ************************************************************************************/
 	public void openDB() {
 		db = usersDBHelper.getWritableDatabase();
-		// db.execSQL("PRAGMA foreign_keys = ON;");
 	}
 
 	/***********************************************************************************
@@ -52,7 +50,7 @@ public class BulletinSQLite {
 	/************************************************************************************
 	 * Insert the Bulletin datas into sqlite according to values
 	 * *************************************************************************************/
-	public void insertDBUsersTableValues(String Title, String Desc,
+	public void insertDBBulletinsTableValues(String Title, String Desc,
 			String BulletinDate, String empName) {
 
 		String insertQuery = "INSERT OR REPLACE INTO "
@@ -62,14 +60,13 @@ public class BulletinSQLite {
 				+ UsersDBHelper.EmployeeName + " ) VALUES ('" + Title + "', '"
 				+ Desc + "', '" + BulletinDate + "', '" + empName + "')";
 
-		// Log.v("INSERT QUERY BULLETINS", "" + insertQuery);
 		db.execSQL(insertQuery);
 	}
 
 	/************************************************************************************
 	 * Update the Bulletin datas according to JSON object
 	 * *************************************************************************************/
-	public void updateDBUsersTableJson(String bulletinFromWS) {
+	public void updateBulletinsListFromWebService(String bulletinFromWS) {
 		try {
 
 			JSONObject bulletinsObj;
@@ -127,7 +124,6 @@ public class BulletinSQLite {
 						+ bulletinsArr.getJSONObject(i).getString(
 								"EmployeeName") + "')";
 
-				// Log.v("UPDATE QUERY BULLETINS", "" + updateQuery);
 				db.execSQL(updateQuery);
 			}
 		} catch (JSONException e) {
@@ -139,21 +135,20 @@ public class BulletinSQLite {
 	/*****************************************************************************************
 	 * Delete All Table Rows
 	 * ************************************************************************************/
-	public void deleteAllRows() {
+	public void deleteOldBulletins() {
 		db.delete(UsersDBHelper.TABLE_BULLETINS, null, null);
 	}
 
 	/*****************************************************************************************
 	 * read all bulletin rows and populate Arraylist of Bulletin
 	 * ************************************************************************************/
-	public ArrayList<Bulletin> getJSONFromDB() {
+	public ArrayList<Bulletin> getBulletinsFromDB() {
 
 		ArrayList<Bulletin> tempArrList = new ArrayList<Bulletin>();
 
 		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_BULLETINS
 				+ " ORDER BY " + UsersDBHelper.BulletinId + " DESC";
 
-		// Log.v("SELECT QUERY BULLETINS", "" + readQuery);
 		Cursor cursor = db.rawQuery(readQuery, null);
 		Log.v("CURSOR BULLETINS SIZE:", "" + cursor.getCount());
 
@@ -190,6 +185,48 @@ public class BulletinSQLite {
 			Log.e("NO ROW FOUND", "Cursor Size is 0");
 		}
 		cursor.close();
+		return null;
+	}
+
+	/*****************************************************************************************
+	 * read the Bulletin of Viewed Item
+	 * ************************************************************************************/
+	public Bulletin getViewedBulletin(int bulletinId) {
+
+		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_BULLETINS
+				+ " WHERE " + UsersDBHelper.BulletinId + "=" + bulletinId
+				+ " ORDER BY " + UsersDBHelper.BulletinId + " DESC";
+
+		Cursor cursor = db.rawQuery(readQuery, null);
+		Log.v("CURSOR Viewed BULLETIN SIZE:", "" + cursor.getCount());
+
+		/**
+		 * If the cursor is able to move to First, at least 1 value is present
+		 **/
+		if (cursor.moveToFirst()) {
+
+			Bulletin tempBulletin = new Bulletin();
+			while (!cursor.isAfterLast()) {
+
+				tempBulletin.setBulletinId(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.BulletinId)));
+				tempBulletin.setTitle(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.Title)));
+				tempBulletin.setDesc(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.Description)));
+				tempBulletin.setDate(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.BulletinDate)));
+				tempBulletin.setEmpName(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.EmployeeName)));
+				tempBulletin.parseDateTime(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.BulletinDate)));
+
+				cursor.moveToNext();
+			}
+
+			cursor.close();
+			return tempBulletin;
+		}
 		return null;
 	}
 

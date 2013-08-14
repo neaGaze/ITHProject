@@ -1,7 +1,9 @@
 package com.ith.project;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +13,6 @@ import com.ith.project.connection.HttpConnection;
 import com.ith.project.menu.CallMenuDialog;
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,23 +35,16 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 	private Bulletin bulletinAdd;
 	private String employeeId, title, desc, date;
 	private Calendar cal;
-	private ProgressDialog pdialog;
 	private JSONObject insertBulletin;
 	private HttpConnection conn;
 	private ImageButton menuButton;
 	private ImageButton homeButton;
 	private Dialog dialog;
-	private CallMenuDialog callDiag;
 	private HashMap<String, String> menuItems;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-/*
-		pdialog = new ProgressDialog(this);
-		pdialog.setCancelable(true);
-		pdialog.setMessage("Loading ....");
-		pdialog.show();*/
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.bulletin_add);
@@ -62,15 +56,13 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 	@Override
 	public void onPause() {
 		super.onPause();
-		/*pdialog.dismiss();
-		*/if (dialog != null)
+		if (dialog != null)
 			dialog.dismiss();
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		/*pdialog.dismiss();*/
 	}
 
 	private void init() {
@@ -90,7 +82,6 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 
 		menuItems = new HashMap<String, String>();
 
-		/*pdialog.dismiss();*/
 	}
 
 	public void onClick(View v) {
@@ -103,11 +94,12 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 		} else if (v.equals(homeButton)) {
 
 			/** Set up the Menu **/
-		//	menuItems.put("Exit", "exit");
-			callDiag = new CallMenuDialog(this, /*pdialog,*/ dialog, menuItems);
-			// callMenuDialog();
-		} else {
-			// pdialog.show();
+			new CallMenuDialog(this, dialog, menuItems);
+
+		}
+		/** When Bulletin Add button is CLicked **/
+		else {
+
 			employeeId = new StringBuilder().append(
 					LoginAuthentication.EmployeeId).toString();
 			title = bulletinTitle.getText().toString();
@@ -177,8 +169,7 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-			// do something on back.
-			/*pdialog.show();*/
+
 			this.finish();
 			return true;
 		}
@@ -190,37 +181,11 @@ public class BulletinAddActivity extends Activity implements OnClickListener {
 		String formattedDateAndTime;
 		cal = Calendar.getInstance();
 
-		String mnth = ((cal.get(Calendar.MONTH) < 9) ? (new StringBuilder()
-				.append("0").append(cal.get(Calendar.MONTH) + 1).toString())
-				: (new StringBuilder().append(cal.get(Calendar.MONTH) + 1)
-						.toString()));
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss",
+				Locale.US);
+		formattedDateAndTime = formatter.format(cal.getTime());
 
-		String dateOfEntry = ((cal.get(Calendar.DATE) < 10) ? (new StringBuilder()
-				.append("0").append(cal.get(Calendar.DATE)).toString())
-				: (new StringBuilder().append(cal.get(Calendar.DATE))
-						.toString()));
-
-		String hour = ((cal.get(Calendar.HOUR_OF_DAY) < 10) ? (new StringBuilder()
-				.append("0").append(cal.get(Calendar.HOUR_OF_DAY)).toString())
-				: (new StringBuilder().append(cal.get(Calendar.HOUR_OF_DAY))
-						.toString()));
-
-		String minute = ((cal.get(Calendar.MINUTE) < 10) ? (new StringBuilder()
-				.append("0").append(cal.get(Calendar.MINUTE)).toString())
-				: (new StringBuilder().append(cal.get(Calendar.MINUTE))
-						.toString()));
-
-		String second = ((cal.get(Calendar.SECOND) < 10) ? (new StringBuilder()
-				.append("0").append(cal.get(Calendar.SECOND)).toString())
-				: (new StringBuilder().append(cal.get(Calendar.SECOND))
-						.toString()));
-
-		formattedDateAndTime = new StringBuilder()
-				.append(cal.get(Calendar.YEAR)).append(mnth)
-				.append(dateOfEntry).append("_").append(hour).append(minute)
-				.append(second).toString();
-
-		Log.v("Today's date: ", "" + formattedDateAndTime);
+		Log.v("TODAY'S DATE: ", "" + formattedDateAndTime);
 		return formattedDateAndTime;
 	}
 }

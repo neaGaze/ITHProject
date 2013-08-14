@@ -26,7 +26,7 @@ public class PwdChangeActivity extends Activity implements OnClickListener {
 
 	private HttpConnection conn;
 	private Dialog dialog;
-	private ImageButton menuButton, homeButton, submitButton;
+	private ImageButton menuButton, submitButton;
 	private TextView employeeName;
 	private EditText oldPwd, newPwd1, newPwd2;
 	private EmployeeSQLite employeeSQLite;
@@ -36,11 +36,6 @@ public class PwdChangeActivity extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		/*
-		 * pdialog = new ProgressDialog(this); pdialog.setCancelable(true);
-		 * pdialog.setEvent("Loading ...."); pdialog.show();
-		 */
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.pwd_change);
@@ -55,7 +50,7 @@ public class PwdChangeActivity extends Activity implements OnClickListener {
 		super.onPause();
 		if (employeeSQLite != null)
 			employeeSQLite.closeDB();
-		/* pdialog.dismiss(); */
+
 		if (dialog != null)
 			dialog.dismiss();
 
@@ -65,7 +60,6 @@ public class PwdChangeActivity extends Activity implements OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		/* pdialog.dismiss(); */
 	}
 
 	private void init() {
@@ -82,6 +76,9 @@ public class PwdChangeActivity extends Activity implements OnClickListener {
 		newPwd1 = (EditText) findViewById(R.id.editTextChangePassword1);
 		newPwd2 = (EditText) findViewById(R.id.editTextChangePassword2);
 
+		menuButton = (ImageButton) findViewById(R.id.menu);
+		menuButton.setOnClickListener(PwdChangeActivity.this);
+
 		validation = true;
 		error = false;
 		submitButton = (ImageButton) findViewById(R.id.buttonPwdChange);
@@ -91,12 +88,12 @@ public class PwdChangeActivity extends Activity implements OnClickListener {
 
 	public void onClick(View v) {
 		if (v.equals(menuButton)) {
-			/* pdialog.show(); */
+
 			Intent intent = new Intent(PwdChangeActivity.this,
 					GridItemActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			this.startActivity(intent);
-			// this.finish();
+
 		} else if (v.equals(submitButton)) {
 			validateFields();
 			if (validation) {
@@ -188,7 +185,7 @@ public class PwdChangeActivity extends Activity implements OnClickListener {
 			pwdChangeQuery.put("newPassword", pwd);
 			pwdChangeQuery.put("oldPassword", oldPwd);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
+			Log.e("JSON EXCEPTION", "" + e.getMessage());
 			e.printStackTrace();
 		}
 		return pwdChangeQuery;

@@ -1,7 +1,11 @@
 package com.ith.project;
 
 import java.util.HashMap;
+
+import com.ith.project.EntityClasses.Bulletin;
 import com.ith.project.menu.CallMenuDialog;
+import com.ith.project.sqlite.BulletinSQLite;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -22,25 +26,19 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 
 	private TextView bulletinTitle;
 	private TextView bulletinDesc;
-	private TextView bulletinAuthor;
 	private TextView bulletinDate;
 	private ImageButton menuButton;
 	private ImageButton BulletinButton;
 	private ImageButton homeButton;
+	private BulletinSQLite bulletinSQLite;
 	public ProgressDialog pdialog;
 	static ListItemArrayAdapter listItemArrAdapter;
 	private Dialog dialog;
-	private CallMenuDialog callDiag;
 	private HashMap<String, String> menuItems;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-/*
-		pdialog = new ProgressDialog(this);
-		pdialog.setCancelable(true);
-		pdialog.setMessage("Loading ....");
-		pdialog.show();*/
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.bulletin_view);
@@ -53,7 +51,8 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 	@Override
 	public void onPause() {
 		super.onPause();
-		/*pdialog.dismiss();*/
+		if (bulletinSQLite != null)
+			bulletinSQLite.closeDB();
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -61,7 +60,6 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		/*pdialog.dismiss();*/
 	}
 
 	private void init() {
@@ -72,43 +70,32 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 
 		inflater.inflate(R.layout.bulletin_view, lin, false);
 		Bundle bundle = getIntent().getExtras();
-		int position = bundle.getInt("PositionOfBulletin");
+		int position = bundle.getInt("BulletinId");
+		
+		bulletinSQLite = new BulletinSQLite(this);
+		bulletinSQLite.openDB();
+		Bulletin viewedBulletin = bulletinSQLite.getViewedBulletin(position);
 
-		Log.v("bulletinTitle", ""
-				+ ListItemActivity.getBulletinArrayList().get(position)
-						.getTitle());
+		Log.v("bulletinTitle", "" + viewedBulletin.getTitle());
 
 		bulletinTitle = (TextView) findViewById(R.id.editTextBulletinTitleView);
-		bulletinTitle.setText(ListItemActivity.getBulletinArrayList()
-				.get(position).getTitle());
+		bulletinTitle.setText(viewedBulletin.getTitle());
 
 		bulletinDesc = (TextView) findViewById(R.id.editTextBulletinDescView);
-		bulletinDesc.setText(ListItemActivity.getBulletinArrayList()
-				.get(position).getDescription());
-
-		// bulletinAuthor = (TextView)
-		// findViewById(R.id.editTextBulletinAuthor);
-		// bulletinAuthor.setText(ListItemActivity.getBulletinArrayList()
-		// .get(position).getEmployeeName());
+		bulletinDesc.setText(viewedBulletin.getDescription());
 
 		bulletinDate = (TextView) findViewById(R.id.editTextBulletinDate);
-		bulletinDate.setText(ListItemActivity.getBulletinArrayList()
-				.get(position).getDate()
-				+ "  "
-				+ ListItemActivity.getBulletinArrayList().get(position)
-						.getTime());
+		bulletinDate.setText(viewedBulletin.getDate() + "  "
+				+ viewedBulletin.getTime());
 
 		menuButton = (ImageButton) findViewById(R.id.menu);
 		menuButton.setOnClickListener(BulletinViewActivity.this);
-
-		// BulletinButton = (ImageButton) findViewById(R.id.bulletin_add_icon);
-		// BulletinButton.setOnClickListener(BulletinViewActivity.this);
 
 		homeButton = (ImageButton) findViewById(R.id.home);
 		homeButton.setOnClickListener(BulletinViewActivity.this);
 
 		menuItems = new HashMap<String, String>();
-		/*pdialog.dismiss();*/
+	
 	}
 
 	public void onClick(View v) {
@@ -119,26 +106,23 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 			this.finish();
 		} else if (v.equals(BulletinButton)) {
 
-			/*pdialog.show();*/
-			// Toast.makeText(this, "Add Bulletin", Toast.LENGTH_SHORT).show();
 			Intent intent = new Intent(this, BulletinAddActivity.class);
 			this.startActivity(intent);
 
 		} else if (v.equals(homeButton)) {
 
 			/** Set up the Menu **/
-		//	menuItems.put("Exit", "exit");
+
 			menuItems.put("Add Bulletin", "add_employee");
-			callDiag = new CallMenuDialog(this, /*pdialog,*/ dialog, menuItems);
-			// callMenuDialog();
+			new CallMenuDialog(this, dialog, menuItems);
+
 		}
 	}
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-			// do something on back.
-			/*pdialog.show();*/
+			
 			this.finish();
 			return true;
 		}
@@ -146,11 +130,4 @@ public class BulletinViewActivity extends Activity implements OnClickListener {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	/*********************************************************************************
-	 * Called when the LExit Button is Clicked
-	 * ******************************************************************************/
-	public void modifyBulletinAdd4Admin(int userRolesId) {
-		// if (userRolesId == 2)
-		// findViewById(R.id.bulletin_add_icon).setVisibility(View.INVISIBLE);
-	}
 }

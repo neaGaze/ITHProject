@@ -3,39 +3,28 @@ package com.ith.project.sdcard;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.protocol.HTTP;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 public class LocalConnection {
 
 	public LocalConnection() {
-		// createOrUseFile();
+
 	}
 
 	/************************************************************************************
 	 * Create a cache file for local storage / reuse otherwise
 	 * *************************************************************************************/
+	@SuppressLint("SdCardPath")
 	protected void createOrUseFile(String loginInfo, String url, String fileName) {
 
-		// FileWriter fileWriter = null;
 		try {
-			// String content = loginInfo.toString();
+
 			String content = loginInfo;
 			File newTextFilePath = new File(url);
 			if (!newTextFilePath.exists())
@@ -53,7 +42,7 @@ public class LocalConnection {
 			 * fileWriter.write(content); fileWriter.close();
 			 */
 			BufferedWriter bufferWritter = new BufferedWriter(fileWriter);
-			bufferWritter.write(content +"; \n"+ pastString);
+			bufferWritter.write(content + "; \n" + pastString);
 			bufferWritter.close();
 
 			/*

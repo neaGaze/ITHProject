@@ -3,6 +3,7 @@ package com.ith.project.sqlite;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,7 +67,6 @@ public class MessageSQLite {
 					+ "', '" + msgDesc + "', '" + dateTime + "', " + msgFrom
 					+ ", " + receiversId[i] + ", " + msgRead + ",'" + pending
 					+ "')";
-			// Log.v("Save Message as Draft", "" + updateQuery);
 
 			db.execSQL(updateQuery);
 		}
@@ -74,7 +74,7 @@ public class MessageSQLite {
 	}
 
 	/************************************************************************************
-	 * INSET OR UPDATE the Message datas according to JSON object
+	 * INSERT OR UPDATE the Message datas according to JSON object
 	 * *************************************************************************************/
 	public void updateMessageTable(String messagesFromWS,
 			MsgEntryLogSQLite msgEntryLogSQLite) {
@@ -91,7 +91,8 @@ public class MessageSQLite {
 
 			/** Calculate the current Date and Time **/
 			Calendar cal = Calendar.getInstance();
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+			SimpleDateFormat dateFormat = new SimpleDateFormat(
+					"yyyyMMddHHmmss", Locale.US);
 			String currDate = dateFormat.format(cal.getTime());
 
 			for (int i = 0; i < messagesArr.length(); i++) {
@@ -201,14 +202,11 @@ public class MessageSQLite {
 							+ messagesArr.getJSONObject(i).getInt(
 									"FromEmployeeId")
 							+ ", "
-							// +
-							// messagesArr.getJSONObject(i).getInt("MessageTo")
 							+ LoginAuthentication.EmployeeId
 							+ ", "
 							+ messagesArr.getJSONObject(i).getInt(
 									"IsMessageRead") + ")";
 
-					// Log.v("UPDATE QUERY BULLETINS", "" + updateQuery);
 					db.execSQL(insertQuery);
 				}
 			}
@@ -232,7 +230,6 @@ public class MessageSQLite {
 				+ UsersDBHelper.MessageId + " DESC";
 
 		Log.e("EmployeeId is:", "" + LoginAuthentication.EmployeeId);
-		// Log.v("SELECT QUERY BULLETINS", "" + readQuery);
 		Cursor cursor = db.rawQuery(readQuery, null);
 		Log.v("CURSOR MESSAGES SIZE:", "" + cursor.getCount());
 
@@ -264,17 +261,9 @@ public class MessageSQLite {
 				tempMessage.setMsgType(cursor.getString(cursor
 						.getColumnIndex(UsersDBHelper.MessageType)));
 
-				// String dateTime = cursor.getString(cursor
-				// .getColumnIndex(UsersDBHelper.MessageDate));
-				// if (dateTime == null || dateTime.equals("") ||
-				// dateTime.equals(null))
-				// Log.e("tait auda ", "huwa fucchheee !!!");
-				// else {
-
-				// Log.e("tait auda ", "huwa kutttteeee !!!");
 				tempMessage.parseDateTime(cursor.getString(cursor
 						.getColumnIndex(UsersDBHelper.MessageDate)));
-				// }
+
 				tempArrList.add(tempMessage);
 
 				cursor.moveToNext();
@@ -389,7 +378,54 @@ public class MessageSQLite {
 					"Pending Msgs Cursor Size = 0");
 		}
 		cursor.close();
-		// db.execSQL(getPendingQuery);
+		return null;
+	}
+
+	/*****************************************************************************************
+	 * read the Message of Viewed Item
+	 * ************************************************************************************/
+	public Message getViewedMessage(int messageId) {
+
+		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_MESSAGE
+				+ " WHERE " + UsersDBHelper.MessageId + "=" + messageId
+				+ " ORDER BY " + UsersDBHelper.MessageId + " DESC";
+
+		Cursor cursor = db.rawQuery(readQuery, null);
+		Log.v("CURSOR Viewed Message SIZE:", "" + cursor.getCount());
+
+		/**
+		 * If the cursor is able to move to First, at least 1 value is present
+		 **/
+		if (cursor.moveToFirst()) {
+
+			Message tempMessage = new Message();
+			while (!cursor.isAfterLast()) {
+
+				tempMessage.setMsgId(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.MessageId)));
+				tempMessage.setMsgRealId(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.MessageRealId)));
+				tempMessage.setMsgTitle(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.MessageSubject)));
+				tempMessage.setMsgDesc(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.MessageDesc)));
+				tempMessage.setMsgDate(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.MessageDate)));
+				tempMessage.setMsgFrom(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.MessageFrom)));
+				tempMessage.setMsgTo(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.MessageTo)));
+				tempMessage.setMsgRead(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.MessageRead)));
+				tempMessage.parseDateTime(cursor.getString(cursor
+						.getColumnIndex(UsersDBHelper.MessageDate)));
+
+				cursor.moveToNext();
+			}
+
+			cursor.close();
+			return tempMessage;
+		}
 		return null;
 	}
 

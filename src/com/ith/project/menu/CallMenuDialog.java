@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import com.ith.project.BulletinAddActivity;
-import com.ith.project.BulletinViewActivity;
 import com.ith.project.EmployeeAddActivity;
 import com.ith.project.EmployeeEditActivity;
 import com.ith.project.EmployeeListActivity;
@@ -19,7 +17,7 @@ import com.ith.project.MessageAddActivity;
 import com.ith.project.MessageListActivity;
 import com.ith.project.R;
 import com.ith.project.EntityClasses.LoginAuthentication;
-
+import com.ith.project.connection.HttpConnection;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -47,14 +45,11 @@ public class CallMenuDialog {
 	private Dialog dialog;
 	private ListView menuListView;
 	private CustomMenuListAdapter menuAdapter;
-	private ProgressDialog pdialog;
 	private HashMap<String, String> menuItems;
 
-	public CallMenuDialog(Context context,/* ProgressDialog pdialog, */
-			Dialog dialog, HashMap<String, String> menuItems) {
+	public CallMenuDialog(Context context, Dialog dialog,
+			HashMap<String, String> menuItems) {
 		this.context = context;
-		// this.pdialog = pdialog;
-		// this.pdialog = new ProgressDialog(context);
 		this.dialog = dialog;
 		this.menuItems = menuItems;
 		init();
@@ -63,8 +58,6 @@ public class CallMenuDialog {
 	public CallMenuDialog(Context context, ProgressDialog pdialog,
 			Dialog dialog, HashMap<String, String> menuItems) {
 		this.context = context;
-		// this.pdialog = pdialog;
-		this.pdialog = pdialog;
 		this.dialog = dialog;
 		this.menuItems = menuItems;
 		init();
@@ -78,7 +71,6 @@ public class CallMenuDialog {
 
 		linLayoutMenu = (LinearLayout) ((Activity) this.context)
 				.findViewById(R.id.linearLayoutCustomMenu_2);
-		// LinearLayout linLayoutMenu = new LinearLayout(this);
 		menuInflater.inflate(R.layout.menu_list_view, linLayoutMenu, false);
 
 		/** To bring front the Dialog box **/
@@ -118,7 +110,6 @@ public class CallMenuDialog {
 						|| menuTitle.equals("Delete Employee")
 						|| menuTitle.equals("Edit Contents")) {
 
-					// tempArrList.remove(menuTitle);
 					continue;
 				}
 				tempArrList.add(setMenuItems(mapValues.getKey(),
@@ -144,8 +135,9 @@ public class CallMenuDialog {
 
 				/** When "Add Message" menu item is pressed **/
 				if (keyword.equals("Add Message")) {
-					if (!EmployeeListActivity.getConnFlag()) {
-						/* pdialog.show(); */
+					if (HttpConnection
+							.getConnectionAvailable(CallMenuDialog.this.context)) {
+
 						((Activity) CallMenuDialog.this.context).finish();
 						Intent intent = new Intent(CallMenuDialog.this.context,
 								BulletinAddActivity.class);
@@ -160,8 +152,9 @@ public class CallMenuDialog {
 				}
 				/** When "Add Bulletin" menu item is pressed **/
 				if (keyword.equals("Add Bulletin")) {
-					if (!ListItemActivity.getConnFlag()) {
-						/* pdialog.show(); */
+					if (HttpConnection
+							.getConnectionAvailable(CallMenuDialog.this.context)) {
+
 						((Activity) CallMenuDialog.this.context).finish();
 						Intent intent = new Intent(CallMenuDialog.this.context,
 								BulletinAddActivity.class);
@@ -176,8 +169,9 @@ public class CallMenuDialog {
 				}
 				/** When "Add Employee" menu item is pressed **/
 				if (keyword.equals("Add Employee")) {
-					if (!EmployeeListActivity.getConnFlag()) {
-						/* pdialog.show(); */
+					if (HttpConnection
+							.getConnectionAvailable(CallMenuDialog.this.context)) {
+
 						Intent intent = new Intent(CallMenuDialog.this.context,
 								EmployeeAddActivity.class);
 						CallMenuDialog.this.context.startActivity(intent);
@@ -191,14 +185,15 @@ public class CallMenuDialog {
 				}
 				/** When "Edit Employee" menu item is pressed **/
 				else if (keyword.equals("Edit Contents")) {
-					if (!EmployeeListActivity.getConnFlag()) {
-						/* pdialog.show(); */
+					if (HttpConnection
+							.getConnectionAvailable(CallMenuDialog.this.context)) {
+
 						Intent intent = new Intent(CallMenuDialog.this.context,
 								EmployeeEditActivity.class);
 						intent.putExtra("PositionOfEmployeeEdit",
 								EmployeeViewActivity.getPosition());
 						CallMenuDialog.this.context.startActivity(intent);
-						// CallMenuDialog.this.context.finish();
+
 					} else {
 						Toast.makeText(CallMenuDialog.this.context,
 								"Oops ! Can't edit while you're Offline",
@@ -208,32 +203,22 @@ public class CallMenuDialog {
 					}
 				} else if (keyword.equals("Delete Employee")) {
 
-					// ((EmployeeListActivity)
-					// CallMenuDialog.this.context).deleteEmployee();
 					((EmployeeListActivity) CallMenuDialog.this.context)
 							.deleteDialog();
 
 				} else if (keyword.equals("Delete Messages")) {
 
-					// ((EmployeeListActivity)
-					// CallMenuDialog.this.context).deleteEmployee();
 					((MessageListActivity) CallMenuDialog.this.context)
 							.deleteMessages();
 
 				} else if (keyword.equals("Send Web Message")) {
-					// if (!EmployeeListActivity.getConnFlag()) {
-					/* pdialog.show(); */
+
 					Intent intent = new Intent(CallMenuDialog.this.context,
 							MessageAddActivity.class);
 					CallMenuDialog.this.context.startActivity(intent);
-					// } else {
 
-					// Log.e("Attempted Web message send While Offline",
-					// "Go Online and then try");
-					// }
 				} else if (keyword.equals("Send SMS")) {
 
-					/* pdialog.show(); */
 					int empPos = EmployeeViewActivity.getPosition();
 					Log.e("Position of emp: ", "" + empPos);
 					Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -243,31 +228,26 @@ public class CallMenuDialog {
 					CallMenuDialog.this.context.startActivity(intent);
 
 				} else if (keyword.equals("Phone Call")) {
-					/* pdialog.show(); */
+
 				} else if (keyword.equals("Add Events")) {
-					// if (!EmployeeListActivity.getConnFlag()) {
-					/* pdialog.show(); */
+
 					Intent intent = new Intent(CallMenuDialog.this.context,
 							EventAddActivity.class);
 					CallMenuDialog.this.context.startActivity(intent);
-					// } else {
 
-					// Log.e("Attempted Web message send While Offline",
-					// "Go Online and then try");
-					// }
 				} else if (keyword.equals("Fill Form")) {
 					Intent intent = new Intent(CallMenuDialog.this.context,
 							LeaveFormActivity.class);
 					CallMenuDialog.this.context.startActivity(intent);
 
 				} else if (keyword.equals("Preferences")) {
-					/* pdialog.show(); */
+
 					((MessageListActivity) CallMenuDialog.this.context)
 							.showPreferencesDialog();
 				}
 				/** When "Exit" menu item is pressed **/
 				else if (keyword.equals("Exit")) {
-					/* pdialog.show(); */
+
 					((Activity) CallMenuDialog.this.context).finish();
 					Intent intent = new Intent(CallMenuDialog.this.context,
 							ListItemActivity.class);
@@ -275,13 +255,10 @@ public class CallMenuDialog {
 					intent.putExtra("Exit", "exit_now");
 					Exit = true;
 					CallMenuDialog.this.context.startActivity(intent);
-					// ListItemActivity.getListItemActivityInstance().finish();
 				}
 				dialog.dismiss();
 			}
 		});
-
-		/* dialog.show(); */
 
 	}
 

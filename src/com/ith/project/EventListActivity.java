@@ -4,16 +4,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.ith.project.EntityClasses.Event;
 import com.ith.project.EntityClasses.LoginAuthentication;
-import com.ith.project.EntityClasses.Message;
 import com.ith.project.connection.HttpConnection;
 import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.sqlite.*;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -31,7 +30,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TableLayout;
@@ -55,7 +53,6 @@ public class EventListActivity extends Activity implements OnClickListener,
 	private static ArrayList<Event> itemDetails;
 	private ListView listView;
 	private static EventItemArrayAdapter eventItemArrAdapter;
-	private CallMenuDialog callDiag;
 	private HashMap<String, String> menuItems;
 	private static int eventCount;
 	private Button buttonCancel, cancelConfirm, deleteConfirm;
@@ -63,10 +60,7 @@ public class EventListActivity extends Activity implements OnClickListener,
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * pdialog = new ProgressDialog(this); pdialog.setCancelable(true);
-		 * pdialog.setMessage("Loading ...."); pdialog.show();
-		 */
+
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.list_view);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
@@ -82,8 +76,6 @@ public class EventListActivity extends Activity implements OnClickListener,
 			eventSQLite.closeDB();
 		if (msgEntryLogSQLite != null)
 			msgEntryLogSQLite.closeDB();
-		/* pdialog.dismiss(); */
-		// exitDialog.dismiss();
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -109,7 +101,6 @@ public class EventListActivity extends Activity implements OnClickListener,
 				if (!msgEntryLogSQLite.isOpen())
 					msgEntryLogSQLite.openDB();
 
-				boolean connAvail = true;
 				/**
 				 * Before populating Event list try to update the pending Events
 				 * operations to webservice
@@ -117,7 +108,8 @@ public class EventListActivity extends Activity implements OnClickListener,
 				ArrayList<Event> pendingEventsSent = new ArrayList<Event>();
 				pendingEventsSent = eventSQLite
 						.selectPendingEvents("eventPending");
-				if (pendingEventsSent != null) {
+				if (pendingEventsSent != null
+						&& HttpConnection.getConnectionAvailable(context)) {
 
 					ArrayList<Event> sentEvents = new ArrayList<Event>();
 					int sender = LoginAuthentication.EmployeeId;
@@ -125,6 +117,7 @@ public class EventListActivity extends Activity implements OnClickListener,
 					String longitude = "", latitude = "";
 					int[] receiversId = new int[pendingEventsSent.size()];
 					int k = 0;
+
 					for (int j = 0; j < pendingEventsSent.size(); j++) {
 
 						if (sender == pendingEventsSent.get(j)
@@ -141,55 +134,58 @@ public class EventListActivity extends Activity implements OnClickListener,
 									.getEventDateTime();
 							longitude = pendingEventsSent.get(j).getLongitude();
 							latitude = pendingEventsSent.get(j).getLatitude();
-						}
-					}
+							
+							JSONObject pendingEventsSentQuery = null;
+							if (title != null && description != null) {
 
-					JSONObject pendingEventsSentQuery = null;
-					if (title != null && description != null) {
+								pendingEventsSentQuery = makeNewMessageJSON(
+										sender, receiversId, title,
+										description, place, dateTime,
+										longitude, latitude);
 
-						pendingEventsSentQuery = makeNewMessageJSON(sender,
-								receiversId, title, description, place,
-								dateTime, longitude, latitude);
+								Log.v(" pendingMessageQuery status", ""
+										+ pendingEventsSentQuery.toString());
+								String insertStatusStr = conn.getJSONFromUrl(
+										pendingEventsSentQuery, sendEvents);
 
-						Log.v(" pendingMessageQuery status", ""
-								+ pendingEventsSentQuery.toString());
-						String insertStatusStr = conn.getJSONFromUrl(
-								pendingEventsSentQuery, sendEvents);
+								if (insertStatusStr.startsWith("{")) {
+									JSONObject insertStatusJson;
+									try {
+										insertStatusJson = new JSONObject(
+												insertStatusStr);
 
-						if (insertStatusStr.startsWith("{")) {
-							JSONObject insertStatusJson;
-							try {
-								insertStatusJson = new JSONObject(
-										insertStatusStr);
+										boolean insertStatus = (Boolean) insertStatusJson
+												.get("CreateEventResult");
 
-								boolean insertStatus = (Boolean) insertStatusJson
-										.get("CreateEventResult");
+										/**
+										 * If web service is successfully called
+										 **/
+										if (insertStatus) {
 
-								/** If web service is successfully called **/
-								if (insertStatus) {
+											eventSQLite
+													.deleteEvents(pendingEventsSent);
+											Log.e("Deleted pending Sent Events ",
+													"Until later retrieved from web service");
+										} else {
 
-									eventSQLite.deleteEvents(pendingEventsSent);
-									Log.e("Deleted pending Sent Events ",
-											"Until later retrieved from web service");
+											Log.e("Problem Posting Events ",
+													"InsertStatus From Web Service"
+															+ insertStatus);
+										}
+									} catch (JSONException e) {
+
+										Log.e("JSONException while posting Events",
+												"" + e.getMessage());
+										e.printStackTrace();
+									}
 								} else {
 
-									Log.e("Problem Posting Events ",
+									Log.e("Server didn't response ",
 											"InsertStatus From Web Service"
-													+ insertStatus);
+													+ insertStatusStr);
 								}
-							} catch (JSONException e) {
-								connAvail = false;
-								Log.e("JSONException while posting Events", ""
-										+ e.getMessage());
-								e.printStackTrace();
 							}
-						} else {
-							connAvail = false;
-							Log.e("Server didn't response ",
-									"InsertStatus From Web Service"
-											+ insertStatusStr);
 						}
-
 					}
 				}
 
@@ -203,7 +199,8 @@ public class EventListActivity extends Activity implements OnClickListener,
 
 				pendingReadEvents = eventSQLite
 						.selectPendingEvents("readUpdatePending");
-				if (pendingReadEvents != null && connAvail) {
+				if (pendingReadEvents != null
+						&& HttpConnection.getConnectionAvailable(context)) {
 
 					for (int i = 0; i < pendingReadEvents.size(); i++) {
 						/**
@@ -264,7 +261,8 @@ public class EventListActivity extends Activity implements OnClickListener,
 
 				pendingGoingEvents = eventSQLite
 						.selectPendingEvents("goingUpdatePending");
-				if (pendingGoingEvents != null && connAvail) {
+				if (pendingGoingEvents != null
+						&& HttpConnection.getConnectionAvailable(context)) {
 
 					for (int i = 0; i < pendingGoingEvents.size(); i++) {
 
@@ -316,7 +314,8 @@ public class EventListActivity extends Activity implements OnClickListener,
 
 				pendingCancelEvents = eventSQLite
 						.selectPendingEvents("cancelEventPending");
-				if (pendingCancelEvents != null && connAvail) {
+				if (pendingCancelEvents != null
+						&& HttpConnection.getConnectionAvailable(context)) {
 
 					for (int i = 0; i < pendingCancelEvents.size(); i++) {
 						/**
@@ -367,7 +366,8 @@ public class EventListActivity extends Activity implements OnClickListener,
 
 				pendingPostponedEvents = eventSQLite
 						.selectPendingEvents("eventPostponed");
-				if (pendingPostponedEvents != null && connAvail) {
+				if (pendingPostponedEvents != null
+						&& HttpConnection.getConnectionAvailable(context)) {
 
 					for (int i = 0; i < pendingPostponedEvents.size(); i++) {
 
@@ -422,103 +422,13 @@ public class EventListActivity extends Activity implements OnClickListener,
 
 				Log.v("GetEvents inquiry", "" + inquiryJson.toString());
 				/** To establish connection to the web service **/
-				/* if (!connAvail) */{
+				{
 					String eventsFromWS = conn.getJSONFromUrl(inquiryJson,
 							getEventsUrl);
-					boolean connFlag = true;
-					/*
-					 * JSONObject mainEvents = new JSONObject(); JSONArray
-					 * ListOfEvents = new JSONArray(); JSONObject Desc = new
-					 * JSONObject(); JSONObject EventId = new JSONObject();
-					 * JSONObject a = new JSONObject(); JSONObject b = new
-					 * JSONObject(); try { Desc.put("Description", "Test");
-					 * Desc.put("EventId", 3); Desc.put("EventStatusId", 1);
-					 * Desc.put("IsEventRead", 1); Desc.put("Latitude", "0.0");
-					 * Desc.put("Longitude", "0.0");
-					 * Desc.put("OrganizerEmployeeId", 4);
-					 * Desc.put("StringEventDate", "20130728_110000");
-					 * Desc.put("Title",
-					 * "Meeting To Appreciate Employee Through Bonus");
-					 * Desc.put("Venue", "Hotel Yak and Yeti");
-					 * 
-					 * JSONArray GoingValues = new JSONArray();
-					 * GoingValues.put(0); GoingValues.put(2);
-					 * GoingValues.put(2); GoingValues.put(1);
-					 * GoingValues.put(1); Desc.put("IsGoing", GoingValues);
-					 * 
-					 * JSONArray EmployeeIds = new JSONArray();
-					 * EmployeeIds.put(3); EmployeeIds.put(4);
-					 * EmployeeIds.put(7); EmployeeIds.put(10);
-					 * EmployeeIds.put(40); Desc.put("ToEmployeeId",
-					 * EmployeeIds);
-					 * 
-					 * EventId.put("Description",
-					 * "Training didai chan hamro Bill Gates ");
-					 * EventId.put("EventId", 24); EventId.put("EventStatusId",
-					 * 2); EventId.put("IsEventRead", 0);
-					 * EventId.put("Latitude", "0.0"); EventId.put("Longitude",
-					 * "0.0"); EventId.put("OrganizerEmployeeId", 3);
-					 * EventId.put("StringEventDate", "20121129_102000");
-					 * EventId.put("Title", "Seminar On Linux Talks");
-					 * EventId.put("Venue", "Hotel Annapurna");
-					 * 
-					 * JSONArray GoingValues1 = new JSONArray();
-					 * GoingValues1.put(1); GoingValues1.put(2);
-					 * GoingValues1.put(0); EventId.put("IsGoing",
-					 * GoingValues1);
-					 * 
-					 * JSONArray EmployeeIds1 = new JSONArray();
-					 * EmployeeIds1.put(3); EmployeeIds1.put(4);
-					 * EmployeeIds1.put(7); EventId.put("ToEmployeeId",
-					 * EmployeeIds1);
-					 * 
-					 * a.put("Description", "Football khelna au hai keta hau");
-					 * a.put("EventId", 20); a.put("EventStatusId", 3);
-					 * a.put("IsEventRead", 0); a.put("Latitude", "0.0");
-					 * a.put("Longitude", "0.0"); a.put("OrganizerEmployeeId",
-					 * 4); a.put("StringEventDate", "20121129_102000");
-					 * a.put("Title", "Football Match on Sunday");
-					 * a.put("Venue", "Pepsi Cola");
-					 * 
-					 * JSONArray GoingValues2 = new JSONArray();
-					 * GoingValues2.put(2); GoingValues2.put(1);
-					 * GoingValues2.put(0); a.put("IsGoing", GoingValues2);
-					 * 
-					 * JSONArray EmployeeIds2 = new JSONArray();
-					 * EmployeeIds2.put(3); EmployeeIds2.put(4);
-					 * EmployeeIds2.put(7); a.put("ToEmployeeId", EmployeeIds2);
-					 * 
-					 * b.put("Description", "Hospital janu paryo");
-					 * b.put("EventId", 10); b.put("EventStatusId", 4);
-					 * b.put("IsEventRead", 1); b.put("Latitude", "0.0");
-					 * b.put("Longitude", "0.0"); b.put("OrganizerEmployeeId",
-					 * 3); b.put("StringEventDate", "20121129_102000");
-					 * b.put("Title", "Injury Time"); b.put("Venue",
-					 * "Jaishidewal");
-					 * 
-					 * JSONArray GoingValues3 = new JSONArray();
-					 * GoingValues3.put(2); GoingValues3.put(1);
-					 * GoingValues3.put(0); b.put("IsGoing", GoingValues3);
-					 * 
-					 * JSONArray EmployeeIds3 = new JSONArray();
-					 * EmployeeIds3.put(4); EmployeeIds3.put(7);
-					 * EmployeeIds3.put(3); b.put("ToEmployeeId", EmployeeIds3);
-					 * 
-					 * ListOfEvents.put(Desc); ListOfEvents.put(EventId);
-					 * ListOfEvents.put(a); ListOfEvents.put(b);
-					 * mainEvents.put("ListOfEventsResult", ListOfEvents); }
-					 * catch (JSONException e) { // TODO Auto-generated catch
-					 * block e.printStackTrace(); }
-					 */
-					// eventsFromWS = mainEvents.toString();
-					// eventsFromWS = test.getText().toString();
 
 					Log.v("Events:", "" + eventsFromWS);
-					if (eventsFromWS.startsWith("{") /*
-													 * ||
-													 * !eventsFromWS.equals("")
-													 */) {
-						connFlag = false;
+					if (eventsFromWS.startsWith("{")) {
+
 						/** Update the local sqlite according to the web service **/
 						eventSQLite.updateEventTable(eventsFromWS,
 								msgEntryLogSQLite);
@@ -555,7 +465,6 @@ public class EventListActivity extends Activity implements OnClickListener,
 							eventCount = eventItemArrAdapter.getCount();
 							listView.setOnItemClickListener(EventListActivity.this);
 
-							/* pdialog.dismiss(); */
 						}
 					});
 
@@ -570,7 +479,6 @@ public class EventListActivity extends Activity implements OnClickListener,
 
 	protected JSONObject getPostponeQuery(int eventRealId, String eventDateTime) {
 
-		// JSONObject deleteEmp = new JSONObject();
 		JSONObject jsonObject = new JSONObject();
 
 		try {
@@ -579,7 +487,6 @@ public class EventListActivity extends Activity implements OnClickListener,
 			jsonObject.put("employeeId",
 					new StringBuilder().append(LoginAuthentication.EmployeeId));
 			jsonObject.put("userLoginId", LoginAuthentication.UserloginId);
-			// deleteEmp.put("SetEventStatus", jsonObject);
 		} catch (JSONException e) {
 			Log.e("JSONEXception @ getCancelEvent", "" + e.getMessage());
 			e.printStackTrace();
@@ -596,22 +503,18 @@ public class EventListActivity extends Activity implements OnClickListener,
 		Log.v("EventlistItemClicked @" + (eventCount - position - 1),
 				"HOOOrAyyy!!!!");
 
-		/* pdialog.show(); */
-
 		Intent intent = new Intent(EventListActivity.this,
 				EventViewActivity.class);
-		intent.putExtra("PositionOfEvent", (position));
+		intent.putExtra("EventId", itemDetails.get(position)
+				.getEventId());
 		EventListActivity.this.startActivity(intent);
-
-		// ListItemActivity.this.finish();
 
 	}
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-			// do something on back.
-			/* pdialog.show(); */
+
 			this.finish();
 			return true;
 		}
@@ -622,7 +525,6 @@ public class EventListActivity extends Activity implements OnClickListener,
 	public void onClick(View v) {
 
 		if (v.equals(menuButton)) {
-			/* pdialog.show(); */
 			Intent intent = new Intent(EventListActivity.this,
 					GridItemActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -630,11 +532,9 @@ public class EventListActivity extends Activity implements OnClickListener,
 		} else if (v.equals(homeButton)) {
 
 			/** Set up the Menu **/
-			// menuItems.put("Send SMS", "mail_sms");
 			menuItems.put("Add Events", "mail_web");
-			// menuItems.put("Exit", "exit");
-			callDiag = new CallMenuDialog(this, /* pdialog, */dialog, menuItems);
-			// callMenuDialog();
+			new CallMenuDialog(this, dialog, menuItems);
+
 		}
 	}
 
@@ -685,22 +585,18 @@ public class EventListActivity extends Activity implements OnClickListener,
 		JSONObject tempJsonFile = new JSONObject();
 
 		Calendar calendar = Calendar.getInstance();
-		SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+		SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMddHHmmss",
+				Locale.US);
 		String currDate = dtFormat.format(calendar.getTime());
 
 		if (startDate == null)
-			startDate = "isFirstTime";// startDate = previousDate;
+			startDate = "isFirstTime";
 		try {
-			tempJsonFile.put("userLoginId",
-			/* "4A85CDB0-8822-43D1-B634-00039D9578C0" */userLoginId);
-			tempJsonFile.put("startDateTime",/* "20130720151055" */startDate);
-			tempJsonFile.put("endDateTime", /* "20130801191055" */currDate);
-			tempJsonFile.put("employeeId",
-					new StringBuilder().append(msgTo/* msgTo */));
-			/*
-			 * tempJsonFile.put("eventId", "2"); tempJsonFile.put("employeeId",
-			 * "7");
-			 */
+			tempJsonFile.put("userLoginId", userLoginId);
+			tempJsonFile.put("startDateTime", startDate);
+			tempJsonFile.put("endDateTime", currDate);
+			tempJsonFile.put("employeeId", new StringBuilder().append(msgTo));
+
 		} catch (JSONException e) {
 			Log.e("Could not convert to JSONObject", "" + e.getMessage());
 			e.printStackTrace();
@@ -714,7 +610,7 @@ public class EventListActivity extends Activity implements OnClickListener,
 	 * *****************************************************************************************/
 	protected JSONObject getDeleteQuery(int eventId) {
 
-		// JSONObject deleteEmp = new JSONObject();
+		
 		JSONObject jsonObject = new JSONObject();
 
 		try {
@@ -723,7 +619,7 @@ public class EventListActivity extends Activity implements OnClickListener,
 			jsonObject.put("employeeId",
 					new StringBuilder().append(LoginAuthentication.EmployeeId));
 			jsonObject.put("userLoginId", LoginAuthentication.UserloginId);
-			// deleteEmp.put("SetEventStatus", jsonObject);
+			
 		} catch (JSONException e) {
 			Log.e("JSONEXception @ getCancelEvent", "" + e.getMessage());
 			e.printStackTrace();
@@ -739,7 +635,7 @@ public class EventListActivity extends Activity implements OnClickListener,
 
 		private Context cntxt;
 		private ArrayList<Event> itemDets;
-		private int IdOfCancelEvent, IdOfDeleteEvent;
+		private int IdOfCancelEvent;
 		private String isPending;
 
 		public EventItemArrayAdapter(Context context, int textViewResourceId,
@@ -755,198 +651,183 @@ public class EventListActivity extends Activity implements OnClickListener,
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 			View view;
-			// if (convertView == null)
-			{
-				view = new View(this.cntxt);
 
-				view = inflater.inflate(R.layout.event_list, parent, false);
+			view = new View(this.cntxt);
 
-				parent.setBackgroundColor(Color.rgb(221, 221, 221));
+			view = inflater.inflate(R.layout.event_list, parent, false);
 
-				TableLayout tableLayout = (TableLayout) view
-						.findViewById(R.id.tableLayoutEventList);
-				if (!this.itemDets.get(position).getEventReadStatus())
-					tableLayout
-							.setBackgroundResource(R.drawable.message_view_unread);
+			parent.setBackgroundColor(Color.rgb(221, 221, 221));
 
-				TextView textView = (TextView) view
-						.findViewById(R.id.textViewEventTitle);
-				textView.setText(this.itemDets.get(position).getEventName());
-				textView.setFocusable(false);
+			TableLayout tableLayout = (TableLayout) view
+					.findViewById(R.id.tableLayoutEventList);
+			if (!this.itemDets.get(position).getEventReadStatus())
+				tableLayout
+						.setBackgroundResource(R.drawable.message_view_unread);
 
-				EmployeeSQLite employeeSQLite = new EmployeeSQLite(
-						EventListActivity.this);
-				employeeSQLite.openDB();
-				TextView msgFrom = (TextView) view
-						.findViewById(R.id.textViewEventCreator);
-				msgFrom.setText("Created By >> "
-						+ employeeSQLite.getEmpName(this.itemDets.get(position)
-								.getEventCreator()));
-				msgFrom.setFocusable(false);
-				employeeSQLite.closeDB();
+			TextView textView = (TextView) view
+					.findViewById(R.id.textViewEventTitle);
+			textView.setText(this.itemDets.get(position).getEventName());
+			textView.setFocusable(false);
 
-				TextView time = (TextView) view
-						.findViewById(R.id.textViewEventDate);
-				time.setText("Happening On: "
-						+ this.itemDets.get(position).getDate() + " @"
-						+ itemDets.get(position).getTime());
-				textView.setFocusable(false);
-				// time.setVisibility(View.GONE);
+			EmployeeSQLite employeeSQLite = new EmployeeSQLite(
+					EventListActivity.this);
+			employeeSQLite.openDB();
+			TextView msgFrom = (TextView) view
+					.findViewById(R.id.textViewEventCreator);
+			msgFrom.setText("Created By >> "
+					+ employeeSQLite.getEmpName(this.itemDets.get(position)
+							.getEventCreator()));
+			msgFrom.setFocusable(false);
+			employeeSQLite.closeDB();
 
-				ImageView goingView = (ImageView) view
-						.findViewById(R.id.imageViewEventParticipation);
-				String goingStats = this.itemDets.get(position)
-						.getParticipationStatus();
-				int eventStatus = itemDets.get(position).getEventStatus();
+			TextView time = (TextView) view
+					.findViewById(R.id.textViewEventDate);
+			time.setText("Happening On: "
+					+ this.itemDets.get(position).getDate() + " @"
+					+ itemDets.get(position).getTime());
+			textView.setFocusable(false);
 
-				String imageName;
+			ImageView goingView = (ImageView) view
+					.findViewById(R.id.imageViewEventParticipation);
+			String goingStats = this.itemDets.get(position)
+					.getParticipationStatus();
+			int eventStatus = itemDets.get(position).getEventStatus();
 
-				if (eventStatus == 3 || goingStats.equals("Cancelled"))
-					imageName = "cancel";
-				else if (eventStatus == 2) {
-					imageName = "complete";
-				} else if (goingStats.equals("Going"))
-					imageName = "green_dot";
-				else if (goingStats.equals("NotGoing"))
-					imageName = "red_dot";
-				else
-					imageName = "pending";
+			String imageName;
 
-				int id = getResources().getIdentifier(imageName, "drawable",
-						getApplicationContext().getPackageName());
+			if (eventStatus == 3 || goingStats.equals("Cancelled"))
+				imageName = "cancel";
+			else if (eventStatus == 2) {
+				imageName = "complete";
+			} else if (goingStats.equals("Going"))
+				imageName = "green_dot";
+			else if (goingStats.equals("NotGoing"))
+				imageName = "red_dot";
+			else
+				imageName = "pending";
 
-				// imageView.setImageResource(R.drawable.user1);
-				goingView.setImageResource(id);
-				goingView.setFocusable(false);
+			int id = getResources().getIdentifier(imageName, "drawable",
+					getApplicationContext().getPackageName());
 
-				ImageButton deleteButton = (ImageButton) view
-						.findViewById(R.id.imageViewDelete);
-				deleteButton.setFocusable(false);
-				// deleteButton.setFocusableInTouchMode(true);
+			goingView.setImageResource(id);
+			goingView.setFocusable(false);
+
+			ImageButton deleteButton = (ImageButton) view
+					.findViewById(R.id.imageViewDelete);
+			deleteButton.setFocusable(false);
+
+			/**
+			 * Check whether eventStatus is cancelled and Completed. If
+			 * eventStatus == 3 || 2 then you can call the deleteEvent function
+			 * if the close button is Clicked
+			 **/
+			if (eventStatus == 3 || eventStatus == 2
+					|| goingStats.equals("Cancelled")) {
+
+				view.setTag(deleteButton);
+				deleteButton.setTag((Event) (itemDets).get(position));
+				/**
+				 * Set up a listener for Click in the Cross button for delete
+				 * Event if Cancelled Flag is on
+				 **/
+				deleteButton.setOnClickListener(new OnClickListener() {
+
+					public void onClick(View v) {
+
+						ImageButton deletedButton = (ImageButton) v;
+						Event deleteEventForDialog = (Event) deletedButton
+								.getTag();
+
+						deleteDialog = new Dialog(getApplicationContext());
+						Button cancelDelete;
+
+						/** To bring front the Dialog box **/
+						deleteDialog = new Dialog(context);
+						deleteDialog.setTitle("Confirm Delete");
+						deleteDialog.setCanceledOnTouchOutside(false);
+
+						/**
+						 * To set the dialog box with the List layout in the
+						 * android xml
+						 **/
+						deleteDialog.setContentView(R.layout.exit_dialog);
+
+						deleteConfirm = (Button) deleteDialog
+								.findViewById(R.id.buttonExitConfirm);
+						deleteConfirm.setText("Delete");
+
+						deleteDialog.show();
+
+						cancelDelete = (Button) deleteDialog
+								.findViewById(R.id.buttonExitCancel);
+						cancelDelete.setOnClickListener(new OnClickListener() {
+
+							public void onClick(View v) {
+								deleteDialog.dismiss();
+
+							}
+						});
+
+						deleteConfirm.setTag(deleteEventForDialog);
+						deleteConfirm.setOnClickListener(new OnClickListener() {
+
+							public void onClick(View v1) {
+								/**
+								 * To delete the Cancelled or confirmed Events
+								 * when confirm button is clicked
+								 * 
+								 **/
+								Button but = (Button) v1;
+								Event deleteEvent = (Event) but.getTag();
+
+								Log.e("Click chai vayo cross Button ma",
+										"Event will be deleted now");
+
+								Log.e("Deleted Item Id:",
+										"" + deleteEvent.getEventId());
+
+								eventSQLite.deleteEvent(deleteEvent
+										.getEventId());
+
+								deleteDialog.dismiss();
+								EventListActivity.this.finish();
+								startActivity(new Intent(
+										EventListActivity.this,
+										EventListActivity.class));
+
+							}
+						});
+
+					}
+				});
+			}
+			/**
+			 * Use the cross button for cancel Events (provided only to the
+			 * creator of Events)
+			 **/
+			else if (this.itemDets.get(position).getEventCreator() == LoginAuthentication.EmployeeId) {
+
+				IdOfCancelEvent = this.itemDets.get(position).getEventRealId();
+				isPending = this.itemDets.get(position).getEventType();
 
 				/**
-				 * Check whether eventStatus is cancelled and Completed. If
-				 * eventStatus == 3 || 2 then you can call the deleteEvent
-				 * function if the close button is Clicked
+				 * Set up a listener for Click in the Cross button for cancel
+				 * Event
 				 **/
-				if (eventStatus == 3 || eventStatus == 2
-						|| goingStats.equals("Cancelled")) {
+				deleteButton.setOnClickListener(new OnClickListener() {
 
-					IdOfDeleteEvent = itemDets.get(position).getEventId();
-					view.setTag(deleteButton);
-					deleteButton.setTag((Event) (itemDets).get(position));
-					/**
-					 * Set up a listener for Click in the Cross button for
-					 * delete Event if Cancelled Flag is on
-					 **/
-					deleteButton.setOnClickListener(new OnClickListener() {
-
-						public void onClick(View v) {
-
-							ImageButton deletedButton = (ImageButton) v;
-							Event deleteEventForDialog = (Event) deletedButton
-									.getTag();
-
-							deleteDialog = new Dialog(getApplicationContext());
-							Button cancelDelete;
-							
-							/** To bring front the Dialog box **/
-							deleteDialog = new Dialog(context);
-							deleteDialog.setTitle("Confirm Delete");
-							deleteDialog.setCanceledOnTouchOutside(false);
-
-							/**
-							 * To set the dialog box with the List layout in the
-							 * android xml
-							 **/
-							deleteDialog.setContentView(R.layout.exit_dialog);
-
-							deleteConfirm = (Button) deleteDialog
-									.findViewById(R.id.buttonExitConfirm);
-							deleteConfirm.setText("Delete");
-							/* pdialog.dismiss(); */
-							deleteDialog.show();
-
-							cancelDelete = (Button) deleteDialog
-									.findViewById(R.id.buttonExitCancel);
-							cancelDelete
-									.setOnClickListener(new OnClickListener() {
-
-										public void onClick(View v) {
-											deleteDialog.dismiss();
-
-										}
-									});
-
-							deleteConfirm.setTag(deleteEventForDialog);
-							deleteConfirm
-									.setOnClickListener(new OnClickListener() {
-
-										public void onClick(View v1) {
-											/**
-											 * To delete the Cancelled or
-											 * confirmed Events when confirm
-											 * button is clicked
-											 * 
-											 **/
-											// ImageButton deletedButton =
-											// (ImageButton) v;
-											Button but = (Button) v1;
-											Event deleteEvent = (Event) but
-													.getTag();
-
-											Log.e("Click chai vayo cross Button ma",
-													"Event will be deleted now");
-
-											Log.e("Deleted Item Id:", ""
-													+ deleteEvent.getEventId());
-
-											eventSQLite.deleteEvent(deleteEvent
-													.getEventId());
-
-											deleteDialog.dismiss();
-											EventListActivity.this.finish();
-											startActivity(new Intent(
-													EventListActivity.this,
-													EventListActivity.class));
-
-										}
-									});
-
-						}
-					});
-				}
-				/**
-				 * Use the cross button for cancel Events (provided only to the
-				 * creator of Events)
-				 **/
-				else if (this.itemDets.get(position).getEventCreator() == LoginAuthentication.EmployeeId) {
-
-					IdOfCancelEvent = this.itemDets.get(position)
-							.getEventRealId();
-					isPending = this.itemDets.get(position).getEventType();
-
-					/**
-					 * Set up a listener for Click in the Cross button for
-					 * cancel Event
-					 **/
-					deleteButton.setOnClickListener(new OnClickListener() {
-
-						public void onClick(View v) {
-							Log.e("La tyo cross click chai vayo",
-									"tara herum k hunxa");
-							cancelEvent();
-						}
-					});
-				}
-				/**
-				 * If EventStatus is Pending OR Postponed, hide the deleteButton
-				 **/
-				else
-					deleteButton.setVisibility(View.INVISIBLE);
-
-			} // else
-				// view = (View) convertView;
+					public void onClick(View v) {
+						Log.e("La tyo cross click chai vayo",
+								"tara herum k hunxa");
+						cancelEvent();
+					}
+				});
+			}
+			/**
+			 * If EventStatus is Pending OR Postponed, hide the deleteButton
+			 **/
+			else
+				deleteButton.setVisibility(View.INVISIBLE);
 
 			return view;
 		}
@@ -979,7 +860,7 @@ public class EventListActivity extends Activity implements OnClickListener,
 				cancelConfirm = (Button) cancelDialog
 						.findViewById(R.id.buttonExitConfirm);
 				cancelConfirm.setText("Cancel");
-				// pdialog.dismiss();
+
 				cancelDialog.show();
 
 				buttonCancel = (Button) cancelDialog
@@ -1036,8 +917,7 @@ public class EventListActivity extends Activity implements OnClickListener,
 								runOnUiThread(new Runnable() {
 
 									public void run() {
-										/* pdialog.show(); */
-										// exitDialog.dismiss();
+
 										cancelDialog.dismiss();
 										EventListActivity.this.finish();
 										Intent intent = new Intent(

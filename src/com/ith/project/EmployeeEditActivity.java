@@ -9,9 +9,10 @@ import com.ith.project.EntityClasses.Employee;
 import com.ith.project.connection.HttpConnection;
 import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.menu.CustomMenuListAdapter;
+import com.ith.project.sqlite.EmployeeSQLite;
+
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,7 +25,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -48,37 +48,31 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 	private Button employeeSubmit;
 	private ImageButton menuButton;
 	private ImageButton homeButton;
-	private ProgressDialog pdialog;
 	private Dialog dialog;
+	private EmployeeSQLite employeeSQLite;
 	static CustomMenuListAdapter menuAdapter;
-	private Context context;
 	private Matcher matcher;
 	private Pattern pattern, mobilePattern;
 	private JSONObject insertEmployee;
 	private String empName, empGender, empHomePhone, empMobile, empEmail,
 			empAddress, empDesignation, empRemarks;
-	private CallMenuDialog callDiag;
 	private HashMap<String, String> menuItems;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*pdialog = new ProgressDialog(this);
-		pdialog.setCancelable(true);
-		pdialog.setMessage("Loading ....");
-		pdialog.show();*/
+
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.employee_edit);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
 				R.layout.custom_title);
-		context = this;
+
 		init();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		/*pdialog.dismiss();*/
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -86,7 +80,6 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		/*pdialog.dismiss();*/
 	}
 
 	/************************************************************************************
@@ -99,24 +92,24 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		inflater.inflate(R.layout.employee_view, lin, false);
-		// Bundle bundle = getIntent().getExtras();
-		// int position = bundle.getInt("PositionOfEmployeeEdit");
 		int position = EmployeeViewActivity.getPosition();
 
-		Log.v("Employee Name Edit", ""
-				+ EmployeeListActivity.getEmployeeArrayList().get(position)
-						.getEmployeeName());
+		employeeSQLite = new EmployeeSQLite(EmployeeEditActivity.this);
+		if (!employeeSQLite.isOpen())
+			employeeSQLite.openDB();
 
-		employeeId = EmployeeListActivity.getEmployeeArrayList().get(position)
-				.getEmployeeId();
+		Employee EditedEmployee = employeeSQLite.getViewedEmployee(position);
+
+		employeeSQLite.closeDB();
+		Log.v("Employee Name Edit", "" + EditedEmployee.getEmployeeName());
+
+		employeeId = EditedEmployee.getEmployeeId();
 
 		employeeName = (EditText) findViewById(R.id.UserAddeditTextUserNameEmpEdit);
-		employeeName.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getEmployeeName());
+		employeeName.setText(EditedEmployee.getEmployeeName());
 
 		employeeGenderGroup = (RadioGroup) findViewById(R.id.radioSexEmpEdit);
-		String genderChk = EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getGender();
+		String genderChk = EditedEmployee.getGender();
 		if (genderChk.equals("Female")) {
 			employeeGender = (RadioButton) findViewById(R.id.radioButton1EmpEdit);
 			employeeGender.setChecked(false);
@@ -127,28 +120,22 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 				.getCheckedRadioButtonId());
 
 		employeeHomePhone = (EditText) findViewById(R.id.UserAddeditTextHomePhoneEmpEdit);
-		employeeHomePhone.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getHomePhone());
+		employeeHomePhone.setText(EditedEmployee.getHomePhone());
 
 		employeeMobile = (EditText) findViewById(R.id.UserAddeditTextMobileEmpEdit);
-		employeeMobile.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getMobile());
+		employeeMobile.setText(EditedEmployee.getMobile());
 
 		employeeEmail = (EditText) findViewById(R.id.UserAddeditTextEmailEmpEdit);
-		employeeEmail.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getEmail());
+		employeeEmail.setText(EditedEmployee.getEmail());
 
 		employeeAddress = (EditText) findViewById(R.id.UserAddeditTextLocationEmpEdit);
-		employeeAddress.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getAddress());
+		employeeAddress.setText(EditedEmployee.getAddress());
 
 		employeeDesignation = (EditText) findViewById(R.id.UserAddeditTextDesignationEmpEdit);
-		employeeDesignation.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getDesignation());
+		employeeDesignation.setText(EditedEmployee.getDesignation());
 
 		employeeRemarks = (EditText) findViewById(R.id.UserAddeditTextRemarksEmpEdit);
-		employeeRemarks.setText(EmployeeListActivity.getEmployeeArrayList()
-				.get(position).getRemarks());
+		employeeRemarks.setText(EditedEmployee.getRemarks());
 
 		employeeSubmit = (Button) findViewById(R.id.UserAddbuttonEditEmpEdit);
 		employeeSubmit.setOnClickListener(this);
@@ -164,13 +151,12 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 		mobilePattern = Pattern.compile(mobileStrPattern);
 
 		menuItems = new HashMap<String, String>();
-		/*pdialog.dismiss();*/
 
 	}
 
 	public void onClick(View v) {
 		if (v.equals(menuButton)) {
-			/*pdialog.show();*/
+
 			Intent intent = new Intent(EmployeeEditActivity.this,
 					GridItemActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -181,12 +167,11 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 			menuItems.put("Send Web Message", "mail_web");
 			menuItems.put("Send SMS", "mail_sms");
 			menuItems.put("Phone Call", "call");
-	//		menuItems.put("Exit", "exit");
-			callDiag = new CallMenuDialog(this, /*pdialog,*/ dialog, menuItems);
-			// callMenuDialog();
+			new CallMenuDialog(this, dialog, menuItems);
+
 		} else {
 			boolean correctEmail = false;
-			// pdialog.show();
+
 			empName = employeeName.getText().toString();
 			if (empName.isEmpty())
 				empName = employeeName.getText().toString();
@@ -278,7 +263,6 @@ public class EmployeeEditActivity extends Activity implements OnClickListener {
 								intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 								startActivity(intent);
 
-								// EmployeeAddActivity.this.finish();
 							}
 						});
 					}

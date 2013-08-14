@@ -6,20 +6,17 @@ import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.ith.project.EntityClasses.Employee;
 import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.EntityClasses.Message;
 import com.ith.project.connection.HttpConnection;
 import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.menu.CustomMenuListAdapter;
-import com.ith.project.sqlite.EntryLogSQLite;
 import com.ith.project.sqlite.EmployeeSQLite;
 import com.ith.project.sqlite.MessageSQLite;
 import com.ith.project.sqlite.MsgEntryLogSQLite;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -53,7 +50,7 @@ public class MessageListActivity extends Activity implements OnClickListener,
 
 	private final String url = "GetMessages";
 	private final String delUrl = "DeleteMessage";
-	private ProgressDialog pdialog;
+
 	private Dialog dialog;
 	private MessageSQLite messageSQLite;
 	private MsgEntryLogSQLite msgEntryLogSQLite;
@@ -68,8 +65,7 @@ public class MessageListActivity extends Activity implements OnClickListener,
 	private static MessageItemArrayAdapter msgItemArrAdapter;
 	private LinearLayout linLayoutPref;
 	private static int messageCount, msgSpinner;
-	private static boolean connFlag, msgStartFlag;
-	private CallMenuDialog callDiag;
+	private static boolean msgStartFlag;
 	private HashMap<String, String> menuItems;
 	private Dialog prefDialog;
 	private String msgBeginDate, msgEndDate;
@@ -82,10 +78,6 @@ public class MessageListActivity extends Activity implements OnClickListener,
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * pdialog = new ProgressDialog(this); pdialog.setCancelable(true);
-		 * pdialog.setMessage("Loading ...."); pdialog.show();
-		 */
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.list_view);
@@ -103,7 +95,6 @@ public class MessageListActivity extends Activity implements OnClickListener,
 			messageSQLite.closeDB();
 		if (msgEntryLogSQLite != null)
 			msgEntryLogSQLite.closeDB();
-		/* pdialog.dismiss(); */
 		if (dialog != null)
 			dialog.dismiss();
 
@@ -112,7 +103,6 @@ public class MessageListActivity extends Activity implements OnClickListener,
 	@Override
 	public void onResume() {
 		super.onResume();
-		/* pdialog.dismiss(); */
 	}
 
 	/************************************************************************************
@@ -135,12 +125,6 @@ public class MessageListActivity extends Activity implements OnClickListener,
 				if (!msgEntryLogSQLite.isOpen())
 					msgEntryLogSQLite.openDB();
 
-				boolean connAvail = true;
-				/**
-				 * Before populating msg list try to update the pending msgs to
-				 * webservice
-				 **/
-
 				ArrayList<Message> pendingMsgs = new ArrayList<Message>();
 				pendingMsgs = messageSQLite.selectPendingMsgs("msgPending");
 				if (pendingMsgs != null) {
@@ -153,14 +137,6 @@ public class MessageListActivity extends Activity implements OnClickListener,
 																			// in
 																			// users
 
-					// pendingMsgs =
-					// messageSQLite.selectPendingMsgs("msgPending");
-
-					/*
-					 * int sender = -1; for (int i = 0; i < pendingMsgs.size();
-					 * i++) { if (pendingMsgs.get(i).getMsgFrom() == sender)
-					 * continue; else sender = pendingMsgs.get(0).getMsgFrom();
-					 */
 					int sender = LoginAuthentication.EmployeeId;
 					String title = null, description = null;
 					String[] titleArr = new String[pendingMsgs.size()];
@@ -170,6 +146,10 @@ public class MessageListActivity extends Activity implements OnClickListener,
 					for (int j = 0; j < pendingMsgs.size(); j++) {
 
 						hasTitle = false;
+						/**
+						 * This loop is to check if there are already title we
+						 * are searching in the titieArr
+						 **/
 						for (int i = 0; i < titleArr.length; i++) {
 							if (pendingMsgs.get(j).getMsgTitle()
 									.equals(titleArr[i])) {
@@ -184,12 +164,22 @@ public class MessageListActivity extends Activity implements OnClickListener,
 							sentMsgs.add(pendingMsgs.get(j));
 							title = pendingMsgs.get(j).getMsgTitle();
 							description = pendingMsgs.get(j).getMsgDesc();
+							/**
+							 * This loop is for sending the same Titled msgs to
+							 * multiple receivers if there are any. Possible
+							 * flaw is when same title bears different
+							 * Description
+							 **/
 							for (Message mess : pendingMsgs) {
 								if (title.equals(mess.getMsgTitle())) {
 
 									tempReceiversId[k++] = mess.getMsgTo();
 								}
 							}
+							/**
+							 * Now reduce the size of receivers Array So that
+							 * 0's will not be sent
+							 **/
 							int[] receiversId = new int[k];
 							int m = 0;
 							for (int rec : tempReceiversId) {
@@ -198,12 +188,6 @@ public class MessageListActivity extends Activity implements OnClickListener,
 							}
 							titleArr[l++] = title;
 
-							/*
-							 * if (title == null ||
-							 * !title.equals(pendingMsgs.get(j) .getMsgTitle()))
-							 * { title = pendingMsgs.get(j).getMsgTitle();
-							 * description = pendingMsgs.get(j).getMsgDesc(); }
-							 */
 							JSONObject pendingMessageQuery = null;
 							if (title != null) {
 								pendingMessageQuery = makeNewMessageJSON(
@@ -236,13 +220,11 @@ public class MessageListActivity extends Activity implements OnClickListener,
 															+ insertStatus);
 										}
 									} catch (JSONException e) {
-										connAvail = false;
 										Log.e("JSONException while sending msgs",
 												"" + e.getMessage());
 										e.printStackTrace();
 									}
 								} else {
-									connAvail = false;
 									Log.e("Server didn't response ",
 											"InsertStatus From Web Service"
 													+ insertStatusStr);
@@ -253,7 +235,6 @@ public class MessageListActivity extends Activity implements OnClickListener,
 					}
 
 				}
-				/* } */
 
 				/** This is for sending the locally read messages to web service **/
 				ArrayList<Message> pendingReadMsgs = new ArrayList<Message>();// If
@@ -265,7 +246,8 @@ public class MessageListActivity extends Activity implements OnClickListener,
 
 				pendingReadMsgs = messageSQLite
 						.selectPendingMsgs("readUpdatePending");
-				if (pendingReadMsgs != null && connAvail) {
+				if (pendingReadMsgs != null
+						&& HttpConnection.getConnectionAvailable(context)) {
 
 					for (int i = 0; i < pendingReadMsgs.size(); i++) {
 
@@ -287,6 +269,7 @@ public class MessageListActivity extends Activity implements OnClickListener,
 
 								boolean readUpdateStatus = (Boolean) readStatusJson
 										.get("MarkMessageAsIsReadResult");
+
 								if (readUpdateStatus) {
 
 									messageSQLite.updateMsgRead(msgTo,
@@ -304,10 +287,13 @@ public class MessageListActivity extends Activity implements OnClickListener,
 											"Read Status Updated locally flag='msgPending' Succesfully");
 								}
 							} catch (JSONException e) {
-								Log.e("Web serrvice response error",
-										"ma ka garnu ta aba??");
+								Log.e("JSON can't be parsed",
+										"Possible web service returned null ");
 								e.printStackTrace();
 							}
+						} else {
+							Log.e("Server response error",
+									"Web service response has something malicious");
 						}
 					}
 				}
@@ -321,12 +307,12 @@ public class MessageListActivity extends Activity implements OnClickListener,
 				Log.v("getmessage inquiry", "" + inputJson.toString());
 
 				/** To establish connection to the web service **/
-				if (connAvail) {
+				if (HttpConnection.getConnectionAvailable(context)) {
 					String messagesFromWS = conn.getJSONFromUrl(inputJson, url);
-					connFlag = true;
+
 					Log.v("Messages:", "" + messagesFromWS);
-					if (!messagesFromWS.equals("")) {
-						connFlag = false;
+					if (messagesFromWS.startsWith("{")) {
+
 						/** Update the local file according to the web service **/
 						messageSQLite.updateMessageTable(messagesFromWS,
 								msgEntryLogSQLite);
@@ -342,18 +328,17 @@ public class MessageListActivity extends Activity implements OnClickListener,
 				menuButton = (ImageButton) findViewById(R.id.menu);
 				menuButton.setOnClickListener(MessageListActivity.this);
 
-				// registerForContextMenu(homeButton);
 				/**
 				 * To run the main thread after completion of the connection
 				 * thread
 				 **/
-				if (itemDetails != null)
-				/** If list is null donot run this thread :D **/
-				{
-					runOnUiThread(new Runnable() {
 
-						public void run() {
+				runOnUiThread(new Runnable() {
 
+					public void run() {
+						if (itemDetails != null)
+						/** If list is null don't run this thread :D **/
+						{
 							homeButton.setClickable(true);
 							homeButton
 									.setOnClickListener(MessageListActivity.this);
@@ -370,12 +355,12 @@ public class MessageListActivity extends Activity implements OnClickListener,
 							listView.setOnItemClickListener(MessageListActivity.this);
 
 							menuItems = new HashMap<String, String>();
-							/* pdialog.dismiss(); */
-						}
-					});
-				} else {
+						} else {
 
-				}
+						}
+					}
+				});
+
 			}
 
 		}).start();
@@ -421,22 +406,16 @@ public class MessageListActivity extends Activity implements OnClickListener,
 		Log.v("MessagelistItemClicked @" + (messageCount - position - 1),
 				"HOOOrAyyy!!!!");
 
-		/* pdialog.show(); */
-
 		Intent intent = new Intent(MessageListActivity.this,
 				MessageViewActivity.class);
-		intent.putExtra("PositionOfMessage", (position));
+		intent.putExtra("MessageId", (itemDetails.get(position).getMsgId()));
 		MessageListActivity.this.startActivity(intent);
-
-		// ListItemActivity.this.finish();
 
 	}
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-			// do something on back.
-			/* pdialog.show(); */
 			this.finish();
 			return true;
 		}
@@ -447,7 +426,7 @@ public class MessageListActivity extends Activity implements OnClickListener,
 	public void onClick(View v) {
 
 		if (v.equals(menuButton)) {
-			/* pdialog.show(); */
+
 			Intent intent = new Intent(MessageListActivity.this,
 					GridItemActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -455,13 +434,11 @@ public class MessageListActivity extends Activity implements OnClickListener,
 		} else if (v.equals(homeButton)) {
 
 			/** Set up the Menu **/
-			// menuItems.put("Send SMS", "mail_sms");
 			menuItems.put("Send Web Message", "mail_web");
 			menuItems.put("Preferences", "preferences");
 			menuItems.put("Delete Messages", "delete_user");
-			// menuItems.put("Exit", "exit");
-			callDiag = new CallMenuDialog(this, /* pdialog, */dialog, menuItems);
-			// callMenuDialog();
+			new CallMenuDialog(this, dialog, menuItems);
+
 		} else if (v.equals(buttonDefault)) {
 
 			Message.isDefault = true;
@@ -526,8 +503,6 @@ public class MessageListActivity extends Activity implements OnClickListener,
 				runOnUiThread(new Runnable() {
 
 					public void run() {
-						/* pdialog.show(); */
-						// exitDialog.dismiss();
 						MessageListActivity.this.finish();
 						Intent intent = new Intent(MessageListActivity.this,
 								MessageListActivity.class);
@@ -570,16 +545,12 @@ public class MessageListActivity extends Activity implements OnClickListener,
 		prefDialog.setContentView(R.layout.preferences_screen);
 
 		/** To get current default time **/
-		// Calendar cal = Calendar.getInstance();
 		Calendar cal = Message.getFirstCalendar();
 		Log.e("FirstCalendar", "" + cal.getTime().toString());
 
-		// msgBeginDatePicker = (DatePicker)
-		// prefDialog.findViewById(R.id.datePickerMessageBegin);
 		year1 = cal.get(Calendar.YEAR);
 		month1 = cal.get(Calendar.MONTH);
 		day1 = cal.get(Calendar.DAY_OF_MONTH);
-		// msgBeginDatePicker.init(year1, month1, day1, this);
 
 		/** To instantiate and initialize the MsgStartTextView **/
 		msgStartTextView = (TextView) prefDialog
@@ -595,7 +566,6 @@ public class MessageListActivity extends Activity implements OnClickListener,
 		msgStartImageView.setOnClickListener(this);
 
 		/** To get 10 days before time **/
-		// cal.add(Calendar.DAY_OF_YEAR, Message.DAY_INTERVAL_MESSAGES);
 		Calendar cal2 = Message.getSecondCalendar();
 		Log.e("SecondCalendar", "" + cal2.getTime().toString());
 
@@ -623,7 +593,6 @@ public class MessageListActivity extends Activity implements OnClickListener,
 		spinnerItems.add("Read");
 		spinnerItems.add("Unread");
 		spinnerItems.add("All");
-		// msgSpinner = "All";
 		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
 				android.R.layout.simple_spinner_item, spinnerItems);
 
@@ -637,12 +606,10 @@ public class MessageListActivity extends Activity implements OnClickListener,
 					int pos, long id) {
 				Log.e("Item at Spinner", ""
 						+ parent.getItemAtPosition(pos).toString());
-				// msgSpinner = parent.getItemAtPosition(pos).toString();
 				msgSpinner = pos;
 			}
 
 			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
 
 			}
 		});
@@ -662,22 +629,19 @@ public class MessageListActivity extends Activity implements OnClickListener,
 
 	public void onDateChanged(DatePicker view, int year, int monthOfYear,
 			int dayOfMonth) {
-
-		// perform your required operation after date has been set
+		
 		String combinedDate = (new StringBuilder()).append(dayOfMonth)
 				.append("-").append(monthOfYear).append("-").append(year)
 				.toString(); // combinedDate == dd-mm-yyyy
 
 		if (view == msgBeginDatePicker) {
 			msgBeginDate = combinedDate;
-			// Message.setFirstCalendar(year, monthOfYear, dayOfMonth);
 			year1 = year;
 			month1 = monthOfYear;
 			day1 = dayOfMonth;
 			Log.e("msgBeginDate	@DatePicker:", "" + msgBeginDate);
 		} else if (view == msgEndDatePicker) {
 			msgEndDate = combinedDate;
-			// Message.setSecondCalendar(year, monthOfYear, dayOfMonth);
 			year2 = year;
 			month2 = monthOfYear;
 			day2 = dayOfMonth;
@@ -689,7 +653,7 @@ public class MessageListActivity extends Activity implements OnClickListener,
 
 		public void onDateSet(DatePicker view, int year, int monthOfYear,
 				int dayOfMonth) {
-			// perform your required operation after date has been set
+			
 			String combinedDate = (new StringBuilder()).append(dayOfMonth)
 					.append("-").append(monthOfYear).append("-").append(year)
 					.toString(); // combinedDate == dd-mm-yyyy
@@ -697,7 +661,6 @@ public class MessageListActivity extends Activity implements OnClickListener,
 			Log.e("Inside the OnDateSet", "keep it on");
 			if (msgStartFlag) {
 				msgBeginDate = combinedDate;
-				// Message.setFirstCalendar(year, monthOfYear, dayOfMonth);
 				year1 = year;
 				month1 = monthOfYear;
 				day1 = dayOfMonth;
@@ -750,66 +713,59 @@ public class MessageListActivity extends Activity implements OnClickListener,
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 			View view;
-			// if (convertView == null)
-			{
-				view = new View(this.cntxt);
 
-				view = inflater.inflate(R.layout.messages_list, parent, false);
+			view = new View(this.cntxt);
 
-				parent.setBackgroundColor(Color.rgb(221, 221, 221));
+			view = inflater.inflate(R.layout.messages_list, parent, false);
 
-				TableLayout tableLayout = (TableLayout) view
-						.findViewById(R.id.tableLayoutCheckBoxMessage);
-				if (!this.itemDets.get(position).getMsgRead())
-					tableLayout
-							.setBackgroundResource(R.drawable.message_view_unread);
+			parent.setBackgroundColor(Color.rgb(221, 221, 221));
 
-				TextView textView = (TextView) view
-						.findViewById(R.id.textViewMessageTitle);
-				textView.setText(this.itemDets.get(position).getMsgTitle());
-				textView.setFocusable(false);
+			TableLayout tableLayout = (TableLayout) view
+					.findViewById(R.id.tableLayoutCheckBoxMessage);
+			if (!this.itemDets.get(position).getMsgRead())
+				tableLayout
+						.setBackgroundResource(R.drawable.message_view_unread);
 
-				EmployeeSQLite employeeSQLite = new EmployeeSQLite(
-						MessageListActivity.this);
-				employeeSQLite.openDB();
-				TextView msgFrom = (TextView) view
-						.findViewById(R.id.textViewMessageSender);
-				msgFrom.setText("Sent By >> "
-						+ employeeSQLite.getEmpName(this.itemDets.get(position)
-								.getMsgFrom()));
-				msgFrom.setFocusable(false);
-				employeeSQLite.closeDB();
+			TextView textView = (TextView) view
+					.findViewById(R.id.textViewMessageTitle);
+			textView.setText(this.itemDets.get(position).getMsgTitle());
+			textView.setFocusable(false);
 
-				TextView time = (TextView) view
-						.findViewById(R.id.textViewMessageDate);
-				time.setText("Created On: "
-						+ this.itemDets.get(position).getDate());
-				textView.setFocusable(false);
-				// time.setVisibility(View.GONE);
+			EmployeeSQLite employeeSQLite = new EmployeeSQLite(
+					MessageListActivity.this);
+			employeeSQLite.openDB();
+			TextView msgFrom = (TextView) view
+					.findViewById(R.id.textViewMessageSender);
+			msgFrom.setText("Sent By >> "
+					+ employeeSQLite.getEmpName(this.itemDets.get(position)
+							.getMsgFrom()));
+			msgFrom.setFocusable(false);
+			employeeSQLite.closeDB();
 
-				CheckBox checkBox = (CheckBox) view
-						.findViewById(R.id.checkBoxMessage);
-				view.setTag(checkBox);
+			TextView time = (TextView) view
+					.findViewById(R.id.textViewMessageDate);
+			time.setText("Created On: " + this.itemDets.get(position).getDate());
+			textView.setFocusable(false);
 
-				checkBox.setOnClickListener(new OnClickListener() {
+			CheckBox checkBox = (CheckBox) view
+					.findViewById(R.id.checkBoxMessage);
+			view.setTag(checkBox);
 
-					public void onClick(View v) {
-						CheckBox chkBox = (CheckBox) v;
-						Message msg = (Message) chkBox.getTag();
-						Log.e("CheckBox in Message checked@",
-								"" + chkBox.isChecked());
-						msg.setChecked(chkBox.isChecked());
-					}
+			checkBox.setOnClickListener(new OnClickListener() {
 
-				});
-				inflater = null;
-				Message message = itemDets.get(position);
-				checkBox.setChecked(message.getChecked());
-				// holder.name.setChecked(employee.getChecked());
-				// holder.name.setTag(employee);
-				checkBox.setTag(message);
-			} // else
-				// view = (View) convertView;
+				public void onClick(View v) {
+					CheckBox chkBox = (CheckBox) v;
+					Message msg = (Message) chkBox.getTag();
+					Log.e("CheckBox in Message checked@",
+							"" + chkBox.isChecked());
+					msg.setChecked(chkBox.isChecked());
+				}
+
+			});
+			inflater = null;
+			Message message = itemDets.get(position);
+			checkBox.setChecked(message.getChecked());
+			checkBox.setTag(message);
 
 			return view;
 		}

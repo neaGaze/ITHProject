@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.ith.project.EntityClasses.Leave;
@@ -44,10 +46,8 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 	private final static String notificationSentUrl = "MarkLeaveRequestAsIsRead";
 	private final static String SendLeaveRequestUrl = "SendLeaveRequest";
 
-	private Context context;
 	private HttpConnection conn;
 	private Dialog dialog, deleteDialog;
-	private CallMenuDialog callDiag;
 	private HashMap<String, String> menuItems;
 	private LeaveSQLite leaveSQLite;
 	private MsgEntryLogSQLite msgEntryLogSQLite;
@@ -57,6 +57,7 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 	private static LeaveItemArrayAdapter leaveItemArrAdapter;
 	private static int leaveCount;
 	private int leaveId;
+	private Context context;
 	private Button deleteConfirm;
 
 	@Override
@@ -67,6 +68,7 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 		setContentView(R.layout.list_view);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
 				R.layout.custom_title);
+		context = this;
 		init();
 	}
 
@@ -77,8 +79,6 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 			leaveSQLite.closeDB();
 		if (msgEntryLogSQLite != null)
 			msgEntryLogSQLite.closeDB();
-		/* pdialog.dismiss(); */
-		// exitDialog.dismiss();
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -103,7 +103,6 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 				if (!msgEntryLogSQLite.isOpen())
 					msgEntryLogSQLite.openDB();
 
-				boolean connAvail = true;
 				/**
 				 * Before populating Leave list try to update the pending Leave
 				 * operations to webservice
@@ -111,9 +110,9 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 				ArrayList<Leave> pendingLeaveSent = new ArrayList<Leave>();
 				pendingLeaveSent = leaveSQLite
 						.selectPendingLeave("leavePending");
-				if (pendingLeaveSent != null) {
+				if (pendingLeaveSent != null
+						&& HttpConnection.getConnectionAvailable(context)) {
 
-					// ArrayList<Leave> sentLeave = new ArrayList<Leave>();
 					int sender = LoginAuthentication.EmployeeId;
 					String remark = null, dateTime = null;
 					int approvalId, leaveType;
@@ -142,33 +141,34 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 
 							if (insertStatusStr.startsWith("{")) {
 								JSONObject insertStatusJson;
+								boolean insertStatus = false;
 								try {
 									insertStatusJson = new JSONObject(
 											insertStatusStr);
 
-									boolean insertStatus = (Boolean) insertStatusJson
+									insertStatus = (Boolean) insertStatusJson
 											.get("SendLeaveRequestResult");
 
-									/** If web service is successfully called **/
-									if (insertStatus) {
-
-										leaveSQLite.deleteLeave(leaveId);
-										Log.e("Deleted pending Sent Leave ",
-												"Until later retrieved from web service");
-									} else {
-
-										Log.e("Problem Posting Leave ",
-												"InsertStatus From Web Service"
-														+ insertStatus);
-									}
 								} catch (JSONException e) {
-									connAvail = false;
+
 									Log.e("JSONException while posting Leave",
 											"" + e.getMessage());
 									e.printStackTrace();
 								}
+								/** If web service is successfully called **/
+								if (insertStatus) {
+
+									leaveSQLite.deleteLeave(leaveId);
+									Log.e("Deleted pending Sent Leave ",
+											"Until later retrieved from web service");
+								} else {
+
+									Log.e("Problem Posting Leave ",
+											"InsertStatus From Web Service"
+													+ insertStatus);
+								}
+
 							} else {
-								connAvail = false;
 								Log.e("Server didn't response ",
 										"InsertStatus From Web Service"
 												+ insertStatusStr);
@@ -190,7 +190,8 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 
 				pendingReadLeave = leaveSQLite
 						.selectPendingLeave("notificationSentPending");
-				if (pendingReadLeave != null && connAvail) {
+				if (pendingReadLeave != null
+						&& HttpConnection.getConnectionAvailable(context)) {
 
 					for (int i = 0; i < pendingReadLeave.size(); i++) {
 
@@ -207,28 +208,28 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 
 						if (readStatusStr.startsWith("{")) {
 							JSONObject readStatusJson;
+							boolean readUpdateStatus = false;
 							try {
 								readStatusJson = new JSONObject(readStatusStr);
 
-								boolean readUpdateStatus = (Boolean) readStatusJson
+								readUpdateStatus = (Boolean) readStatusJson
 										.get("MarkLeaveRequestAsIsReadResult");
-								if (readUpdateStatus) {
-
-									leaveSQLite
-											.updateLeaveNotificationSent(leaveId);
-									leaveSQLite
-											.updateLeaveNotificationSentPending(
-													leaveId, "");
-									Log.e("read status Updated for Leave",
-											"Read Status Updated Succesfully");
-								} else {
-
-								}
 							} catch (JSONException e) {
 								Log.e("Web service response error",
 										"ma ka garnu ta aba??");
 								e.printStackTrace();
 							}
+
+							if (readUpdateStatus) {
+
+								leaveSQLite
+										.updateLeaveNotificationSent(leaveId);
+								leaveSQLite.updateLeaveNotificationSentPending(
+										leaveId, "");
+								Log.e("read status Updated for Leave",
+										"Read Status Updated Succesfully");
+							}
+
 						}
 					}
 
@@ -247,7 +248,8 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 
 				pendingApprovalLeave = leaveSQLite
 						.selectPendingLeave("approvalUpdatePending");
-				if (pendingApprovalLeave != null && connAvail) {
+				if (pendingApprovalLeave != null
+						&& HttpConnection.getConnectionAvailable(context)) {
 
 					for (int i = 0; i < pendingApprovalLeave.size(); i++) {
 
@@ -268,29 +270,28 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 
 						if (approvalStatusStr.startsWith("{")) {
 							JSONObject approvalStatusJson;
+							boolean approvalUpdateStatus = false;
 							try {
 								approvalStatusJson = new JSONObject(
 										approvalStatusStr);
 
-								boolean approvalUpdateStatus = (Boolean) approvalStatusJson
+								approvalUpdateStatus = (Boolean) approvalStatusJson
 										.get("SetLeaveStatusResult");
-								if (approvalUpdateStatus) {
-
-									leaveSQLite.updateLeaveStatusPending(
-											leaveId, "");
-									leaveSQLite
-											.updateLeaveNotificationSentPending(
-													leaveId, "");
-									Log.e("Approval status Updated for Leave",
-											"Approval Status Updated Succesfully");
-								} else {
-
-								}
 							} catch (JSONException e) {
 								Log.e("Web serrvice response error",
 										"ma ka garnu ta aba??");
 								e.printStackTrace();
 							}
+							if (approvalUpdateStatus) {
+
+								leaveSQLite.updateLeaveStatusPending(leaveId,
+										"");
+								leaveSQLite.updateLeaveNotificationSentPending(
+										leaveId, "");
+								Log.e("Approval status Updated for Leave",
+										"Approval Status Updated Succesfully");
+							}
+
 						}
 					}
 
@@ -304,19 +305,18 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 
 				Log.v("GetLeave inquiry", "" + inquiryJson.toString());
 				/** To establish connection to the web service **/
-				/* if (!connAvail) */{
-					String leaveFromWS = conn.getJSONFromUrl(inquiryJson,
-							getLeaveUrl);
-					boolean connFlag = true;
-					Log.v("Leave Request:", "" + leaveFromWS);
 
-					if (leaveFromWS.startsWith("{")) {
-						connFlag = false;
-						/** Update the local sqlite according to the web service **/
-						leaveSQLite.updateLeaveTable(leaveFromWS,
-								msgEntryLogSQLite);
-					}
+				String leaveFromWS = conn.getJSONFromUrl(inquiryJson,
+						getLeaveUrl);
+				Log.v("Leave Request:", "" + leaveFromWS);
+
+				if (leaveFromWS.startsWith("{")) {
+
+					/** Update the local sqlite according to the web service **/
+					leaveSQLite
+							.updateLeaveTable(leaveFromWS, msgEntryLogSQLite);
 				}
+
 				/** Now read from the local DB always **/
 				itemDetails = leaveSQLite.getLeaveFromDB();
 
@@ -347,7 +347,6 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 							leaveCount = leaveItemArrAdapter.getCount();
 							listView.setOnItemClickListener(LeaveListActivity.this);
 
-							/* pdialog.dismiss(); */
 						}
 					});
 
@@ -365,7 +364,8 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 		JSONObject tempJsonFile = new JSONObject();
 
 		Calendar calendar = Calendar.getInstance();
-		SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+		SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMddHHmmss",
+				Locale.US);
 		String currDate = dtFormat.format(calendar.getTime());
 
 		if (startDate == null)
@@ -387,8 +387,7 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-			// do something on back.
-			/* pdialog.show(); */
+
 			this.finish();
 			return true;
 		}
@@ -399,7 +398,6 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 	public void onClick(View v) {
 
 		if (v.equals(menuButton)) {
-			/* pdialog.show(); */
 			Intent intent = new Intent(LeaveListActivity.this,
 					GridItemActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -408,8 +406,8 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 
 			/** Set up the Menu **/
 			menuItems.put("Fill Form", "mail_web");
-			callDiag = new CallMenuDialog(this, /* pdialog, */dialog, menuItems);
-			// callMenuDialog();
+			new CallMenuDialog(this, dialog, menuItems);
+
 		}
 
 	}
@@ -420,14 +418,10 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 		Log.v("LeavelistItemClicked @" + (leaveCount - position - 1),
 				"HOOOrAyyy!!!!");
 
-		/* pdialog.show(); */
-
 		Intent intent = new Intent(LeaveListActivity.this,
 				LeaveViewActivity.class);
-		intent.putExtra("PositionOfLeave", (position));
+		intent.putExtra("LeaveId", itemDetails.get(position).getLeaveId());
 		LeaveListActivity.this.startActivity(intent);
-
-		// ListItemActivity.this.finish();
 
 	}
 
@@ -438,8 +432,6 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 
 		private Context cntxt;
 		private ArrayList<Leave> itemDets;
-		private int IdOfDeleteLeave;
-		private String isPending;
 
 		public LeaveItemArrayAdapter(Context context, int textViewResourceId,
 				ArrayList<Leave> itemDetails) {
@@ -537,7 +529,6 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 			 **/
 			if (leaveStatus == 3 || leaveStatus == 2) {
 
-				IdOfDeleteLeave = itemDets.get(position).getLeaveId();
 				view.setTag(deleteButton);
 				deleteButton.setTag((Leave) (itemDets).get(position));
 				/**

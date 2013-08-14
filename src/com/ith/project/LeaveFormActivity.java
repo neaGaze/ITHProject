@@ -3,10 +3,7 @@ package com.ith.project;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.app.Activity;
@@ -39,44 +36,37 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import com.ith.project.R;
 import com.ith.project.EntityClasses.Employee;
 import com.ith.project.EntityClasses.Leave;
 import com.ith.project.EntityClasses.LoginAuthentication;
 import com.ith.project.connection.HttpConnection;
-import com.ith.project.menu.CallMenuDialog;
 import com.ith.project.sqlite.EmployeeSQLite;
 import com.ith.project.sqlite.LeaveSQLite;
 
 public class LeaveFormActivity extends Activity implements OnClickListener,
-		TextWatcher, OnItemClickListener {
+		TextWatcher {
 
 	private final static String CreateForm = "SendLeaveRequest";
 
 	private EditText leaveTo, searchBox, leaveRemark;
 	private TextView leaveDate;
-	private Button leaveSubmit, empSelectBut;
+	private Button leaveSubmit;
 	private ImageButton menuButton, empSearch, homeButton, buttonDate;
-	private String leaveIdStr, leaveRemarkStr, leaveDateStr, leaveDateTimeStr,
-			day, month, year;
+	private String leaveRemarkStr, leaveDateTimeStr, day, month, year;
 	private Dialog dialog, empSelectDialog;
-	private CallMenuDialog callDiag;
-	private HashMap<String, String> menuItems;
 	private HttpConnection conn;
 	private static int employeeCount;
 	private JSONObject createLeave;
 	private Spinner leaveTypeSpinner;
 	private ArrayList<String> spinnerItems;
-	// private static EmployeeListItemArrayAdapter listItemArrAdapter;
 	private EmployeeSQLite employeeSQLite;
 	private LeaveSQLite leaveSQLite;
-	private static ArrayList<Employee> itemDetails, returnItemDetails;
+	private static ArrayList<Employee> itemDetails;
 	private static EmployeeListItemArrayAdapter listItemArrAdapter;
-	private Leave leaveAdd;
 	private ListView empListView;
-	private int currPos, applicantId, approvalId, leaveSpinner;
+	private int applicantId, approvalId, leaveSpinner;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -92,7 +82,6 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 	@Override
 	public void onPause() {
 		super.onPause();
-		/* pdialog.dismiss(); */
 		if (dialog != null)
 			dialog.dismiss();
 	}
@@ -100,11 +89,9 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 	@Override
 	public void onResume() {
 		super.onResume();
-		/* pdialog.dismiss(); */
 	}
 
 	private void init() {
-		leaveAdd = new Leave();
 		leaveTypeSpinner = (Spinner) findViewById(R.id.spinnerLeaveType);
 		leaveTo = (EditText) findViewById(R.id.editTextLeaveTo);
 		empSearch = (ImageButton) findViewById(R.id.imageButtonLeaveSearch);
@@ -119,11 +106,8 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 		/** To set the Names of persons in the "leaveTo" field **/
 		LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		LinearLayout linLayout = (LinearLayout) findViewById(R.id.linearLayoutLeaveFormFill);
-		// LinearLayout linLayoutMenu = new LinearLayout(this);
-		layoutInflater.inflate(R.layout.leave_form, linLayout, false);
 
-		ArrayList<Employee> selectedEmployees = EmployeeListActivity
-				.getSelected();
+		layoutInflater.inflate(R.layout.leave_form, linLayout, false);
 
 		/** To set the default Names **/
 		leaveTo.setText("");
@@ -155,8 +139,6 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 							View view, int pos, long id) {
 						Log.e("Item at Leave Type Spinner", ""
 								+ parent.getItemAtPosition(pos).toString());
-						// msgSpinner =
-						// parent.getItemAtPosition(pos).toString();
 						leaveSpinner = pos;
 
 					}
@@ -181,9 +163,6 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 		buttonDate.setOnClickListener(this);
 		leaveSubmit.setOnClickListener(this);
 
-		menuItems = new HashMap<String, String>();
-		/* pdialog.dismiss(); */
-
 		EmployeeListActivity.clearEmployeeChecked();
 
 		/** To open up the Database and query for the EmployeeList **/
@@ -196,7 +175,6 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 		 * Here returnItemDetails is required to store the searched list. By
 		 * default it is always equals to itemDetails
 		 **/
-		returnItemDetails = itemDetails;
 		employeeSQLite.closeDB();
 
 	}
@@ -204,17 +182,12 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 	public void onClick(View v) {
 
 		if (v.equals(menuButton)) {
-			/* pdialog.show(); */
 			Intent intent = new Intent(this, GridItemActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			this.startActivity(intent);
 			this.finish();
 		} else if (v.equals(homeButton)) {
 
-			/** Set up the Menu **/
-			// menuItems.put("Exit", "exit");
-			// callDiag = new CallMenuDialog(this, pdialog, dialog, menuItems);
-			// callMenuDialog();
 		} else if (v.equals(empSearch)) {
 
 			callEmployeeSearch();
@@ -228,7 +201,7 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 			if (year == "" && month == "" && day == "") {
 				Calendar currDate = Calendar.getInstance();
 				SimpleDateFormat dtFormat = new SimpleDateFormat(
-						"yyyyMMddHHmmss");
+						"yyyyMMddHHmmss", Locale.US);
 				saf = dtFormat.format(currDate.getTime());
 
 				year = saf.subSequence(0, 4).toString();
@@ -247,13 +220,11 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 		 **/
 		else if (v.equals(leaveSubmit)) {
 
-			// pdialog.show();
 			applicantId = LoginAuthentication.EmployeeId;
 			leaveDateTimeStr = new StringBuilder().append(year).append(month)
 					.append(day).append("00").append("00").append("00")
 					.toString();
 			leaveRemarkStr = leaveRemark.getText().toString();
-			// Log.d("leave Send Date", "" + msgDate);
 
 			/** Make an inquiry json object **/
 			convertNamesToId();
@@ -275,28 +246,14 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 					Log.e("Here comes createLeaveStr", "" + insertStatusStr);
 					leaveSQLite = new LeaveSQLite(LeaveFormActivity.this);
 					leaveSQLite.openDB();
+					boolean insertStatus = false;
 					try {
 
 						JSONObject insertStatusJson = new JSONObject(
 								insertStatusStr);
 
-						boolean insertStatus = (Boolean) insertStatusJson
+						insertStatus = (Boolean) insertStatusJson
 								.get("SendLeaveRequestResult");
-
-						if (insertStatus) {
-
-							Log.e("Leave has been sent",
-									"LEAVE sent successfully !!!");
-						} else {
-
-							leaveSQLite.saveLeaveDraft(applicantId, approvalId,
-									leaveSpinner, leaveDateTimeStr,
-									leaveRemarkStr, "leavePending");
-
-							Log.e("Problem Sending Leave ",
-									"Leave saved as draft" + insertStatus);
-						}
-
 					} catch (JSONException e) {
 						/**
 						 * Save the typed leave application as draft in sqlite
@@ -306,16 +263,27 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 								leaveSpinner, leaveDateTimeStr, leaveRemarkStr,
 								"leavePending");
 
-						// Toast.makeText(LeaveAddActivity.this,"Leave Saved as draft",
-						// Toast.LENGTH_SHORT)
-						// .show();
-
 						Log.e("JSONException while sending leave",
 								"" + e.getMessage());
 						Log.e("leaves Saved as Draft",
 								"Saved leaves will be sent next time");
 						e.printStackTrace();
 					}
+
+					if (insertStatus) {
+
+						Log.e("Leave has been sent",
+								"LEAVE sent successfully !!!");
+					} else {
+
+						leaveSQLite.saveLeaveDraft(applicantId, approvalId,
+								leaveSpinner, leaveDateTimeStr, leaveRemarkStr,
+								"leavePending");
+
+						Log.e("Problem Sending Leave ", "Leave saved as draft"
+								+ insertStatus);
+					}
+
 					leaveSQLite.closeDB();
 					runOnUiThread(new Runnable() {
 
@@ -324,8 +292,6 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 									LeaveListActivity.class);
 							intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 							startActivity(intent);
-
-							// BulletinAddActivity.this.finish();
 						}
 					});
 				}
@@ -386,11 +352,6 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 		parent.addView(hawaInflater.inflate(R.layout.employee_list_view, null),
 				500, 2);
 
-		/**
-		 * For intializing the linearLayout for selected Employees \w cross sign
-		 **/
-		// inflateEmployees("name");
-
 		/** for initializing EmpSelectBut and searchBox **/
 		searchBox = (EditText) empSelectDialog
 				.findViewById(R.id.editTextSearch);
@@ -399,24 +360,14 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 		searchBox.addTextChangedListener(this);
 		empListView = (ListView) empSelectDialog.findViewById(R.id.listView1);
 
-		/** To open up the Database and query for the EmployeeList **/
-		/*
-		 * employeeSQLite = new EmployeeSQLite(this); employeeSQLite.openDB();
-		 * itemDetails = employeeSQLite.getJSONFromDB(); returnItemDetails =
-		 * itemDetails; employeeSQLite.closeDB();
-		 */
-
 		/** Add the listener to the list of Employees items **/
 		listItemArrAdapter = new EmployeeListItemArrayAdapter(this,
 				R.id.linearLayoutEmployeeListItems, itemDetails);
 		empListView.setAdapter(listItemArrAdapter);
 		employeeCount = listItemArrAdapter.getCount();
 
-		empListView.setOnItemClickListener(this);
-
 		leaveTo.setText("");
 		empSelectDialog.show();
-		/* pdialog.dismiss(); */
 
 	}
 
@@ -471,10 +422,7 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 			LayoutInflater inflater = (LayoutInflater) cntxt
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-			currPos = position;
-
 			View view;
-			// if (convertView == null)
 
 			view = new View(this.cntxt);
 
@@ -577,7 +525,6 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 
 						results.values = itemDetails;
 						results.count = itemDetails.size();
-						returnItemDetails = itemDetails;
 					}
 					/** If constraint is not null */
 					else {
@@ -593,11 +540,11 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 
 						results.count = FilteredItemDetails.size();
 						results.values = FilteredItemDetails;
-						returnItemDetails = FilteredItemDetails;
 					}
 					return results;
 				}
 
+				@SuppressWarnings("unchecked")
 				@Override
 				protected void publishResults(CharSequence constraint,
 						FilterResults results) {
@@ -627,8 +574,4 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 
 	}
 
-	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		// TODO Auto-generated method stub
-
-	}
 }

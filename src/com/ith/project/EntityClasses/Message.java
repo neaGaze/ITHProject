@@ -3,6 +3,8 @@ package com.ith.project.EntityClasses;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,7 +18,6 @@ public class Message {
 			MessageDate = null, MessageTime = null, MessageType;
 	private static String previousDate, currDate;
 	private boolean MessageRead;
-	private String msgFilter;
 	private static Calendar calendar1, calendar2;
 	public static boolean isDefault;
 	private boolean Checked = false;
@@ -115,7 +116,7 @@ public class Message {
 	 * ***************************************************************************************/
 	public void parseDateTime(String dateTime2) {
 
-		//Log.e("dateTime equals", "here it is: " + dateTime2);
+		// Log.e("dateTime equals", "here it is: " + dateTime2);
 
 		if ((dateTime2 == null) || dateTime2.equals("")) {
 			MessageDate = null;
@@ -222,7 +223,8 @@ public class Message {
 
 			/** Get current day **/
 			calendar1 = Calendar.getInstance();
-			SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+			SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMddHHmmss",
+					Locale.US);
 			currDate = dtFormat.format(calendar1.getTime());
 
 			Log.e("CurrDate", "" + currDate);
