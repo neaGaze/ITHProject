@@ -163,6 +163,7 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 	/**
 	 * For Leave
 	 * **/
+	public static final String LeaveId = "LeaveId";
 	public static final String LeaveRqId = "LeaveRqId";
 	public static final String ApplicantId = "ApplicantId";
 	public static final String ApprovalId = "ApprovalId";
@@ -176,14 +177,13 @@ public class UsersDBHelper extends SQLiteOpenHelper {
 	public static final String TABLE_LEAVE = "LEAVE";
 
 	private static final String LEAVE_CREATE_QUERY = "CREATE TABLE "
-			+ TABLE_LEAVE + " (" + LeaveRqId
-			+ " INTEGER PRIMARY KEY AUTOINCREMENT, " + ApplicantId
-			+ " INTEGER NOT NULL, " + ApprovalId + " INTEGER NOT NULL, "
-			+ LeaveTypeId + " INTEGER NOT NULL, " + LeaveStatusId
-			+ " INTEGER NOT NULL, " + Remark + " TEXT, " + LeaveStartDate
-			+ " TEXT NOT NULL, " + LeaveEndDate + " TEXT, "
-			+ IsNotificationSent + " INTEGER NOT NULL, "
-			+ UsersDBHelper.LeaveType + " TEXT)";
+			+ TABLE_LEAVE + " (" + LeaveId + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+			+ LeaveRqId + " INTEGER , " + ApplicantId + " INTEGER NOT NULL, "
+			+ ApprovalId + " INTEGER NOT NULL, " + LeaveTypeId
+			+ " INTEGER NOT NULL, " + LeaveStatusId + " INTEGER NOT NULL, "
+			+ Remark + " TEXT, " + LeaveStartDate + " TEXT NOT NULL, "
+			+ LeaveEndDate + " TEXT, " + IsNotificationSent
+			+ " INTEGER NOT NULL, " + UsersDBHelper.LeaveType + " TEXT)";
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {

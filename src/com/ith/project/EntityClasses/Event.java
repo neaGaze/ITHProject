@@ -8,6 +8,10 @@ import android.util.Log;
 
 public class Event {
 
+	/**
+	 * EventStatus:1=NOT HAPPENED, 2=COMPLETED, 3=CANCELLED, 4=POSTPONED
+	 * **/
+	
 	private int eventId, eventRealId, createdBy, sentTo, eventStatus;
 	private String eventName, eventDesc, eventDateTime, eventPlace, eventDate,
 			eventTime, eventType, participationStatus;

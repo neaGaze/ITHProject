@@ -40,7 +40,8 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 	private LeaveSQLite leaveSQLite;
 	private Leave viewedLeave;
 	private HttpConnection conn;
-	private int position, empId, leaveId, responseItem, leaveUpdateStatus;
+	private int position, empId, leaveId, leaveRqId, responseItem,
+			leaveUpdateStatus;
 	private boolean isNotificationSent, readStatusUpdated;
 	private Spinner leaveReponseSpinner;
 	private ArrayList<String> spinnerItems;
@@ -134,24 +135,26 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 		leaveReponseSpinner = (Spinner) findViewById(R.id.spinnerLeaveResponse);
 
 		if (viewedLeave.getLeaveStatus() == 3) {
-			responseItem = 2;
+			responseItem = 1;
 			leaveImageName = "thumbs_down";
 		} else if (viewedLeave.getLeaveStatus() == 2) {
-			responseItem = 1;
+			responseItem = 0;
 			leaveImageName = "thumbs_up";
 		} else {
-			responseItem = 0;
+			// responseItem = 0;
 			leaveImageName = "pending";
 		}
 		statusImage = (ImageView) findViewById(R.id.imageViewResponse);
 		statusImage.setImageResource(getResources().getIdentifier(
 				leaveImageName, "drawable", this.getPackageName()));
 
-		if (viewedLeave.getApplicantId() == LoginAuthentication.EmployeeId) {
+		if (viewedLeave.getApplicantId() == LoginAuthentication.EmployeeId
+				|| (viewedLeave.getLeaveStatus() == 3 || viewedLeave
+						.getLeaveStatus() == 2)) {
 			leaveReponseSpinner.setVisibility(View.GONE);
 		} else {
 			spinnerItems = new ArrayList<String>();
-			spinnerItems.add("Pending");
+			// spinnerItems.add("Pending");
 			spinnerItems.add("Approved");
 			spinnerItems.add("Declined");
 
@@ -161,7 +164,7 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 			dataAdapter
 					.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			leaveReponseSpinner.setAdapter(dataAdapter);
-			leaveReponseSpinner.setSelection(responseItem);
+			// leaveReponseSpinner.setSelection(responseItem);
 
 			updateIsNotificationSent();
 		}
@@ -182,12 +185,14 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 								"" + parent.getItemAtPosition(pos).toString());
 						responseItem = pos;
 
-						if (responseItem == 1)
+						Log.e("responseItem is:", ": " + responseItem);
+						if (responseItem == 0)
 							leaveImageName = "thumbs_up";
-						else if (responseItem == 2)
+						else if (responseItem == 1)
 							leaveImageName = "thumbs_down";
 						else
 							leaveImageName = "pending";
+
 						int imageId = getResources().getIdentifier(
 								leaveImageName, "drawable",
 								getApplicationContext().getPackageName());
@@ -195,14 +200,13 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 
 						/** Now sync only when read Status in main DB is true **/
 						if (readStatusUpdated
-								&& (LeaveListActivity.getLeaveArrayList()
-										.get(position).getApprovalId() == LoginAuthentication.EmployeeId)) {
+								&& (viewedLeave.getApprovalId() == LoginAuthentication.EmployeeId)) {
 							updateResponseStatus(responseItem);
 						}
 					}
 
 					public void onNothingSelected(AdapterView<?> arg0) {
-						responseItem = 2;
+						// responseItem = 2;
 
 					}
 				});
@@ -216,9 +220,9 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 
 		empId = LoginAuthentication.EmployeeId;
 		leaveId = viewedLeave.getLeaveId();
+		leaveRqId = viewedLeave.getLeaveRqId();
 
-		isNotificationSent = LeaveListActivity.getLeaveArrayList()
-				.get(position).getNotificationSentStatus();
+		isNotificationSent = viewedLeave.getNotificationSentStatus();
 		isPending = viewedLeave.getLeaveType();
 
 		Log.e("Let's see the isNotificationSent Flag",
@@ -234,7 +238,7 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 			/** make Notification status in local sqlite as true **/
 			leaveSQLite.updateLeaveNotificationSent(leaveId);
 
-			readLeaveInquiry = makeLeaveNotificationSentJson(empId, leaveId);
+			readLeaveInquiry = makeLeaveNotificationSentJson(empId, leaveRqId);
 		}
 		/**
 		 * ApprovalStatus can be synced if isNotificationSent = true && Leave is
@@ -325,13 +329,12 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 	 * ***********************************************************************************/
 	protected void updateResponseStatus(int leaveStatus) {
 
-		leaveUpdateStatus = leaveStatus + 1;
+		leaveUpdateStatus = leaveStatus;
 
 		if (((isPending == null || isPending.equals("")))) {
 
-			int approvalEmpId = LeaveListActivity.getLeaveArrayList()
-					.get(position).getApprovalId();
-			updateStatusInquiry = makeLeaveStatusInquiryJson(leaveId,
+			int approvalEmpId = viewedLeave.getApprovalId();
+			updateStatusInquiry = makeLeaveStatusInquiryJson(leaveRqId,
 					leaveUpdateStatus, approvalEmpId);
 		}
 
@@ -364,7 +367,7 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 						 * LeaveType="leaveUpdatePending" if connection is
 						 * refused
 						 **/
-						leaveSQLite.updateLeaveStatusPending(leaveId,
+						leaveSQLite.updateLeaveStatusPending(leaveId,leaveUpdateStatus,
 								"approvalUpdatePending");
 
 						Log.e("Problem Sending Update Leave Status ",
@@ -376,7 +379,7 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 					 * Save the going leave in sqlite if connection return is
 					 * *JPT*
 					 **/
-					leaveSQLite.updateLeaveStatusPending(leaveId,
+					leaveSQLite.updateLeaveStatusPending(leaveId,leaveUpdateStatus,
 							"approvalUpdatePending");
 
 					Log.e("JSONException while Updating Leave Status",
@@ -402,13 +405,18 @@ public class LeaveViewActivity extends Activity implements OnClickListener {
 		JSONObject readInquiry = new JSONObject();
 		try {
 
-			readInquiry.put("leaveRequestId",
-					new StringBuilder().append(leaveId).toString());
-			readInquiry.put("approvalEmployeeId",
-					new StringBuilder().append(approvalEmpId).toString());
+			String leaveUpdateStatusString = null;
+			if (leaveStatus == 0)
+				leaveUpdateStatusString = "Approved";
+			else if (leaveStatus == 1)
+				leaveUpdateStatusString = "Declined";
+			else
+				leaveUpdateStatusString = "Pending";
+
+			readInquiry.put("leaveRequestId", leaveId + "");
+			readInquiry.put("approvalEmployeeId", approvalEmpId + "");
 			readInquiry.put("userLoginId", LoginAuthentication.UserloginId);
-			readInquiry.put("leaveStatus",
-					new StringBuilder().append(leaveStatus).toString());
+			readInquiry.put("leaveStatus", leaveUpdateStatusString);
 
 			return readInquiry;
 		} catch (JSONException e) {

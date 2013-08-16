@@ -287,6 +287,25 @@ public class EventAddActivity extends Activity implements OnClickListener,
 
 						insertStatus = (Boolean) insertStatusJson
 								.get("CreateEventResult");
+
+						/**
+						 * If returned true from web service insert in our local
+						 * DB
+						 **/
+						if (insertStatus) {
+
+							Log.e("Event has been sent",
+									"EVENT sent successfully !!!");
+						} else {
+
+							eventSQLite.saveEventDraft(msgFrom, receiversId,
+									eventTitleStr, eventDescStr,
+									eventDateTimeStr, eventVenueStr, longitude,
+									latitude, "pending", 0, 0, "eventPending");
+
+							Log.e("Problem Sending Event ",
+									"Event saved as draft" + insertStatus);
+						}
 					} catch (JSONException e) {
 						/**
 						 * Assuming that error can only occur while extracting
@@ -301,22 +320,6 @@ public class EventAddActivity extends Activity implements OnClickListener,
 								"" + e.getMessage());
 						e.printStackTrace();
 					}
-					/** If returned true from web service insert in our local DB **/
-					if (insertStatus) {
-
-						Log.e("Event has been sent",
-								"EVENT sent successfully !!!");
-					} else {
-
-						eventSQLite.saveEventDraft(msgFrom, receiversId,
-								eventTitleStr, eventDescStr, eventDateTimeStr,
-								eventVenueStr, longitude, latitude, "pending",
-								0, 0, "eventPending");
-
-						Log.e("Problem Sending Event ", "Event saved as draft"
-								+ insertStatus);
-					}
-
 					eventSQLite.closeDB();
 					runOnUiThread(new Runnable() {
 

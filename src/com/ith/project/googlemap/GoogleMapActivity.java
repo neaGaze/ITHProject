@@ -75,7 +75,6 @@ public class GoogleMapActivity extends FragmentActivity implements
 				"New marker added @" + point.toString(), Toast.LENGTH_SHORT)
 				.show();
 		Log.e("Marker pinned @", "" + point.toString());
-		Log.e("Latitude:", "" + point.toString());
 
 		latitude = Double.toString(point.latitude);
 		longitude = Double.toString(point.longitude);

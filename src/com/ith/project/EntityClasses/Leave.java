@@ -11,7 +11,8 @@ public class Leave {
 	 * leaveType: 1 = Sick, 2 = Personal, 3 = Family Function, 4 = Others
 	 * leaveStatus: 1 = Pending, 2 = Approved, 3 = Declined
 	 * **/
-	private int leaveId, applicantId, approvalId, leaveTypeId, leaveStatus;
+	private int leaveId, leaveRqId, applicantId, approvalId, leaveTypeId,
+			leaveStatus;
 	private String remarks, leaveStartDate, leaveEndDate, formattedStartDate,
 			leaveType, applicantName, approvalName;
 	private boolean isNotificationSent;
@@ -22,6 +23,10 @@ public class Leave {
 
 	public int getLeaveId() {
 		return leaveId;
+	}
+
+	public int getLeaveRqId() {
+		return leaveRqId;
 	}
 
 	public int getApplicantId() {
@@ -76,7 +81,7 @@ public class Leave {
 
 		try {
 
-			leaveId = remoteJson.getInt("LeaveRequestId");
+			leaveRqId = remoteJson.getInt("LeaveRequestId");
 			applicantId = remoteJson.getInt("ApplicantEmployeeId");
 			approvalId = remoteJson.getInt("ApprovalEmployeeId");
 			leaveTypeId = remoteJson.getInt("LeaveTypeId");
@@ -117,6 +122,10 @@ public class Leave {
 
 	public void setLeaveId(int leaveId) {
 		this.leaveId = leaveId;
+	}
+
+	public void setLeaveRqId(int leaveRqId) {
+		this.leaveRqId = leaveRqId;
 	}
 
 	public void setApplicantId(int applicantId) {
@@ -165,7 +174,7 @@ public class Leave {
 	}
 
 	/**
-	 * To make the json Object out of 
+	 * To make the json Object out of
 	 * **/
 	public static JSONObject makeNewLeaveJSON(int applicantId2,
 			int approvalId2, int leaveSpinner, String leaveDateTimeStr,

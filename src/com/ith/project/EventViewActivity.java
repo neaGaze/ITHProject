@@ -152,8 +152,7 @@ public class EventViewActivity extends Activity implements OnClickListener {
 		postponeLayout = (LinearLayout) findViewById(R.id.datePostponeEvent);
 
 		if (LoginAuthentication.EmployeeId != viewedEvent.getEventCreator()
-				|| (viewedEvent.getEventStatus() == 2)
-				|| (viewedEvent.getEventStatus() == 3)) {
+				|| (eventStatus == 2) || (eventStatus == 3)) {
 
 			postponeLayout.setVisibility(View.GONE);
 		} else {
@@ -191,8 +190,8 @@ public class EventViewActivity extends Activity implements OnClickListener {
 
 		if (longitudeStr.equals("") || longitudeStr == null)
 			longitude = 15.15;
-		
-		longitude = Double.valueOf(longitudeStr).doubleValue();
+		else
+			longitude = Double.valueOf(longitudeStr).doubleValue();
 
 		LinearLayout eventStatusLinLayout = (LinearLayout) findViewById(R.id.linearLayoutIsGoingStatus);
 		GoingStatusSpinner = (Spinner) findViewById(R.id.spinnerGoingStatus);

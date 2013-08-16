@@ -33,7 +33,24 @@ public class LoginSQLite {
 	 * To close the DBHelper class
 	 * ************************************************************************************/
 	public void closeDB() {
-		usersDBHelper.close();
+		if (db != null) {
+			try {
+				db.close();
+				usersDBHelper.close();
+			} catch (NullPointerException e) {
+				Log.e("Close", "Error: " + e + " " + e.getMessage());
+			}
+		} else
+			Log.e("Close", "Error! db is null.");
+	}
+
+	public boolean isOpen() {
+		if (db == null) {
+			return false;
+		} else {
+			Log.e("Database isOpen: ", "" + db.isOpen());
+			return db.isOpen();
+		}
 	}
 
 	/************************************************************************************

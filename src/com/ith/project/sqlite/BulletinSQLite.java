@@ -147,7 +147,7 @@ public class BulletinSQLite {
 		ArrayList<Bulletin> tempArrList = new ArrayList<Bulletin>();
 
 		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_BULLETINS
-				+ " ORDER BY " + UsersDBHelper.BulletinId + " DESC";
+				+ " ORDER BY " + UsersDBHelper.BulletinId + " ASC";
 
 		Cursor cursor = db.rawQuery(readQuery, null);
 		Log.v("CURSOR BULLETINS SIZE:", "" + cursor.getCount());
@@ -195,7 +195,7 @@ public class BulletinSQLite {
 
 		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_BULLETINS
 				+ " WHERE " + UsersDBHelper.BulletinId + "=" + bulletinId
-				+ " ORDER BY " + UsersDBHelper.BulletinId + " DESC";
+				+ " ORDER BY " + UsersDBHelper.BulletinId + " ASC";
 
 		Cursor cursor = db.rawQuery(readQuery, null);
 		Log.v("CURSOR Viewed BULLETIN SIZE:", "" + cursor.getCount());

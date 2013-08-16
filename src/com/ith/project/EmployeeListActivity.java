@@ -221,7 +221,6 @@ public class EmployeeListActivity extends Activity implements OnClickListener,
 				Log.e("jSONException", "" + e.getMessage());
 				e.printStackTrace();
 			}
-
 		}
 		return tempArrList;
 	}

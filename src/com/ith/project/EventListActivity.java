@@ -112,20 +112,34 @@ public class EventListActivity extends Activity implements OnClickListener,
 						&& HttpConnection.getConnectionAvailable(context)) {
 
 					ArrayList<Event> sentEvents = new ArrayList<Event>();
+
 					int sender = LoginAuthentication.EmployeeId;
 					String title = null, description = null, place = null, dateTime = null;
 					String longitude = "", latitude = "";
-					int[] receiversId = new int[pendingEventsSent.size()];
-					int k = 0;
+					String[] titleArr = new String[pendingEventsSent.size()];
+					int[] tempReceiversId = new int[pendingEventsSent.size()];
+					int k = 0, l = 0;
+					boolean hasTitle;
 
 					for (int j = 0; j < pendingEventsSent.size(); j++) {
 
+						hasTitle = false;
+						/**
+						 * This loop is to check if there are already title we
+						 * are searching in the titieArr
+						 **/
+						for (int i = 0; i < titleArr.length; i++) {
+							if (pendingEventsSent.get(j).getEventName()
+									.equals(titleArr[i])) {
+								hasTitle = true;
+								break;
+							}
+						}
 						if (sender == pendingEventsSent.get(j)
-								.getEventCreator()) {
+								.getEventCreator() && (!hasTitle)) {
 
 							sentEvents.add(pendingEventsSent.get(j));
-							receiversId[k++] = pendingEventsSent.get(j)
-									.getEventReceiver();
+
 							title = pendingEventsSent.get(j).getEventName();
 							description = pendingEventsSent.get(j)
 									.getEventDesc();
@@ -134,16 +148,40 @@ public class EventListActivity extends Activity implements OnClickListener,
 									.getEventDateTime();
 							longitude = pendingEventsSent.get(j).getLongitude();
 							latitude = pendingEventsSent.get(j).getLatitude();
-							
+							/**
+							 * This loop is for sending the same Named events to
+							 * multiple receivers if there are any. Possible
+							 * flaw is when same title bears different
+							 * Description
+							 **/
+							for (Event mess : pendingEventsSent) {
+								if (title.equals(mess.getEventName())) {
+
+									tempReceiversId[k++] = mess
+											.getEventReceiver();
+								}
+							}
+							/**
+							 * Now reduce the size of receivers Array So that
+							 * 0's will not be sent
+							 **/
+							int[] receiversId = new int[k];
+							int m = 0;
+							for (int rec : tempReceiversId) {
+								if (rec != 0)
+									receiversId[m++] = rec;
+							}
+							titleArr[l++] = title;
+
 							JSONObject pendingEventsSentQuery = null;
 							if (title != null && description != null) {
 
-								pendingEventsSentQuery = makeNewMessageJSON(
+								pendingEventsSentQuery = makeNewEventJSON(
 										sender, receiversId, title,
 										description, place, dateTime,
 										longitude, latitude);
 
-								Log.v(" pendingMessageQuery status", ""
+								Log.v(" pendingEventQuery status", ""
 										+ pendingEventsSentQuery.toString());
 								String insertStatusStr = conn.getJSONFromUrl(
 										pendingEventsSentQuery, sendEvents);
@@ -189,7 +227,7 @@ public class EventListActivity extends Activity implements OnClickListener,
 					}
 				}
 
-				/** This is for sending the locally read messages to web service **/
+				/** This is for sending the locally read events to web service **/
 				ArrayList<Event> pendingReadEvents = new ArrayList<Event>();// If
 																			// the
 																			// msgs
@@ -422,17 +460,16 @@ public class EventListActivity extends Activity implements OnClickListener,
 
 				Log.v("GetEvents inquiry", "" + inquiryJson.toString());
 				/** To establish connection to the web service **/
-				{
-					String eventsFromWS = conn.getJSONFromUrl(inquiryJson,
-							getEventsUrl);
 
-					Log.v("Events:", "" + eventsFromWS);
-					if (eventsFromWS.startsWith("{")) {
+				String eventsFromWS = conn.getJSONFromUrl(inquiryJson,
+						getEventsUrl);
 
-						/** Update the local sqlite according to the web service **/
-						eventSQLite.updateEventTable(eventsFromWS,
-								msgEntryLogSQLite);
-					}
+				Log.v("Events:", "" + eventsFromWS);
+				if (eventsFromWS.startsWith("{")) {
+
+					/** Update the local sqlite according to the web service **/
+					eventSQLite.updateEventTable(eventsFromWS,
+							msgEntryLogSQLite);
 				}
 
 				/** Now read from the local DB always **/
@@ -505,8 +542,7 @@ public class EventListActivity extends Activity implements OnClickListener,
 
 		Intent intent = new Intent(EventListActivity.this,
 				EventViewActivity.class);
-		intent.putExtra("EventId", itemDetails.get(position)
-				.getEventId());
+		intent.putExtra("EventId", itemDetails.get(position).getEventId());
 		EventListActivity.this.startActivity(intent);
 
 	}
@@ -541,7 +577,7 @@ public class EventListActivity extends Activity implements OnClickListener,
 	/*************************************************************************************
 	 * Make a JSONObject of new Event that user fills
 	 * ***************************************************************************************/
-	protected JSONObject makeNewMessageJSON(int sender, int[] receiversId,
+	protected JSONObject makeNewEventJSON(int sender, int[] receiversId,
 			String title, String description, String place, String dateTime,
 			String longitude, String latitude) {
 
@@ -610,7 +646,6 @@ public class EventListActivity extends Activity implements OnClickListener,
 	 * *****************************************************************************************/
 	protected JSONObject getDeleteQuery(int eventId) {
 
-		
 		JSONObject jsonObject = new JSONObject();
 
 		try {
@@ -619,7 +654,7 @@ public class EventListActivity extends Activity implements OnClickListener,
 			jsonObject.put("employeeId",
 					new StringBuilder().append(LoginAuthentication.EmployeeId));
 			jsonObject.put("userLoginId", LoginAuthentication.UserloginId);
-			
+
 		} catch (JSONException e) {
 			Log.e("JSONEXception @ getCancelEvent", "" + e.getMessage());
 			e.printStackTrace();

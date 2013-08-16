@@ -254,14 +254,28 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 
 						insertStatus = (Boolean) insertStatusJson
 								.get("SendLeaveRequestResult");
+
+						if (insertStatus) {
+
+							Log.e("Leave has been sent",
+									"LEAVE sent successfully !!!");
+						} else {
+
+							leaveSQLite.saveLeaveDraft(applicantId, approvalId,
+									(leaveSpinner + 1), leaveDateTimeStr,
+									leaveRemarkStr, "leavePending");
+
+							Log.e("Problem Sending Leave ",
+									"Leave saved as draft: " + insertStatus);
+						}
 					} catch (JSONException e) {
 						/**
 						 * Save the typed leave application as draft in sqlite
 						 * if connection return is *JPT*
 						 **/
 						leaveSQLite.saveLeaveDraft(applicantId, approvalId,
-								leaveSpinner, leaveDateTimeStr, leaveRemarkStr,
-								"leavePending");
+								(leaveSpinner + 1), leaveDateTimeStr,
+								leaveRemarkStr, "leavePending");
 
 						Log.e("JSONException while sending leave",
 								"" + e.getMessage());
@@ -269,21 +283,6 @@ public class LeaveFormActivity extends Activity implements OnClickListener,
 								"Saved leaves will be sent next time");
 						e.printStackTrace();
 					}
-
-					if (insertStatus) {
-
-						Log.e("Leave has been sent",
-								"LEAVE sent successfully !!!");
-					} else {
-
-						leaveSQLite.saveLeaveDraft(applicantId, approvalId,
-								leaveSpinner, leaveDateTimeStr, leaveRemarkStr,
-								"leavePending");
-
-						Log.e("Problem Sending Leave ", "Leave saved as draft"
-								+ insertStatus);
-					}
-
 					leaveSQLite.closeDB();
 					runOnUiThread(new Runnable() {
 

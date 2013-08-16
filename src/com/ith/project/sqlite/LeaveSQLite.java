@@ -117,6 +117,7 @@ public class LeaveSQLite {
 							+ leaveArr.getJSONObject(i).getString(
 									"LeaveRequestId");
 
+					Log.v("UPDATE QUERY LEAVE", "" + updateQuery);
 					db.execSQL(updateQuery);
 
 				} else {
@@ -167,7 +168,7 @@ public class LeaveSQLite {
 							+ leaveArr.getJSONObject(i).getString(
 									"StringLeaveDateTime") + "', ''" + ")";
 
-					// Log.v("UPDATE QUERY LEAVE", "" + updateQuery);
+					Log.v("INSERT QUERY LEAVE", "" + insertQuery);
 					db.execSQL(insertQuery);
 				}
 			}
@@ -190,7 +191,8 @@ public class LeaveSQLite {
 				+ " WHERE " + UsersDBHelper.ApplicantId + "="
 				+ LoginAuthentication.EmployeeId + " OR "
 				+ UsersDBHelper.ApprovalId + "="
-				+ LoginAuthentication.EmployeeId;
+				+ LoginAuthentication.EmployeeId + " ORDER BY "
+				+ UsersDBHelper.LeaveId + " DESC";
 
 		Log.v("SELECT QUERY LEAVE", "" + readQuery);
 		Cursor cursor = db.rawQuery(readQuery, null);
@@ -208,6 +210,8 @@ public class LeaveSQLite {
 				Leave tempLeave = new Leave();
 
 				tempLeave.setLeaveId(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.LeaveId)));
+				tempLeave.setLeaveRqId(cursor.getInt(cursor
 						.getColumnIndex(UsersDBHelper.LeaveRqId)));
 				tempLeave.setApplicantId((cursor.getInt(cursor
 						.getColumnIndex(UsersDBHelper.ApplicantId))));
@@ -250,7 +254,7 @@ public class LeaveSQLite {
 	public void deleteLeave(int leaveId) {
 
 		String deleteQuery = "DELETE FROM " + UsersDBHelper.TABLE_LEAVE
-				+ " WHERE " + UsersDBHelper.LeaveRqId + "=" + leaveId;
+				+ " WHERE " + UsersDBHelper.LeaveId + "=" + leaveId;
 
 		Log.e("DELETE Query is", "" + deleteQuery);
 		db.execSQL(deleteQuery);
@@ -263,6 +267,16 @@ public class LeaveSQLite {
 	public void saveLeaveDraft(int applicantId, int approvalId,
 			int leaveSpinner, String leaveDateTimeStr, String leaveRemarkStr,
 			String pending) {
+		/** To check for occurence of quotes ' in the String **/
+		String unNormalizedRemark = leaveRemarkStr;
+		StringBuilder normalizedRemark = new StringBuilder();
+		String[] remarkParts = unNormalizedRemark.split("'");
+		for (int j = 0; j < remarkParts.length; j++) {
+			if (j == remarkParts.length - 1)
+				normalizedRemark.append(remarkParts[j]);
+			else
+				normalizedRemark.append(remarkParts[j] + "''");
+		}
 
 		String updateQuery = "INSERT OR REPLACE INTO "
 				+ UsersDBHelper.TABLE_LEAVE + " ( " + UsersDBHelper.ApplicantId
@@ -273,8 +287,9 @@ public class LeaveSQLite {
 				+ UsersDBHelper.LeaveStartDate + ", "
 				+ UsersDBHelper.LeaveEndDate + ", " + UsersDBHelper.LeaveType
 				+ ") VALUES (" + applicantId + ", " + approvalId + ", "
-				+ leaveSpinner + ", " + 3 + ", '" + leaveRemarkStr + "', " + 0
-				+ ", '" + leaveDateTimeStr + "', '', '" + pending + "')";
+				+ leaveSpinner + ", " + 1 + ", '" + normalizedRemark.toString()
+				+ "', " + 0 + ", '" + leaveDateTimeStr + "', '', '" + pending
+				+ "')";
 
 		db.execSQL(updateQuery);
 
@@ -289,7 +304,7 @@ public class LeaveSQLite {
 
 		String updateReadQuery = "UPDATE " + UsersDBHelper.TABLE_LEAVE
 				+ " SET " + UsersDBHelper.IsNotificationSent + "=" + 1
-				+ " WHERE " + UsersDBHelper.LeaveRqId + "=" + leaveId;
+				+ " WHERE " + UsersDBHelper.LeaveId + "=" + leaveId;
 		// UPDATE LEAVE SET IsNotificationSent=1 WHERE LeaveRqId=2;
 		db.execSQL(updateReadQuery);
 
@@ -305,7 +320,7 @@ public class LeaveSQLite {
 
 		String updateReadQuery = "UPDATE " + UsersDBHelper.TABLE_LEAVE
 				+ " SET " + UsersDBHelper.LeaveType + "='" + pendingStatus
-				+ "' WHERE " + UsersDBHelper.LeaveRqId + "=" + leaveId;
+				+ "' WHERE " + UsersDBHelper.LeaveId + "=" + leaveId;
 		// UPDATE LEAVE SET LeaveType='notificationSentPending' WHERE
 		// LeaveRqId=2;
 		db.execSQL(updateReadQuery);
@@ -320,7 +335,7 @@ public class LeaveSQLite {
 
 		String updateGoingStatus = "UPDATE " + UsersDBHelper.TABLE_LEAVE
 				+ " SET " + UsersDBHelper.LeaveStatusId + "="
-				+ leaveUpdateStatus + " WHERE " + UsersDBHelper.LeaveRqId + "="
+				+ leaveUpdateStatus + " WHERE " + UsersDBHelper.LeaveId + "="
 				+ leaveId;
 
 		Log.e("UPDATE LEAVE STATUS", "" + updateGoingStatus);
@@ -332,11 +347,14 @@ public class LeaveSQLite {
 	/***********************************************************************************
 	 * Update the pending status in the given leaveId
 	 * ************************************************************************************/
-	public void updateLeaveStatusPending(int leaveId, String pendingStatus) {
+	public void updateLeaveStatusPending(int leaveId, int leaveUpdateStatus,
+			String pendingStatus) {
 
 		String updateReadQuery = "UPDATE " + UsersDBHelper.TABLE_LEAVE
-				+ " SET " + UsersDBHelper.LeaveType + "='" + pendingStatus
-				+ "' WHERE " + UsersDBHelper.LeaveRqId + "=" + leaveId;
+				+ " SET " + UsersDBHelper.LeaveStatusId + "="
+				+ leaveUpdateStatus + ", " + UsersDBHelper.LeaveType + "='"
+				+ pendingStatus + "' WHERE " + UsersDBHelper.LeaveId + "="
+				+ leaveId;
 		// UPDATE LEAVE SET LeaveType='leaveUpdatePending' WHERE LeaveRqId=2;
 		db.execSQL(updateReadQuery);
 
@@ -376,6 +394,8 @@ public class LeaveSQLite {
 				Leave tempLeave = new Leave();
 
 				tempLeave.setLeaveId(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.LeaveId)));
+				tempLeave.setLeaveRqId(cursor.getInt(cursor
 						.getColumnIndex(UsersDBHelper.LeaveRqId)));
 				tempLeave.setApplicantId((cursor.getInt(cursor
 						.getColumnIndex(UsersDBHelper.ApplicantId))));
@@ -415,8 +435,8 @@ public class LeaveSQLite {
 	public Leave getViewedLeave(int leaveId) {
 
 		String readQuery = "SELECT * FROM " + UsersDBHelper.TABLE_LEAVE
-				+ " WHERE " + UsersDBHelper.LeaveRqId + "=" + leaveId
-				+ " ORDER BY " + UsersDBHelper.LeaveRqId + " DESC";
+				+ " WHERE " + UsersDBHelper.LeaveId + "=" + leaveId
+				+ " ORDER BY " + UsersDBHelper.LeaveId + " DESC";
 
 		Cursor cursor = db.rawQuery(readQuery, null);
 		Log.v("CURSOR Viewed Leave SIZE:", "" + cursor.getCount());
@@ -430,6 +450,8 @@ public class LeaveSQLite {
 			while (!cursor.isAfterLast()) {
 
 				tempLeave.setLeaveId(cursor.getInt(cursor
+						.getColumnIndex(UsersDBHelper.LeaveId)));
+				tempLeave.setLeaveRqId(cursor.getInt(cursor
 						.getColumnIndex(UsersDBHelper.LeaveRqId)));
 				tempLeave.setApplicantId((cursor.getInt(cursor
 						.getColumnIndex(UsersDBHelper.ApplicantId))));

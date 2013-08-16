@@ -38,9 +38,7 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.login_screen);
-
 		initialize();
-
 	}
 
 	@Override
@@ -78,8 +76,9 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 
 				/** Initialize the loginSQLite **/
 				loginSQLite = new LoginSQLite(ITHProjectActivity.this);
-
-				loginSQLite.openDB();
+				if (!loginSQLite.isOpen()) {
+					loginSQLite.openDB();
+				}
 
 				auth = new LoginAuthentication();
 				tempObject = jsonFormValues(uname, pass);
@@ -157,6 +156,7 @@ public class ITHProjectActivity extends Activity implements OnClickListener {
 									"Login Failure", Toast.LENGTH_SHORT).show();
 
 						}
+						loginSQLite.closeDB();
 					}
 				});
 

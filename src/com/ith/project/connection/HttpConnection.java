@@ -62,7 +62,6 @@ public class HttpConnection {
 		InputStream is = null;
 		String result = "";
 
-		
 		try {
 			httppost = new HttpPost(url);
 			httppost.setHeader(HTTP.CONTENT_TYPE,
@@ -112,10 +111,21 @@ public class HttpConnection {
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo netInfo = conMgr.getActiveNetworkInfo();
 
-		if (netInfo != null && netInfo.isAvailable() && netInfo.isConnected())
+		if (netInfo != null && netInfo.isAvailable() && netInfo.isConnected()) {
+
+			Log.e("Connection is good dude", ":D :D");
 			return true;
-		else
+		} else {
+			if (netInfo == null)
+				Log.e("Connection is null", "It's empty buddy :( :(");
+			else if (!netInfo.isAvailable())
+				Log.e("Connection is not Available",
+						"No Connection available :( :(");
+			else
+				Log.e("Connection is not Connected",
+						"No Connection buddy :( :(");
 			return false;
+		}
 	}
 
 }

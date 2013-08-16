@@ -130,7 +130,7 @@ public class PwdChangeActivity extends Activity implements OnClickListener {
 							.get("ChangePasswordResult");
 
 					if (changeStatus
-							.equals("Your Password Have Been Changed Successfully")) {
+							.equals("Your Password Have Been Changed Successfully.")) {
 
 						Log.e("Pwd has been changed",
 								"PASSWORD sent successfully !!!");
@@ -142,7 +142,7 @@ public class PwdChangeActivity extends Activity implements OnClickListener {
 
 					} else {
 
-						Log.e("Problem Changing Pwd ", "PWd not changed"
+						Log.e("Problem Changing Pwd ", "PWd not changed: "
 								+ changeStatus);
 						error = true;
 					}

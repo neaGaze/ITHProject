@@ -528,6 +528,26 @@ public class EventSQLite {
 			String eventVenueStr, String longitude, String latitude,
 			String goingStatus, int eventStatus, int isRead, String pending) {
 
+		/** To check for occurence of quotes ' in the String **/
+		String unNormalizedBulletinTitle = eventTitleStr;
+		StringBuilder normalizedTitle = new StringBuilder();
+		String[] titleParts = unNormalizedBulletinTitle.split("'");
+		for (int j = 0; j < titleParts.length; j++) {
+			if (j == titleParts.length - 1)
+				normalizedTitle.append(titleParts[j]);
+			else
+				normalizedTitle.append(titleParts[j] + "''");
+		}
+
+		String unNormalizedBulletinDesc = eventDescStr;
+		StringBuilder normalizedDesc = new StringBuilder();
+		String[] descParts = unNormalizedBulletinDesc.split("'");
+		for (int j = 0; j < descParts.length; j++) {
+			if (j == descParts.length - 1)
+				normalizedDesc.append(descParts[j]);
+			else
+				normalizedDesc.append(descParts[j] + "''");
+		}
 		for (int i = 0; i < receiversId.length; i++) {
 			String updateQuery = "INSERT OR REPLACE INTO "
 					+ UsersDBHelper.TABLE_EVENT + " ( "
@@ -539,8 +559,9 @@ public class EventSQLite {
 					+ ", " + UsersDBHelper.GoingStatus + ", "
 					+ UsersDBHelper.IsEventRead + ","
 					+ UsersDBHelper.EventStatus + ", "
-					+ UsersDBHelper.EventType + ") VALUES ('" + eventTitleStr
-					+ "', '" + eventDescStr + "', " + eventFrom + ", "
+					+ UsersDBHelper.EventType + ") VALUES ('"
+					+ normalizedTitle.toString() + "', '"
+					+ normalizedDesc.toString() + "', " + eventFrom + ", "
 					+ receiversId[i] + ", '" + eventVenueStr + "', '"
 					+ eventDateTimeStr + "', '" + latitude + "', '" + longitude
 					+ "', '" + goingStatus + "', " + isRead + "," + eventStatus

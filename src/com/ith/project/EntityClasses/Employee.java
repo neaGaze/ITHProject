@@ -44,9 +44,6 @@ public class Employee {
 			String latestDateMod) {
 
 		JSONObject tempJsonFile = new JSONObject();
-	//	Calendar cal = Calendar.getInstance();
-	//	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-	//	String currDate = dateFormat.format(cal.getTime());
 		try {
 			tempJsonFile.put("userLoginId", UserLoginId);
 			tempJsonFile.put("modifiedDateTime", latestDateMod);

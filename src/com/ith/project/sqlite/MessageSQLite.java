@@ -54,6 +54,27 @@ public class MessageSQLite {
 			String msgTitle, String msgDesc, String dateTime, int msgRead,
 			String pending) {
 
+		/** To check for occurence of quotes ' in the String **/
+		String unNormalizedBulletinTitle = msgTitle;
+		StringBuilder normalizedTitle = new StringBuilder();
+		String[] titleParts = unNormalizedBulletinTitle.split("'");
+		for (int j = 0; j < titleParts.length; j++) {
+			if (j == titleParts.length - 1)
+				normalizedTitle.append(titleParts[j]);
+			else
+				normalizedTitle.append(titleParts[j] + "''");
+		}
+
+		String unNormalizedBulletinDesc = msgDesc;
+		StringBuilder normalizedDesc = new StringBuilder();
+		String[] descParts = unNormalizedBulletinDesc.split("'");
+		for (int j = 0; j < descParts.length; j++) {
+			if (j == descParts.length - 1)
+				normalizedDesc.append(descParts[j]);
+			else
+				normalizedDesc.append(descParts[j] + "''");
+		}
+
 		for (int i = 0; i < receiversId.length; i++) {
 			String updateQuery = "INSERT OR REPLACE INTO "
 					+ UsersDBHelper.TABLE_MESSAGE + " ( "
@@ -63,10 +84,11 @@ public class MessageSQLite {
 					+ UsersDBHelper.MessageFrom + ", "
 					+ UsersDBHelper.MessageTo + ", "
 					+ UsersDBHelper.MessageRead + ", "
-					+ UsersDBHelper.MessageType + ") VALUES ('" + msgTitle
-					+ "', '" + msgDesc + "', '" + dateTime + "', " + msgFrom
-					+ ", " + receiversId[i] + ", " + msgRead + ",'" + pending
-					+ "')";
+					+ UsersDBHelper.MessageType + ") VALUES ('"
+					+ normalizedTitle.toString() + "', '"
+					+ normalizedDesc.toString() + "', '" + dateTime + "', "
+					+ msgFrom + ", " + receiversId[i] + ", " + msgRead + ",'"
+					+ pending + "')";
 
 			db.execSQL(updateQuery);
 		}

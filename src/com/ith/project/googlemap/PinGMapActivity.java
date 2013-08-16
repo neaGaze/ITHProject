@@ -15,8 +15,8 @@ import android.util.Log;
 public class PinGMapActivity extends FragmentActivity {
 
 	private FragmentManager fragmentManager;
-	double latitude = 12.972456;
-	double longitude = 20.594504;
+	double latitude;
+	double longitude;
 	private LatLng latlng;
 	private GoogleMap gMap;
 
@@ -80,7 +80,7 @@ public class PinGMapActivity extends FragmentActivity {
 		 */
 		float zoom = 11;
 		gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, zoom)); // toPosition,
-		// ZoomLevel
+	
 
 	}
 

@@ -56,7 +56,6 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 	private ListView listView;
 	private static LeaveItemArrayAdapter leaveItemArrAdapter;
 	private static int leaveCount;
-	private int leaveId;
 	private Context context;
 	private Button deleteConfirm;
 
@@ -112,14 +111,13 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 						.selectPendingLeave("leavePending");
 				if (pendingLeaveSent != null
 						&& HttpConnection.getConnectionAvailable(context)) {
-
 					int sender = LoginAuthentication.EmployeeId;
 					String remark = null, dateTime = null;
 					int approvalId, leaveType;
 					for (int j = 0; j < pendingLeaveSent.size(); j++) {
 
 						if (sender == pendingLeaveSent.get(j).getApplicantId()) {
-							leaveId = pendingLeaveSent.get(j).getLeaveId();
+							int leaveId = pendingLeaveSent.get(j).getLeaveId();
 							approvalId = pendingLeaveSent.get(j)
 									.getApprovalId();
 							leaveType = pendingLeaveSent.get(j)
@@ -138,6 +136,9 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 									+ pendingLeaveSentQuery.toString());
 							String insertStatusStr = conn.getJSONFromUrl(
 									pendingLeaveSentQuery, SendLeaveRequestUrl);
+
+							Log.e("reply for Leave ", "tuuut: "
+									+ insertStatusStr);
 
 							if (insertStatusStr.startsWith("{")) {
 								JSONObject insertStatusJson;
@@ -176,7 +177,6 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 						}
 					}
 				}
-
 				/**
 				 * This is for sending the locally read Leave application to web
 				 * service
@@ -197,8 +197,11 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 
 						int leaveTo = pendingReadLeave.get(i).getApprovalId();
 						int leaveId = pendingReadLeave.get(i).getLeaveId();
+						int leaveRqId = pendingReadLeave.get(i).getLeaveRqId();
+
 						JSONObject readLeaveInquiry = LeaveViewActivity
-								.makeLeaveNotificationSentJson(leaveTo, leaveId);
+								.makeLeaveNotificationSentJson(leaveTo,
+										leaveRqId);
 
 						Log.e("readLeaveInquiry",
 								"" + readLeaveInquiry.toString());
@@ -256,9 +259,11 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 						int leaveTo = pendingApprovalLeave.get(i)
 								.getApprovalId();
 						int leaveId = pendingApprovalLeave.get(i).getLeaveId();
+						int leaveRqId = pendingApprovalLeave.get(i)
+								.getLeaveRqId();
 
 						JSONObject approvalLeaveInquiry = LeaveViewActivity
-								.makeLeaveStatusInquiryJson(leaveId,
+								.makeLeaveStatusInquiryJson(leaveRqId,
 										pendingApprovalLeave.get(i)
 												.getLeaveStatus(), leaveTo);
 
@@ -285,7 +290,8 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 							if (approvalUpdateStatus) {
 
 								leaveSQLite.updateLeaveStatusPending(leaveId,
-										"");
+										pendingApprovalLeave.get(i)
+												.getLeaveStatus(), "");
 								leaveSQLite.updateLeaveNotificationSentPending(
 										leaveId, "");
 								Log.e("Approval status Updated for Leave",
@@ -527,7 +533,10 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 			 * == 3 || 2 then you can call the deleteLeave function if the close
 			 * button is Clicked
 			 **/
-			if (leaveStatus == 3 || leaveStatus == 2) {
+			if (leaveStatus == 3
+					|| leaveStatus == 2
+					|| (itemDets.get(position).getLeaveType() != null && (itemDets
+							.get(position).getApplicantId() == LoginAuthentication.EmployeeId))) {
 
 				view.setTag(deleteButton);
 				deleteButton.setTag((Leave) (itemDets).get(position));
@@ -562,7 +571,6 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 						deleteConfirm = (Button) deleteDialog
 								.findViewById(R.id.buttonExitConfirm);
 						deleteConfirm.setText("Delete");
-						/* pdialog.dismiss(); */
 
 						deleteDialog.show();
 
@@ -616,10 +624,6 @@ public class LeaveListActivity extends Activity implements OnClickListener,
 
 			return position;
 		}
-	}
-
-	public static ArrayList<Leave> getLeaveArrayList() {
-		return itemDetails;
 	}
 
 }
